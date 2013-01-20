@@ -201,23 +201,27 @@
       (let [arr      (.array nm parent)
             new-arr  (object-array 33)
             new-rngs (int-array 33)]
-        (aset ^objects arr 0 child)
+        (aset ^objects new-arr 0 child)
         (System/arraycopy arr 1 new-arr 1 li)
-        (aset ^objects arr 32 new-rngs)
+        (aset ^objects new-arr 32 new-rngs)
         (aset new-rngs 0 (int rng0))
         (aset new-rngs li (int ncnt))
         (aset new-rngs 32 (int (inc li)))
         (loop [i 1]
-          (when (< i li)
+          (when (<= i li)
             (aset new-rngs i (+ (aget new-rngs (dec i)) step))
             (recur (inc i))))
         (.node nm nil new-arr)))
     (let [new-arr  (aclone ^objects (.array nm parent))
-          new-rngs (aclone (ranges nm parent))
+          rngs     (ranges nm parent)
+          new-rngs (aclone rngs)
           li       (dec (index-of-0 new-rngs))]
       (aset ^objects new-arr 32 new-rngs)
-      (aset ^objects new-arr li child)
-      (aset new-rngs li (int (- (aget new-rngs li) d)))
+      (aset ^objects new-arr 0 child)
+      (loop [i 0]
+        (when (<= i li)
+          (aset new-rngs i (- (aget rngs i) (int d)))
+          (recur (inc i))))
       (.node nm nil new-arr))))
 
 (defn replace-rightmost-child [^NodeManager nm shift parent child d]

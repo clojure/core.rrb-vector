@@ -560,7 +560,7 @@
                      (if-not (== ccnt (bit-shift-left 1 shift))
                        (.pushTail this
                                   (unchecked-subtract-int shift (int 5))
-                                  ccnt
+                                  (unchecked-inc-int ccnt)
                                   (aget ^objects arr li)
                                   tail-node))))]
         (if cret
@@ -1047,8 +1047,8 @@
                             (ints (regular-ranges (- shift 5) r))
                             (ranges nm c))
                      gcs  (if rngs (aget rngs 32) (index-of-nil arr))]
-                 (map list (take gcs arr) (take gcs rngs))))]
-    (mapcat cseq (take cs arr) (take cs rngs))))
+                 (map list (take gcs arr) (take gcs (map - rngs (cons 0 rngs))))))]
+    (mapcat cseq (take cs arr) (take cs (map - rngs (cons 0 rngs))))))
 
 (defn rebalance
   [^NodeManager nm ^ArrayManager am shift n1 cnt1 n2 cnt2 ^Box transferred-leaves]
@@ -1076,13 +1076,15 @@
                   r (int-array 33)]
               (aset a 32 r)
               (aset r 32 (count block))
-              (loop [i 0 gcs (seq block)]
+              (loop [i 0 o (int 0) gcs (seq block)]
                 (when-first [[gc gcr] gcs]
                   (aset ^objects a i gc)
-                  (aset r i (int gcr))
-                  (recur (inc i) (next gcs))))
+                  (aset r i (unchecked-add-int o (int gcr)))
+                  (recur (inc i) (unchecked-add-int o (int gcr)) (next gcs))))
               (aset ^objects new-arr i (.node nm nil a))
-              (aset new-rngs i (int (second (last block))))
+              (aset new-rngs i
+                    (+ (aget r (dec (aget r 32)))
+                       (if (pos? i) (aget new-rngs (dec i)) (int 0))))
               (aset new-rngs 32 (inc i))
               (recur (inc i) (next bs)))))
         (aset new-arr 32 new-rngs)
@@ -1096,7 +1098,6 @@
             new-rngs2 (int-array 33)
             new-n1    (.node nm nil new-arr1)
             new-n2    (.node nm nil new-arr2)]
-        (set! (.-val transferred-leaves) (- cnt1))
         (loop [i  0
                bs (partition-all 32
                                  (concat (child-seq nm n1 shift cnt1)
@@ -1106,19 +1107,26 @@
                   r (int-array 33)]
               (aset a 32 r)
               (aset r 32 (count block))
-              (loop [i 0 gcs (seq block)]
+              (loop [i 0 o (int 0) gcs (seq block)]
                 (when-first [[gc gcr] gcs]
                   (aset a i gc)
-                  (aset r i (int gcr))
-                  (recur (inc i) (next gcs))))
+                  (aset r i (unchecked-add-int o (int gcr)))
+                  (recur (inc i) (unchecked-add-int o (int gcr)) (next gcs))))
+              (if (and (< i 32) (> (+ (* i 32) (count block)) sbc1))
+                (let [tbs (- (+ (* i 32) (count block)) sbc1)
+                      li  (dec (aget r 32))
+                      d   (if (>= tbs 32)
+                            (aget r li)
+                            (- (aget r li) (aget r (- li tbs))))]
+                  (set! (.-val transferred-leaves)
+                        (+ (.-val transferred-leaves) d))))
               (let [new-arr  (if (< i 32) new-arr1 new-arr2)
                     new-rngs (if (< i 32) new-rngs1 new-rngs2)
                     i        (mod i 32)]
-                (if (< i 32)
-                  (set! (.-val transferred-leaves)
-                        (+ (.-val transferred-leaves) (second (last block)))))
                 (aset ^objects new-arr i (.node nm nil a))
-                (aset new-rngs i (int (second (last block))))
+                (aset new-rngs i
+                      (+ (aget r (dec (aget r 32)))
+                         (if (pos? i) (aget new-rngs (dec i)) (int 0))))
                 (aset new-rngs 32 (int (inc i))))
               (recur (inc i) (next bs)))))
         (aset new-arr1 32 new-rngs1)
@@ -1132,11 +1140,17 @@
     (let [c1 (last-child nm n1)
           c2 (first-child nm n2)
           ccnt1 (if (.regular nm n1)
-                  (mod cnt1 (bit-shift-left 1 shift))
-                  (last-range nm n1))
+                  (let [m (mod cnt1 (bit-shift-left 1 shift))]
+                    (if (zero? m) (bit-shift-left 1 shift) m))
+                  (let [rngs (ranges nm n1)
+                        i    (dec (aget rngs 32))]
+                    (if (zero? i)
+                      (aget rngs 0)
+                      (- (aget rngs i) (aget rngs (dec i))))))
           ccnt2 (if (.regular nm n2)
-                  (mod cnt2 (bit-shift-left 1 shift))
-                  (last-range nm n2))
+                  (let [m (mod cnt2 (bit-shift-left 1 shift))]
+                    (if (zero? m) (bit-shift-left 1 shift) m))
+                  (aget (ranges nm n2) 0))
           next-transferred-leaves (Box. 0)
           [new-c1 new-c2] (zippath nm am (- shift 5) c1 ccnt1 c2 ccnt2
                                    next-transferred-leaves)
@@ -1196,20 +1210,20 @@
           r1 (.-root v1)
           o? (overflow? nm r1 s1 (+ (count v1) (- 32 (.alength am (.-tail v1)))))
           r1 (if o?
-                 (let [tail      (.-tail v1)
-                       tail-node (.node nm nil tail)
-                       reg?      (and (.regular nm r1) (== (.alength am tail) 32))
-                       arr       (object-array (if reg? 32 33))]
-                   (aset arr 0 r1)
-                   (aset arr 1 (new-path nm am s1 tail-node))
-                   (if-not reg?
-                     (let [rngs (int-array 33)]
-                       (aset rngs 32 2)
-                       (aset rngs 0 (- (count v1) (.alength am tail)))
-                       (aset rngs 1 (count v1))
-                       (aset arr 32 rngs)))
-                   (.node nm nil arr))
-                 (fold-tail nm am r1 s1 (.tailoff v1) (.-tail v1)))
+               (let [tail      (.-tail v1)
+                     tail-node (.node nm nil tail)
+                     reg?      (and (.regular nm r1) (== (.alength am tail) 32))
+                     arr       (object-array (if reg? 32 33))]
+                 (aset arr 0 r1)
+                 (aset arr 1 (new-path nm am s1 tail-node))
+                 (if-not reg?
+                   (let [rngs (int-array 33)]
+                     (aset rngs 32 2)
+                     (aset rngs 0 (- (count v1) (.alength am tail)))
+                     (aset rngs 1 (count v1))
+                     (aset arr 32 rngs)))
+                 (.node nm nil arr))
+               (fold-tail nm am r1 s1 (.tailoff v1) (.-tail v1)))
           s1 (if o? (+ s1 5) s1)
           r2 (.-root v2)
           s  (max s1 s2)
@@ -1226,16 +1240,24 @@
           ncnt2   (- (count v2) (.alength am (.-tail v2)) d)
           [n1 n2] (if (identical? n2 r2)
                     (squash-nodes nm s n1 ncnt1 n2 ncnt2)
-                    (object-array (list n1 n2)))]
+                    (object-array (list n1 n2)))
+          ncnt1   (if (identical? n2 r2)
+                    (int ncnt1)
+                    (let [rngs (ranges nm n1)]
+                      (aget rngs (dec (aget rngs 32)))))
+          ncnt2   (int (cond
+                         (identical? n2 r2) (int ncnt2)
+                         (not n2) (int 0)
+                         :else (let [rngs (ranges nm n2)]
+                                 (aget rngs (dec (aget rngs 32))))))]
       (if n2
         (let [arr      (object-array 33)
               new-root (.node nm nil arr)]
           (aset arr 0 n1)
           (aset arr 1 n2)
           (aset arr 32 (doto (int-array 33)
-                         (aset 0 (count v1))
-                         (aset 1 (+ (count v1)
-                                    (- (count v2) (.alength am (.-tail v2)))))
+                         (aset 0 ncnt1)
+                         (aset 1 (+ ncnt1 ncnt2))
                          (aset 32 2)))
           (Vector. nm am (+ (count v1) (count v2)) (+ s 5) new-root (.-tail v2)
                    nil -1 -1))
