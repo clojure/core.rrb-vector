@@ -9,10 +9,12 @@
                                    replace-rightmost-child
                                    fold-tail new-path index-of-nil
                                    object-am object-nm primitive-nm
-                                   pv-shift pv-root pv-tail]])
-  (:import (clojure.core ArrayManager Vec)
+                                   pv-shift pv-root pv-tail]]
+            [clojure.core.protocols :refer [IKVReduce]])
+  (:import (clojure.core ArrayManager Vec VecSeq)
            (clojure.lang Util Box PersistentVector APersistentVector$SubVector)
-           (flexvec.nodes NodeManager)))
+           (flexvec.nodes NodeManager)
+           (java.util.concurrent.atomic AtomicReference)))
 
 (def ^:const rrbt-concat-threshold 33)
 (def ^:const max-extra-search-steps 2)
@@ -483,9 +485,14 @@
           (throw (IndexOutOfBoundsException.))))
       (throw (IllegalArgumentException. "Key must be integer"))))
 
+  ;; hack to reuse gvec's chunked seqs
+  clojure.core.IVecImpl
+
   clojure.lang.Seqable
   (seq [this]
-    (iterator-seq (.iterator this)))
+    (if (zero? cnt)
+      nil
+      (VecSeq. am this (.arrayFor this 0) 0 0)))
 
   clojure.lang.Sequential
 
@@ -662,7 +669,7 @@
             (aset new-rngs 32 (unchecked-dec-int (aget new-rngs (int 32))))
             (.node nm (.edit nm root) arr))))))
 
-  (newPath [this edit shift node]
+  (newPath [this ^AtomicReference edit ^int shift node]
     (if (== (.alength am tail) (int 32))
       (let [shift (int shift)]
         (loop [s (int 0) node node]
@@ -723,6 +730,27 @@
                           val))
           (.node nm (.edit nm node) arr)))))
 
+  IKVReduce
+  (kv-reduce [this f init]
+    (loop [i (int 0)
+           j (int 0)
+           init init
+           arr  (.arrayFor this i)
+           lim  (unchecked-dec-int (.alength am arr))
+           step (unchecked-inc-int lim)]
+      (let [init (f init (unchecked-add-int i j) (.aget am arr j))]
+        (if (reduced? init)
+          @init
+          (if (< j lim)
+            (recur i (unchecked-inc-int j) init arr lim step)
+            (let [i (unchecked-add-int i step)]
+              (if (< i cnt)
+                (let [arr (.arrayFor this i)
+                      len (.alength am arr)
+                      lim (unchecked-dec-int len)]
+                  (recur i (int 0) init arr lim len))
+                init)))))))
+  
   PSliceableVector
   (slicev [this start end]
     (let [start   (int start)

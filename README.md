@@ -57,15 +57,15 @@ submit to flexvec becoming part of the Clojure project.
 
 Current TODO list:
 
- 1. features: chunked seqs, transients;
+ 1. tests;
 
- 2. performance: general perf tuning, efficient `catvec`
+ 2. benchmarks;
+
+ 3. performance: general perf tuning, efficient `catvec`
     implementation (to replace current seq-ops-based impl);
 
- 3. benchmarks;
+ 4. transients;
 
- 4. tests;
- 
  5. ClojureScript version.
 
 ## Clojure(Script) code reuse

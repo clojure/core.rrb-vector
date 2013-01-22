@@ -1,4 +1,4 @@
-(defproject flexvec "0.0.2"
+(defproject flexvec "0.0.3"
   :description "RRB-Trees for Clojure(Script) -- see Bagwell & Rompf"
   :url "https://github.com/michalmarczyk/flexvec"
   :license {:name "Eclipse Public License"
