@@ -86,3 +86,41 @@
         v1 (apply concat ranges)
         v2 (apply fv/catvec (map fv/vec ranges))]
     (= v1 v2)))
+
+(defn generative-check-subvec [iterations max-init-cnt slices]
+  (dotimes [_ iterations]
+    (let [init-cnt (rand-int (inc max-init-cnt))
+          s1       (rand-int init-cnt)
+          e1       (+ s1 (rand-int (- init-cnt s1)))]
+      (loop [s&es [s1 e1] cnt (- e1 s1) slices slices]
+        (if (or (zero? cnt) (zero? slices))
+          (if-not (try (apply check-subvec init-cnt s&es)
+                       (catch Exception e
+                         (throw
+                          (ex-info "check-subvec failure w/ Exception"
+                                   {:init-cnt init-cnt :s&es s&es}
+                                   e))))
+            (throw
+             (ex-info "check-subvec failure w/o Exception"
+                      {:init-cnt init-cnt :s&es s&es})))
+          (let [s (rand-int cnt)
+                e (+ s (rand-int (- cnt s)))
+                c (- e s)]
+            (recur (conj s&es s e) c (dec slices)))))))
+  true)
+
+(defn generative-check-catvec [iterations max-vcnt min-cnt max-cnt]
+  (dotimes [_ iterations]
+    (let [vcnt (inc (rand-int (dec max-vcnt)))
+          cnts (vec (repeatedly vcnt
+                                #(+ min-cnt
+                                    (rand-int (- (inc max-cnt) min-cnt)))))]
+      (if-not (try (apply check-catvec cnts)
+                   (catch Exception e
+                     (throw
+                      (ex-info "check-catvec failure w/ Exception"
+                               {:cnts cnts}
+                               e))))
+        (throw
+         (ex-info "check-catvec failure w/o Exception" {:cnts cnts})))))
+  true)
