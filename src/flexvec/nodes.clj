@@ -135,7 +135,9 @@
                (recur nm
                       (aget ^objects (.array nm root) (unchecked-dec-int slc))
                       (unchecked-subtract-int (int shift) (int 5))
-                      (unchecked-subtract-int (aget rngs 31) (aget rngs 30))))))))
+                      (unchecked-add-int
+                       (unchecked-subtract-int (aget rngs 31) (aget rngs 30))
+                       (int 32))))))))
 
 ;;; find nil / 0
 
@@ -186,9 +188,16 @@
         (System/arraycopy arr 1 new-arr 0 31)
         (if-not regular?
           (let [rngs     (ranges nm parent)
-                new-rngs (aclone rngs)]
-            (System/arraycopy rngs 1 new-rngs 0 (dec (aget rngs 32)))
+                rng0     (aget rngs 0)
+                new-rngs (int-array 33)
+                lim      (aget rngs 32)]
+            (System/arraycopy rngs 1 new-rngs 0 (dec lim))
+            (loop [i 0]
+              (when (< i lim)
+                (aset new-rngs i (- (aget new-rngs i) rng0))
+                (recur (inc i))))
             (aset new-rngs 32 (dec (aget rngs 32)))
+            (aset new-rngs (dec (aget rngs 32)) (int 0))
             (aset ^objects new-arr 32 new-rngs)))
         (.node nm (.edit nm parent) new-arr)))))
 
@@ -197,25 +206,26 @@
     (let [step (bit-shift-left 1 shift)
           rng0 (- step d)
           ncnt (- pcnt d)
-          li   (bit-and (bit-shift-right shift (dec pcnt)) 0x1f)]
-      (let [arr      (.array nm parent)
-            new-arr  (object-array 33)
-            new-rngs (int-array 33)]
-        (aset ^objects new-arr 0 child)
-        (System/arraycopy arr 1 new-arr 1 li)
-        (aset ^objects new-arr 32 new-rngs)
-        (aset new-rngs 0 (int rng0))
-        (aset new-rngs li (int ncnt))
-        (aset new-rngs 32 (int (inc li)))
-        (loop [i 1]
-          (when (<= i li)
-            (aset new-rngs i (+ (aget new-rngs (dec i)) step))
-            (recur (inc i))))
-        (.node nm nil new-arr)))
+          li   (bit-and (bit-shift-right shift (dec pcnt)) 0x1f)
+          arr      (.array nm parent)
+          new-arr  (object-array 33)
+          new-rngs (int-array 33)]
+      (aset ^objects new-arr 0 child)
+      (System/arraycopy arr 1 new-arr 1 li)
+      (aset ^objects new-arr 32 new-rngs)
+      (aset new-rngs 0 (int rng0))
+      (aset new-rngs li (int ncnt))
+      (aset new-rngs 32 (int (inc li)))
+      (loop [i 1]
+        (when (<= i li)
+          (aset new-rngs i (+ (aget new-rngs (dec i)) step))
+          (recur (inc i))))
+      (.node nm nil new-arr))
     (let [new-arr  (aclone ^objects (.array nm parent))
           rngs     (ranges nm parent)
-          new-rngs (aclone rngs)
-          li       (dec (index-of-0 new-rngs))]
+          new-rngs (int-array 33)
+          li       (dec (aget rngs 32))]
+      (aset new-rngs 32 (aget rngs 32))
       (aset ^objects new-arr 32 new-rngs)
       (aset ^objects new-arr 0 child)
       (loop [i 0]
@@ -293,19 +303,18 @@
                               (- shift 5)
                               (if (.regular nm node)
                                 (mod cnt (bit-shift-left 1 shift))
-                                (let [li (aget rngs 32)]
+                                (let [li (unchecked-dec-int (aget rngs 32))]
                                   (if (pos? li)
                                     (unchecked-subtract-int
-                                     (aget rngs (unchecked-dec-int li))
-                                     (aget rngs (unchecked-subtract-int
-                                                 li (int 2))))
-                                    (aget rngs (unchecked-dec-int li)))))
+                                     (aget rngs li)
+                                     (aget rngs (unchecked-dec-int li)))
+                                    (aget rngs 0))))
                               tail))
         new-rngs (ints (if-not reg?
                          (if rngs
                            (aclone rngs)
                            (regular-ranges shift cnt))))]
-    (when-not (and (== shift 5) (== li 32))
+    (when-not (and (or (nil? cret) (== shift 5)) (== li 32))
       (System/arraycopy arr 0 new-arr 0 li)
       (when-not reg?
         (if (or (nil? cret) (== shift 5))

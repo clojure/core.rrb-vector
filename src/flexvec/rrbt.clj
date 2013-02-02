@@ -82,7 +82,8 @@
                              (.regular nm new-child))
             new-arr   (object-array (if (and regular? regular-child?) 32 33))
             new-child-rng  (if regular-child?
-                             -1
+                             (let [m (mod child-end (bit-shift-left 1 shift))]
+                               (if (zero? m) (bit-shift-left 1 shift) m))
                              (if (== shift (int 5))
                                (.alength am (.array nm new-child))
                                (last-range nm new-child)))]
@@ -123,7 +124,7 @@
             i        (if regular?
                        i
                        (loop [j i]
-                         (if (<= start (aget rngs j))
+                         (if (< start (aget rngs j))
                            j
                            (recur (unchecked-inc-int j)))))
             len      (if regular?
@@ -140,12 +141,14 @@
                                     i (bit-shift-left (int 1) shift))
                                    (aget rngs (unchecked-dec-int i))))
                           start)
-            child-end   (int (min end (if regular?
-                                        (unchecked-multiply-int
-                                         i (bit-shift-left (int 1) shift))
-                                        (if (pos? i)
-                                          (aget rngs (unchecked-dec-int i))
-                                          end))))
+            child-end   (int (min (bit-shift-left (int 1) shift)
+                                  (if (pos? i)
+                                    (unchecked-subtract-int
+                                     end (if regular?
+                                           (unchecked-multiply-int
+                                            i (bit-shift-left (int 1) shift))
+                                           (aget rngs (unchecked-dec-int i))))
+                                    end)))
             new-child   (slice-left nm am
                                     (aget ^objects arr i)
                                     (unchecked-subtract-int shift (int 5))
@@ -175,6 +178,7 @@
               (when (< j new-len)
                 (aset rngs j r)
                 (recur (unchecked-inc-int j) (unchecked-add-int r step))))
+            (aset rngs (dec new-len) (- end start))
             (aset rngs 32 new-len)
             (System/arraycopy arr (if (nil? new-child) (unchecked-inc-int i) i)
                               new-arr 0
@@ -646,7 +650,9 @@
               (let [rng  (int (last-range nm child))
                     diff (unchecked-subtract-int
                           rng
-                          (last-range nm new-child))
+                          (if new-child
+                            (last-range nm new-child)
+                            0))
                     arr  (aclone ^objects (.array nm node))]
                 (aset new-rngs subidx
                       (unchecked-subtract-int (aget new-rngs subidx) diff))
@@ -797,15 +803,16 @@
                                                  new-cnt
                                                  shift new-root
                                                  (.array am 0) nil -1 -1)
-                                        shift new-cnt new-root))
-                  new-root  (if (nil? new-root) (.empty nm) new-root)]
-              (loop [r new-root
-                     s (int shift)]
-                (if (and (> s (int 5))
-                         (nil? (aget ^objects (.array nm r) 1)))
-                  (recur (aget ^objects (.array nm r) 0)
-                         (unchecked-subtract-int s (int 5)))
-                  (Vector. nm am new-cnt s r new-tail _meta -1 -1)))))))))
+                                        shift new-cnt new-root))]
+              (if (nil? new-root)
+                (Vector. nm am new-cnt 5 (.empty nm) new-tail _meta -1 -1)
+                (loop [r new-root
+                       s (int shift)]
+                  (if (and (> s (int 5))
+                           (nil? (aget ^objects (.array nm r) 1)))
+                    (recur (aget ^objects (.array nm r) 0)
+                           (unchecked-subtract-int s (int 5)))
+                    (Vector. nm am new-cnt s r new-tail _meta -1 -1))))))))))
 
   PSpliceableVector
   (splicev [this that]
@@ -1080,86 +1087,88 @@
 
 (defn rebalance
   [^NodeManager nm ^ArrayManager am shift n1 cnt1 n2 cnt2 ^Box transferred-leaves]
-  (let [slc1 (slot-count nm am n1 shift)
-        slc2 (slot-count nm am n2 shift)
-        a    (+ slc1 slc2)
-        sbc1 (subtree-branch-count nm am n1 shift)
-        sbc2 (subtree-branch-count nm am n2 shift)
-        p    (+ sbc1 sbc2)
-        e    (- a (inc (quot (dec p) 32)))]
-    (cond
-      (<= e max-extra-search-steps)
-      (object-array (list n1 n2))
+  (if (nil? n2)
+    (object-array (list n1 nil))
+    (let [slc1 (slot-count nm am n1 shift)
+          slc2 (slot-count nm am n2 shift)
+          a    (+ slc1 slc2)
+          sbc1 (subtree-branch-count nm am n1 shift)
+          sbc2 (subtree-branch-count nm am n2 shift)
+          p    (+ sbc1 sbc2)
+          e    (- a (inc (quot (dec p) 32)))]
+      (cond
+        (<= e max-extra-search-steps)
+        (object-array (list n1 n2))
 
-      (<= (+ sbc1 sbc2) 1024)
-      (let [new-arr  (object-array 33)
-            new-rngs (int-array 33)
-            new-n1   (.node nm nil new-arr)]
-        (loop [i  0
-               bs (partition-all 32
-                                 (concat (child-seq nm n1 shift cnt1)
-                                         (child-seq nm n2 shift cnt2)))]
-          (when-first [block bs]
-            (let [a (object-array 33)
-                  r (int-array 33)]
-              (aset a 32 r)
-              (aset r 32 (count block))
-              (loop [i 0 o (int 0) gcs (seq block)]
-                (when-first [[gc gcr] gcs]
-                  (aset ^objects a i gc)
-                  (aset r i (unchecked-add-int o (int gcr)))
-                  (recur (inc i) (unchecked-add-int o (int gcr)) (next gcs))))
-              (aset ^objects new-arr i (.node nm nil a))
-              (aset new-rngs i
-                    (+ (aget r (dec (aget r 32)))
-                       (if (pos? i) (aget new-rngs (dec i)) (int 0))))
-              (aset new-rngs 32 (inc i))
-              (recur (inc i) (next bs)))))
-        (aset new-arr 32 new-rngs)
-        (set! (.-val transferred-leaves) cnt2)
-        (object-array (list new-n1 nil)))
-
-      :else
-      (let [new-arr1  (object-array 33)
-            new-arr2  (object-array 33)
-            new-rngs1 (int-array 33)
-            new-rngs2 (int-array 33)
-            new-n1    (.node nm nil new-arr1)
-            new-n2    (.node nm nil new-arr2)]
-        (loop [i  0
-               bs (partition-all 32
-                                 (concat (child-seq nm n1 shift cnt1)
-                                         (child-seq nm n2 shift cnt2)))]
-          (when-first [block bs]
-            (let [a (object-array 33)
-                  r (int-array 33)]
-              (aset a 32 r)
-              (aset r 32 (count block))
-              (loop [i 0 o (int 0) gcs (seq block)]
-                (when-first [[gc gcr] gcs]
-                  (aset a i gc)
-                  (aset r i (unchecked-add-int o (int gcr)))
-                  (recur (inc i) (unchecked-add-int o (int gcr)) (next gcs))))
-              (if (and (< i 32) (> (+ (* i 32) (count block)) sbc1))
-                (let [tbs (- (+ (* i 32) (count block)) sbc1)
-                      li  (dec (aget r 32))
-                      d   (if (>= tbs 32)
-                            (aget r li)
-                            (- (aget r li) (aget r (- li tbs))))]
-                  (set! (.-val transferred-leaves)
-                        (+ (.-val transferred-leaves) d))))
-              (let [new-arr  (if (< i 32) new-arr1 new-arr2)
-                    new-rngs (if (< i 32) new-rngs1 new-rngs2)
-                    i        (mod i 32)]
+        (<= (+ sbc1 sbc2) 1024)
+        (let [new-arr  (object-array 33)
+              new-rngs (int-array 33)
+              new-n1   (.node nm nil new-arr)]
+          (loop [i  0
+                 bs (partition-all 32
+                                   (concat (child-seq nm n1 shift cnt1)
+                                           (child-seq nm n2 shift cnt2)))]
+            (when-first [block bs]
+              (let [a (object-array 33)
+                    r (int-array 33)]
+                (aset a 32 r)
+                (aset r 32 (count block))
+                (loop [i 0 o (int 0) gcs (seq block)]
+                  (when-first [[gc gcr] gcs]
+                    (aset ^objects a i gc)
+                    (aset r i (unchecked-add-int o (int gcr)))
+                    (recur (inc i) (unchecked-add-int o (int gcr)) (next gcs))))
                 (aset ^objects new-arr i (.node nm nil a))
                 (aset new-rngs i
                       (+ (aget r (dec (aget r 32)))
                          (if (pos? i) (aget new-rngs (dec i)) (int 0))))
-                (aset new-rngs 32 (int (inc i))))
-              (recur (inc i) (next bs)))))
-        (aset new-arr1 32 new-rngs1)
-        (aset new-arr2 32 new-rngs2)
-        (object-array (list new-n1 new-n2))))))
+                (aset new-rngs 32 (inc i))
+                (recur (inc i) (next bs)))))
+          (aset new-arr 32 new-rngs)
+          (set! (.-val transferred-leaves) cnt2)
+          (object-array (list new-n1 nil)))
+
+        :else
+        (let [new-arr1  (object-array 33)
+              new-arr2  (object-array 33)
+              new-rngs1 (int-array 33)
+              new-rngs2 (int-array 33)
+              new-n1    (.node nm nil new-arr1)
+              new-n2    (.node nm nil new-arr2)]
+          (loop [i  0
+                 bs (partition-all 32
+                                   (concat (child-seq nm n1 shift cnt1)
+                                           (child-seq nm n2 shift cnt2)))]
+            (when-first [block bs]
+              (let [a (object-array 33)
+                    r (int-array 33)]
+                (aset a 32 r)
+                (aset r 32 (count block))
+                (loop [i 0 o (int 0) gcs (seq block)]
+                  (when-first [[gc gcr] gcs]
+                    (aset a i gc)
+                    (aset r i (unchecked-add-int o (int gcr)))
+                    (recur (inc i) (unchecked-add-int o (int gcr)) (next gcs))))
+                (if (and (< i 32) (> (+ (* i 32) (count block)) sbc1))
+                  (let [tbs (- (+ (* i 32) (count block)) sbc1)
+                        li  (dec (aget r 32))
+                        d   (if (>= tbs 32)
+                              (aget r li)
+                              (- (aget r li) (aget r (- li tbs))))]
+                    (set! (.-val transferred-leaves)
+                          (+ (.-val transferred-leaves) d))))
+                (let [new-arr  (if (< i 32) new-arr1 new-arr2)
+                      new-rngs (if (< i 32) new-rngs1 new-rngs2)
+                      i        (mod i 32)]
+                  (aset ^objects new-arr i (.node nm nil a))
+                  (aset new-rngs i
+                        (+ (aget r (dec (aget r 32)))
+                           (if (pos? i) (aget new-rngs (dec i)) (int 0))))
+                  (aset new-rngs 32 (int (inc i))))
+                (recur (inc i) (next bs)))))
+          (aset new-arr1 32 new-rngs1)
+          (aset new-arr2 32 new-rngs2)
+          (object-array (list new-n1 new-n2)))))))
 
 (defn zippath
   [^NodeManager nm ^ArrayManager am shift n1 cnt1 n2 cnt2 ^Box transferred-leaves]
