@@ -1278,15 +1278,12 @@
           [n1 n2] (if (identical? n2 r2)
                     (squash-nodes nm s n1 ncnt1 n2 ncnt2)
                     (object-array (list n1 n2)))
-          ncnt1   (if (identical? n2 r2)
+          ncnt1   (if n2
                     (int ncnt1)
-                    (let [rngs (ranges nm n1)]
-                      (aget rngs (dec (aget rngs 32)))))
-          ncnt2   (int (cond
-                         (identical? n2 r2) (int ncnt2)
-                         (not n2) (int 0)
-                         :else (let [rngs (ranges nm n2)]
-                                 (aget rngs (dec (aget rngs 32))))))]
+                    (unchecked-add-int (int ncnt1) (int ncnt2)))
+          ncnt2   (if n2
+                    (int ncnt2)
+                    (int 0))]
       (if n2
         (let [arr      (object-array 33)
               new-root (.node nm nil arr)]

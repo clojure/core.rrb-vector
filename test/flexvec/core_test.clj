@@ -20,6 +20,7 @@
 (deftest test-splicing
   (testing "splicing"
     (is (dv/check-catvec 1025 1025 3245 1025 32768 1025 1025 10123 1025 1025))
+    (is (dv/check-catvec 10 40 40 40 40 40 40 40 40))
     (is (apply dv/check-catvec (repeat 30 33))))
   (testing "splicing (generative)"
     (is (try (dv/generative-check-catvec 250 30 10 60000)
