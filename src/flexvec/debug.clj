@@ -1,7 +1,6 @@
 (ns flexvec.debug
   (:require flexvec.rrbt
-            [flexvec.nodes :refer [ranges object-nm primitive-nm
-                                   pv-root pv-shift pv-tail]]
+            [flexvec.nodes :refer [ranges object-nm primitive-nm]]
             [flexvec.core :as fv])
   (:import (clojure.lang PersistentVector)
            (clojure.core Vec)
@@ -11,7 +10,10 @@
 (defn dbg-vec [v]
   (let [[extract-root extract-shift extract-tail ^NodeManager nm]
         (condp identical? (class v)
-          PersistentVector [pv-root pv-shift pv-tail object-nm]
+          PersistentVector [#(.-root ^PersistentVector %)
+                            #(.-shift ^PersistentVector %)
+                            #(.-tail ^PersistentVector %)
+                            object-nm]
           Vec              [#(.-root ^Vec %)
                             #(.-shift ^Vec %)
                             #(.-tail ^Vec %)

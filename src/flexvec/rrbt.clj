@@ -8,8 +8,7 @@
                                    replace-leftmost-child
                                    replace-rightmost-child
                                    fold-tail new-path index-of-nil
-                                   object-am object-nm primitive-nm
-                                   pv-shift pv-root pv-tail]]
+                                   object-am object-nm primitive-nm]]
             [clojure.core.protocols :refer [IKVReduce]])
   (:import (clojure.core ArrayManager Vec VecSeq)
            (clojure.lang Util Box PersistentVector APersistentVector$SubVector)
@@ -922,21 +921,6 @@
 (defmethod print-method ::Vector [v w]
   ((get (methods print-method) clojure.lang.IPersistentVector) v w))
 
-(let [vector-field (.getDeclaredField APersistentVector$SubVector "v")]
-  (.setAccessible vector-field true)
-  (defn sv-vector [^APersistentVector$SubVector sv]
-    (.get vector-field sv)))
-
-(let [start-field (.getDeclaredField APersistentVector$SubVector "start")]
-  (.setAccessible start-field true)
-  (defn sv-start [^APersistentVector$SubVector sv]
-    (.get start-field sv)))
-
-(let [end-field (.getDeclaredField APersistentVector$SubVector "end")]
-  (.setAccessible end-field true)
-  (defn sv-end [^APersistentVector$SubVector sv]
-    (.get end-field sv)))
-
 (extend-protocol AsRRBT
   Vec
   (as-rrbt [^Vec this]
@@ -947,14 +931,14 @@
   PersistentVector
   (as-rrbt [^PersistentVector this]
     (Vector. object-nm object-am
-             (count this) (pv-shift this) (pv-root this) (pv-tail this)
+             (count this) (.-shift this) (.-root this) (.-tail this)
              (meta this) -1 -1))
 
   APersistentVector$SubVector
   (as-rrbt [^APersistentVector$SubVector this]
-    (let [v     (sv-vector this)
-          start (sv-start this)
-          end   (sv-end this)]
+    (let [v     (.-v this)
+          start (.-start this)
+          end   (.-end this)]
       (slicev (as-rrbt v) start end))))
 
 (defn shift-from-to [^NodeManager nm node from to]

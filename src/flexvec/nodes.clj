@@ -18,45 +18,11 @@
 
 ;;; empty nodes
 
-(let [empty-node-field (.getDeclaredField PersistentVector "EMPTY_NODE")]
-  (.setAccessible empty-node-field true)
-  (def empty-pv-node (.get empty-node-field nil)))
+(def empty-pv-node PersistentVector/EMPTY_NODE)
 
 (def empty-gvec-node clojure.core/EMPTY-NODE)
 
 ;;; node managers
-
-(let [root-field (doto (.getDeclaredField PersistentVector "root")
-                   (.setAccessible true))]
-  (defn ^clojure.lang.PersistentVector$Node pv-root [^PersistentVector v]
-    (.get root-field v)))
-
-(let [tail-field (doto (.getDeclaredField PersistentVector "tail")
-                   (.setAccessible true))]
-  (defn pv-tail [^PersistentVector v]
-    (.get tail-field v)))
-
-(let [shift-field (doto (.getDeclaredField PersistentVector "shift")
-                    (.setAccessible true))]
-  (defn pv-shift [^PersistentVector v]
-    (.get shift-field v)))
-
-(let [array-field (doto (.getDeclaredField PersistentVector$Node "array")
-                    (.setAccessible true))]
-  (defn pv-node-array [^PersistentVector$Node node]
-    (.get array-field node)))
-
-(let [edit-field (doto (.getDeclaredField PersistentVector$Node "edit")
-                   (.setAccessible true))]
-  (defn ^AtomicReference pv-node-edit [^PersistentVector$Node node]
-    (.get edit-field node)))
-
-(let [node-ctor (.getDeclaredConstructor
-                 PersistentVector$Node
-                 (into-array Class [AtomicReference (class (object-array 0))]))]
-  (.setAccessible node-ctor true)
-  (defn make-pv-node [^AtomicReference edit ^objects arr]
-    (.newInstance node-ctor (object-array (list edit arr)))))
 
 (definterface NodeManager
   (node [^java.util.concurrent.atomic.AtomicReference edit arr])
@@ -69,18 +35,19 @@
 (def object-nm
   (reify NodeManager
     (node [_ edit arr]
-      (make-pv-node edit arr))
+      (PersistentVector$Node. edit arr))
     (empty [_]
       empty-pv-node)
     (array [_ node]
-      (pv-node-array node))
+      (.-array ^PersistentVector$Node node))
     (edit [_ node]
-      (pv-node-edit node))
+      (.-edit ^PersistentVector$Node node))
     (regular [_ node]
-      (not (== (alength ^objects (pv-node-array node)) (int 33))))
+      (not (== (alength ^objects (.-array ^PersistentVector$Node node)) (int 33))))
     (clone [_ am shift node]
-      (make-pv-node (pv-node-edit node)
-                    (aclone ^objects (pv-node-array node))))))
+      (PersistentVector$Node.
+       (.-edit ^PersistentVector$Node node)
+       (aclone ^objects (.-array ^PersistentVector$Node node))))))
 
 (def primitive-nm
   (reify NodeManager
