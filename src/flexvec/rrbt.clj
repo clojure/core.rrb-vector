@@ -9,7 +9,9 @@
                                    replace-rightmost-child
                                    fold-tail new-path index-of-nil
                                    object-am object-nm primitive-nm]]
-            [clojure.core.protocols :refer [IKVReduce]])
+            [flexvec.fork-join :as fj]
+            [clojure.core.protocols :refer [IKVReduce]]
+            [clojure.core.reducers :as r :refer [CollFold coll-fold]])
   (:import (clojure.core ArrayManager Vec VecSeq)
            (clojure.lang Util Box PersistentVector APersistentVector$SubVector)
            (flexvec.nodes NodeManager)
@@ -755,6 +757,24 @@
                       lim (unchecked-dec-int len)]
                   (recur i (int 0) init arr lim len))
                 init)))))))
+
+  CollFold
+  ;; adapted from #'clojure.core.reducers/foldvec
+  (coll-fold [this n combinef reducef]
+    (let [n (int n)]
+      (cond
+        (zero? cnt) (combinef)
+        (<= cnt n)  (r/reduce reducef (combinef) this)
+        :else
+        (let [split (quot cnt 2)
+              v1 (slicev this 0 split)
+              v2 (slicev this split cnt)
+              fc (fn [child] #(coll-fold child n combinef reducef))]
+          (fj/invoke
+           #(let [f1 (fc v1)
+                  t2 (fj/task (fc v2))]
+              (fj/fork t2)
+              (combinef (f1) (fj/join t2))))))))
   
   PSliceableVector
   (slicev [this start end]
