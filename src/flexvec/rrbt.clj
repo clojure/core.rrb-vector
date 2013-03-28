@@ -447,6 +447,9 @@
       (== i cnt) (.cons this val)
       :else (throw (IndexOutOfBoundsException.))))
 
+  (length [this]
+    (.count this))
+
   clojure.lang.Reversible
   (rseq [this]
     (if (pos? cnt)
