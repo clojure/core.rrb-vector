@@ -1,4 +1,4 @@
-(ns flexvec.protocols)
+(ns clojure.core.rrb-vector.protocols)
 
 (defprotocol PSpliceableVector
   (splicev [v1 v2]))

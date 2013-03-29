@@ -1,4 +1,4 @@
-# flexvec
+# core.rrb-vector
 
 An implementation of the confluently persistent vector data structure
 introduced in Bagwell, Rompf, "RRB-Trees: Efficient Immutable
@@ -7,32 +7,35 @@ Vectors", EPFL-REPORT-169879, September, 2011.
 RRB-Trees build upon Clojure's PersistentVectors, adding logarithmic
 time concatenation and slicing.
 
-The main API entry points are `flexvec.core/catvec`, performing vector
-concatenation, and `flexvec.core/subvec`, which produces a new vector
-containing the appropriate subrange of the input vector (in contrast
-to `clojure.core/subvec`, which returns a view on the input vector).
+The main API entry points are `clojure.core.rrb-vector/catvec`,
+performing vector concatenation, and `clojure.core.rrb-vector/subvec`,
+which produces a new vector containing the appropriate subrange of the
+input vector (in contrast to `clojure.core/subvec`, which returns a
+view on the input vector).
 
-flexvec's vectors can store objects or unboxed primitives. The
+core.rrb-vector's vectors can store objects or unboxed primitives. The
 implementation allows for seamless interoperability with
 `clojure.lang.PersistentVector`, `clojure.core.Vec` (more commonly
 known as gvec) and `clojure.lang.APersistentVector$SubVector`
-instances: `flexvec.core/catvec` and `flexvec.core/subvec` convert
-their inputs to `flexvec.rrbt.Vector` instances whenever necessary
+instances: `clojure.core.rrb-vector/catvec` and
+`clojure.core.rrb-vector/subvec` convert their inputs to
+`clojure.core.rrb-vector.rrbt.Vector` instances whenever necessary
 (this is a very fast constant time operation for PersistentVector and
 gvec; for SubVector it is O(log n), where n is the size of the
 underlying vector).
 
-`flexvec.core` also exports its own versions of `vector`, `vector-of`
-and `vec` which always produce `flexvec.rrbt.Vector` instances. Note
-that `vector-of` accepts `:object` as one of the possible type
-arguments, in addition to keywords naming primitive types.
+`clojure.core.rrb-vector` also exports its own versions of `vector`,
+`vector-of` and `vec` which always produce
+`clojure.core.rrb-vector.rrbt.Vector` instances. Note that `vector-of`
+accepts `:object` as one of the possible type arguments, in addition
+to keywords naming primitive types.
 
 ## Usage
 
-    (require '[flexvec.core :as fv])
+    (require '[clojure.core.rrb-vector :as fv])
 
     ;; read the overview at the REPL
-    (doc flexvec.core)
+    (doc clojure.core.rrb-vector)
 
     ;; functions meant for public consumption
     (doc fv/subvec)
@@ -46,14 +49,16 @@ arguments, in addition to keywords naming primitive types.
     (fv/subvec (vec (range 1024)) 123 456)
 
     ;; for peeking under the hood
-    (require '[flexvec.debug :as dv])
+    (require '[clojure.core.rrb-vector.debug :as dv])
     (dv/dbg-vec (fv/catvec (vec (range 1234)) (vec (range 8765))))
 
 ## Future development
 
-Please note that patches will only be accepted from developers who
-have submitted the Clojure CA and would be happy with the code they
-submit to flexvec becoming part of the Clojure project.
+core.rrb-vector is being developed as a Clojure Contrib project, see
+the
+[What is Clojure Contrib](http://dev.clojure.org/pages/viewpage.action?pageId=5767464)
+page for details. Patches will only be accepted from developers who
+have signed the Clojure Contributor Agreement.
 
 Current TODO list:
 
@@ -70,7 +75,7 @@ Current TODO list:
 
 ## Clojure(Script) code reuse
 
-flexvec's vectors support the same basic functionality regular
+core.rrb-vector's vectors support the same basic functionality regular
 Clojure's vectors do (with the omissions listed above). Where
 possible, this is achieved by reusing code from Clojure's gvec and
 ClojureScript's PersistentVector implementations. The Clojure(Script)
@@ -87,6 +92,6 @@ copyright notice:
 
 ## Licence
 
-Copyright © 2012 Michał Marczyk
+Copyright © 2012 Michał Marczyk, Rich Hickey
 
 Distributed under the Eclipse Public License, the same as Clojure.

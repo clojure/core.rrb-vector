@@ -1,11 +1,11 @@
-(ns flexvec.debug
-  (:require flexvec.rrbt
-            [flexvec.nodes :refer [ranges object-nm primitive-nm]]
-            [flexvec.core :as fv])
+(ns clojure.core.rrb-vector.debug
+  (:require clojure.core.rrb-vector.rrbt
+            [clojure.core.rrb-vector.nodes :refer [ranges object-nm primitive-nm]]
+            [clojure.core.rrb-vector :as fv])
   (:import (clojure.lang PersistentVector)
            (clojure.core Vec)
-           (flexvec.rrbt Vector)
-           (flexvec.nodes NodeManager)))
+           (clojure.core.rrb_vector.rrbt Vector)
+           (clojure.core.rrb_vector.nodes NodeManager)))
 
 (defn dbg-vec [v]
   (let [[extract-root extract-shift extract-tail ^NodeManager nm]

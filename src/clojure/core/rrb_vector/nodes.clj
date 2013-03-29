@@ -1,4 +1,4 @@
-(ns flexvec.nodes
+(ns clojure.core.rrb-vector.nodes
   (:import (clojure.core VecNode ArrayManager)
            (clojure.lang PersistentVector PersistentVector$Node)
            (java.util.concurrent.atomic AtomicReference)))

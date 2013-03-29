@@ -1,4 +1,4 @@
-(ns flexvec.core
+(ns clojure.core.rrb-vector
 
   "An implementation of the confluently persistent vector data
   structure introduced in Bagwell, Rompf, \"RRB-Trees: Efficient
@@ -7,36 +7,39 @@
   RRB-Trees build upon Clojure's PersistentVectors, adding logarithmic
   time concatenation and slicing.
 
-  The main API entry points are flexvec.core/catvec, performing vector
-  concatenation, and flexvec.core/subvec, which produces a new vector
-  containing the appropriate subrange of the input vector (in contrast
-  to clojure.core/subvec, which returns a view on the input vector).
+  The main API entry points are clojure.core.rrb-vector/catvec,
+  performing vector concatenation, and clojure.core.rrb-vector/subvec,
+  which produces a new vector containing the appropriate subrange of
+  the input vector (in contrast to clojure.core/subvec, which returns
+  a view on the input vector).
 
-  flexvec's vectors can store objects or unboxed primitives. The
-  implementation allows for seamless interoperability with
+  core.rrb-vector's vectors can store objects or unboxed primitives.
+  The implementation allows for seamless interoperability with
   clojure.lang.PersistentVector, clojure.core.Vec (more commonly known
   as gvec) and clojure.lang.APersistentVector$SubVector instances:
-  flexvec.core/catvec and flexvec.core/subvec convert their inputs to
-  flexvec.rrbt.Vector instances whenever necessary (this is a very
-  fast constant time operation for PersistentVector and gvec; for
-  SubVector it is O(log n), where n is the size of the underlying
-  vector).
+  clojure.core.rrb-vector/catvec and clojure.core.rrb-vector/subvec
+  convert their inputs to clojure.core.rrb-vector.rrbt.Vector instances whenever
+  necessary (this is a very fast constant time operation for
+  PersistentVector and gvec; for SubVector it is O(log n), where n is
+  the size of the underlying vector).
 
-  flexvec.core also exports its own versions of vector, vector-of and
-  vec which always produce flexvec.rrbt.Vector instances. Note that
-  vector-of accepts :object as one of the possible type arguments, in
-  addition to keywords naming primitive types."
+  clojure.core.rrb-vector also exports its own versions of vector,
+  vector-of and vec which always produce clojure.core.rrb-vector.rrbt.Vector
+  instances. Note that vector-of accepts :object as one of the
+  possible type arguments, in addition to keywords naming primitive
+  types."
 
   {:author "Michał Marczyk"}
 
   (:refer-clojure :exclude [vector vector-of vec subvec])
-  (:require [flexvec.protocols :refer [slicev splicev]]
-            [flexvec.nodes :refer [ams object-am object-nm primitive-nm
-                                   empty-pv-node empty-gvec-node]]
-            flexvec.rrbt
-            flexvec.interop)
-  (:import (flexvec.rrbt Vector)
-           (flexvec.nodes NodeManager)
+  (:require [clojure.core.rrb-vector.protocols :refer [slicev splicev]]
+            [clojure.core.rrb-vector.nodes
+             :refer [ams object-am object-nm primitive-nm
+                     empty-pv-node empty-gvec-node]]
+            clojure.core.rrb-vector.rrbt
+            clojure.core.rrb-vector.interop)
+  (:import (clojure.core.rrb_vector.rrbt Vector)
+           (clojure.core.rrb_vector.nodes NodeManager)
            (clojure.core ArrayManager)))
 
 (defn catvec

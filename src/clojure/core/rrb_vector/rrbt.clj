@@ -1,20 +1,19 @@
-(ns flexvec.rrbt
+(ns clojure.core.rrb-vector.rrbt
   (:refer-clojure :exclude [assert])
-  (:require [flexvec.protocols :refer [PSliceableVector slicev
-                                       PSpliceableVector splicev]]
-            [flexvec.nodes :refer [ranges overflow? last-range regular-ranges
-                                   first-child last-child
-                                   remove-leftmost-child
-                                   replace-leftmost-child
-                                   replace-rightmost-child
-                                   fold-tail new-path index-of-nil
-                                   object-am object-nm primitive-nm]]
-            [flexvec.fork-join :as fj]
+  (:require [clojure.core.rrb-vector.protocols :refer [PSliceableVector slicev
+                                                       PSpliceableVector splicev]]
+            [clojure.core.rrb-vector.nodes
+             :refer [ranges overflow? last-range regular-ranges
+                     first-child last-child remove-leftmost-child
+                     replace-leftmost-child replace-rightmost-child
+                     fold-tail new-path index-of-nil
+                     object-am object-nm primitive-nm]]
+            [clojure.core.rrb-vector.fork-join :as fj]
             [clojure.core.protocols :refer [IKVReduce]]
             [clojure.core.reducers :as r :refer [CollFold coll-fold]])
   (:import (clojure.core ArrayManager Vec VecSeq)
            (clojure.lang Util Box PersistentVector APersistentVector$SubVector)
-           (flexvec.nodes NodeManager)
+           (clojure.core.rrb_vector.nodes NodeManager)
            (java.util.concurrent.atomic AtomicReference)))
 
 (def ^:const rrbt-concat-threshold 33)

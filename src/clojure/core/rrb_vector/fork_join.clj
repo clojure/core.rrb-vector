@@ -1,4 +1,4 @@
-(ns flexvec.fork-join
+(ns clojure.core.rrb-vector.fork-join
   (:require [clojure.core.reducers :as r]))
 
 (def pool   @#'r/pool)

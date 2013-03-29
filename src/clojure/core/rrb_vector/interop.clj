@@ -1,10 +1,10 @@
-(ns flexvec.interop
-  (:require [flexvec.protocols :refer [PSliceableVector slicev
-                                       PSpliceableVector splicev]]
-            [flexvec.rrbt :refer [as-rrbt]])
+(ns clojure.core.rrb-vector.interop
+  (:require [clojure.core.rrb-vector.protocols :refer [PSliceableVector slicev
+                                                       PSpliceableVector splicev]]
+            [clojure.core.rrb-vector.rrbt :refer [as-rrbt]])
   (:import (clojure.core Vec)
            (clojure.lang PersistentVector APersistentVector$SubVector)
-           (flexvec.rrbt Vector)))
+           (clojure.core.rrb_vector.rrbt Vector)))
 
 (extend-protocol PSliceableVector
   Vec

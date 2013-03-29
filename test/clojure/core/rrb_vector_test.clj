@@ -1,6 +1,6 @@
-(ns flexvec.core-test
-  (:require [flexvec.core :as fv]
-            [flexvec.debug :as dv])
+(ns clojure.core.rrb-vector-test
+  (:require [clojure.core.rrb-vector :as fv]
+            [clojure.core.rrb-vector.debug :as dv])
   (:use clojure.test)
   (:import (clojure.lang ExceptionInfo)))
 
