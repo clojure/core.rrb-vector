@@ -18,16 +18,16 @@
   clojure.lang.PersistentVector, clojure.core.Vec (more commonly known
   as gvec) and clojure.lang.APersistentVector$SubVector instances:
   clojure.core.rrb-vector/catvec and clojure.core.rrb-vector/subvec
-  convert their inputs to clojure.core.rrb-vector.rrbt.Vector instances whenever
-  necessary (this is a very fast constant time operation for
-  PersistentVector and gvec; for SubVector it is O(log n), where n is
-  the size of the underlying vector).
+  convert their inputs to clojure.core.rrb-vector.rrbt.Vector
+  instances whenever necessary (this is a very fast constant time
+  operation for PersistentVector and gvec; for SubVector it is O(log
+  n), where n is the size of the underlying vector).
 
-  clojure.core.rrb-vector also exports its own versions of vector,
-  vector-of and vec which always produce clojure.core.rrb-vector.rrbt.Vector
-  instances. Note that vector-of accepts :object as one of the
-  possible type arguments, in addition to keywords naming primitive
-  types."
+  clojure.core.rrb-vector also exports its own versions of vector and
+  vector-of and vec which always produce
+  clojure.core.rrb-vector.rrbt.Vector instances. Note that vector-of
+  accepts :object as one of the possible type arguments, in addition
+  to keywords naming primitive types."
 
   {:author "Michał Marczyk"}
 
