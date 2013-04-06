@@ -61,7 +61,10 @@
 (defn subvec
   "Returns a new vector containing the elements of the given vector v
   lying between the start (inclusive) and end (exclusive) indices in
-  logarithmic time. end defaults to end of vector."
+  logarithmic time. end defaults to end of vector. The resulting
+  vector shares structure with the original, but does not hold on to
+  any elements of the original vector lying outside the given index
+  range."
   ([v start]
      (slicev v start (count v)))
   ([v start end]
