@@ -101,7 +101,9 @@
                 (next xn))
          v))))
 
-(defn vec [coll]
+(defn vec
+  "Returns a new vector containing the contents of coll."
+  [coll]
   (apply vector coll))
 
 (defmacro ^:private gen-vector-of-method [t & params]
