@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>core.rrb-vector</artifactId>
+  <version>0.0.9-SNAPSHOT</version>
+  <name>${artifactId}</name>
+  <description>RRB-Trees for Clojure(Script) -- see Bagwell &amp; Rompf</description>
+
+  <licenses>
+    <license>
+      <name>Eclipse Public License 1.0</name>
+      <url>http://opensource.org/licenses/eclipse-1.0.php</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <parent>
+    <groupId>org.clojure</groupId>
+    <artifactId>pom.contrib</artifactId>
+    <version>0.0.26</version>
+  </parent>
+
+  <developers>
+    <developer>
+      <name>Michał Marczyk</name>
+      <url>https://github.com/michalmarczyk</url>
+    </developer>
+  </developers>
+
+  <scm>
+    <connection>scm:git:git://github.com/clojure/core.rrb-vector.git</connection>
+    <developerConnection>scm:git:git://github.com/clojure/core.rrb-vector.git</developerConnection>
+    <url>https://github.com/clojure/core.rrb-vector</url>
+  </scm>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.clojure</groupId>
+      <artifactId>clojure</artifactId>
+      <version>1.5.1</version>
+    </dependency>
+  </dependencies>
+</project>
