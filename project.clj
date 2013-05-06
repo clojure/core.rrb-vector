@@ -3,7 +3,7 @@
   :url "https://github.com/clojure/core.rrb-vector"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
-  :parent [org.clojure/pom.contrib "0.0.26"]
+  :parent [org.clojure/pom.contrib "0.1.2"]
   :dependencies [[org.clojure/clojure "1.5.1"]]
   :source-paths ["src/main/clojure"]
   :test-paths ["src/test/clojure"]
