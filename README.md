@@ -52,15 +52,7 @@ to keywords naming primitive types.
     (require '[clojure.core.rrb-vector.debug :as dv])
     (dv/dbg-vec (fv/catvec (vec (range 1234)) (vec (range 8765))))
 
-## Future development
-
-core.rrb-vector is being developed as a Clojure Contrib project, see
-the
-[What is Clojure Contrib](http://dev.clojure.org/pages/viewpage.action?pageId=5767464)
-page for details. Patches will only be accepted from developers who
-have signed the Clojure Contributor Agreement.
-
-Current TODO list:
+## TODO
 
  1. tests;
 
@@ -72,6 +64,22 @@ Current TODO list:
  4. transients;
 
  5. ClojureScript version.
+
+## Developer information
+
+core.rrb-vector is being developed as a Clojure Contrib project, see
+the
+[What is Clojure Contrib](http://dev.clojure.org/pages/viewpage.action?pageId=5767464)
+page for details. Patches will only be accepted from developers who
+have signed the Clojure Contributor Agreement.
+
+* [GitHub project](https://github.com/clojure/core.rrb-vector)
+
+* [Bug Tracker](http://dev.clojure.org/jira/browse/CRRBV)
+
+* [Continuous Integration](http://build.clojure.org/job/core.rrb-vector/)
+
+* [Compatibility Test Matrix](http://build.clojure.org/job/core.rrb-vector-test-matrix/)
 
 ## Clojure(Script) code reuse
 
