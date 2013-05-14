@@ -12,7 +12,7 @@
             [clojure.core.protocols :refer [IKVReduce]]
             [clojure.core.reducers :as r :refer [CollFold coll-fold]])
   (:import (clojure.core ArrayManager Vec VecSeq)
-           (clojure.lang Util Box PersistentVector APersistentVector$SubVector)
+           (clojure.lang RT Util Box PersistentVector APersistentVector$SubVector)
            (clojure.core.rrb_vector.nodes NodeManager)
            (java.util.concurrent.atomic AtomicReference)))
 
@@ -491,6 +491,15 @@
           (.nth this i)
           (throw (IndexOutOfBoundsException.))))
       (throw (IllegalArgumentException. "Key must be integer"))))
+
+  (applyTo [this args]
+    (let [n (RT/boundedLength args 1)]
+      (case n
+        0 (throw (clojure.lang.ArityException.
+                  n (.. this (getClass) (getSimpleName))))
+        1 (.invoke this (first args))
+        2 (throw (clojure.lang.ArityException.
+                  n (.. this (getClass) (getSimpleName)))))))
 
   ;; hack to reuse gvec's chunked seqs
   clojure.core.IVecImpl
