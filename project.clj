@@ -1,4 +1,4 @@
-(defproject org.clojure/core.rrb-vector "0.0.9-SNAPSHOT"
+(defproject org.clojure/core.rrb-vector "0.0.9"
   :description "RRB-Trees for Clojure(Script) -- see Bagwell & Rompf"
   :url "https://github.com/clojure/core.rrb-vector"
   :license {:name "Eclipse Public License"
