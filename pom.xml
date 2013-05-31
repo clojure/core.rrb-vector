@@ -33,12 +33,14 @@
     <url>https://github.com/clojure/core.rrb-vector</url>
   </scm>
 
+  <properties>
+    <!-- core.rrb-vector depends on implementation details of vectors
+         which were made public in Clojure 1.5.0 -->
+    <clojure.version>1.5.1</clojure.version>
+    <clojure.warnOnReflection>true</clojure.warnOnReflection>
+  </properties>
+
   <dependencies>
-    <dependency>
-      <groupId>org.clojure</groupId>
-      <artifactId>clojure</artifactId>
-      <version>1.5.1</version>
-    </dependency>
     <dependency>
       <groupId>org.codehaus.jsr166-mirror</groupId>
       <artifactId>jsr166y</artifactId>
