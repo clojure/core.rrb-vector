@@ -7,4 +7,5 @@
   :dependencies [[org.clojure/clojure "1.5.1"]]
   :source-paths ["src/main/clojure"]
   :test-paths ["src/test/clojure"]
-  :warn-on-reflection true)
+  :warn-on-reflection true
+  :jvm-opts ^:replace [])
