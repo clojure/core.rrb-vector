@@ -1,6 +1,7 @@
 (ns clojure.core.rrb-vector.debug
   (:require clojure.core.rrb-vector.rrbt
-            [clojure.core.rrb-vector.nodes :refer [ranges object-nm primitive-nm]]
+            [clojure.core.rrb-vector.nodes
+             :refer [ranges object-nm primitive-nm]]
             [clojure.core.rrb-vector :as fv])
   (:import (clojure.lang PersistentVector)
            (clojure.core Vec)

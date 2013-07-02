@@ -1,6 +1,7 @@
 (ns clojure.core.rrb-vector.interop
-  (:require [clojure.core.rrb-vector.protocols :refer [PSliceableVector slicev
-                                                       PSpliceableVector splicev]]
+  (:require [clojure.core.rrb-vector.protocols
+             :refer [PSliceableVector slicev
+                     PSpliceableVector splicev]]
             [clojure.core.rrb-vector.rrbt :refer [as-rrbt]])
   (:import (clojure.core Vec)
            (clojure.lang PersistentVector APersistentVector$SubVector)

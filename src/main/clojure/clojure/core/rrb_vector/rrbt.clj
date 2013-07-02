@@ -1,7 +1,8 @@
 (ns clojure.core.rrb-vector.rrbt
   (:refer-clojure :exclude [assert])
-  (:require [clojure.core.rrb-vector.protocols :refer [PSliceableVector slicev
-                                                       PSpliceableVector splicev]]
+  (:require [clojure.core.rrb-vector.protocols
+             :refer [PSliceableVector slicev
+                     PSpliceableVector splicev]]
             [clojure.core.rrb-vector.nodes
              :refer [ranges overflow? last-range regular-ranges
                      first-child last-child remove-leftmost-child
@@ -12,7 +13,8 @@
             [clojure.core.protocols :refer [IKVReduce]]
             [clojure.core.reducers :as r :refer [CollFold coll-fold]])
   (:import (clojure.core ArrayManager Vec VecSeq)
-           (clojure.lang RT Util Box PersistentVector APersistentVector$SubVector)
+           (clojure.lang RT Util Box PersistentVector
+                         APersistentVector$SubVector)
            (clojure.core.rrb_vector.nodes NodeManager)
            (java.util.concurrent.atomic AtomicReference)))
 
