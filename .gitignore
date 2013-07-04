@@ -8,3 +8,6 @@
 .lein-failures
 .lein-plugins
 .lein-repl-history
+/.repl
+/out
+/repl
