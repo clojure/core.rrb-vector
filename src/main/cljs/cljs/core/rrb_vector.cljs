@@ -51,7 +51,7 @@
      (-splicev (-splicev v1 v2) (-splicev v3 v4)))
   ([v1 v2 v3 v4 & vn]
      (-splicev (-splicev (-splicev v1 v2) (-splicev v3 v4))
-              (apply catvec vn))))
+               (apply catvec vn))))
 
 (defn subvec
   "Returns a new vector containing the elements of the given vector v
