@@ -461,7 +461,7 @@
     (ci-reduce this f start))
 
   IKVReduce
-  (kv-reduce [this f init]
+  (-kv-reduce [this f init]
     (loop [i    0
            j    0
            init init
