@@ -5,13 +5,15 @@ introduced in Bagwell, Rompf, "RRB-Trees: Efficient Immutable
 Vectors", EPFL-REPORT-169879, September, 2011.
 
 RRB-Trees build upon Clojure's PersistentVectors, adding logarithmic
-time concatenation and slicing.
+time concatenation and slicing. ClojureScript is supported by the
+current development version.
 
 The main API entry points are `clojure.core.rrb-vector/catvec`,
 performing vector concatenation, and `clojure.core.rrb-vector/subvec`,
 which produces a new vector containing the appropriate subrange of the
 input vector (in contrast to `clojure.core/subvec`, which returns a
-view on the input vector).
+view on the input vector). The ClojureScript version lives under
+`cljs.core.rrb-vector`.
 
 core.rrb-vector's vectors can store objects or unboxed primitives. The
 implementation allows for seamless interoperability with
@@ -32,6 +34,7 @@ to keywords naming primitive types.
 
 ## Usage
 
+    ;; cljs.core.rrb-vector in ClojureScript
     (require '[clojure.core.rrb-vector :as fv])
 
     ;; read the overview at the REPL
@@ -61,11 +64,12 @@ to keywords naming primitive types.
  3. performance: general perf tuning, efficient `catvec`
     implementation (to replace current seq-ops-based impl);
 
- 4. transients;
-
- 5. ClojureScript version.
+ 4. transients.
 
 ## Releases and dependency information
+
+core.rrb-vector requires Clojure >= 1.5.0. The ClojureScript version
+currently requires ClojureScript master.
 
 core.rrb-vector releases are available from Maven Central. Development
 snapshots are available from the Sonatype OSS repository.
