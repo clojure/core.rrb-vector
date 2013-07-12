@@ -98,7 +98,14 @@
         s)))
 
   IHash
-  (-hash [coll] (caching-hash coll hash-coll __hash)))
+  (-hash [coll] (caching-hash coll hash-coll __hash))
+
+  IReduce
+  (-reduce [coll f]
+    (ci-reduce (clsj.core/subvec vec (+ i off) (count vec)) f))
+
+  (-reduce [coll f start]
+    (ci-reduce (cljs.core/subvec vec (+ i off) (count vec)) f start)))
 
 (defn rrb-chunked-seq
   ([vec i off]
