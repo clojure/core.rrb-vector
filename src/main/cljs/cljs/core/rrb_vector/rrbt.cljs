@@ -35,6 +35,8 @@
   IWithMeta
   (-with-meta [coll m]
     (rrb-chunked-seq vec node i off m))
+
+  IMeta
   (-meta [coll] meta)
 
   ISeqable
@@ -48,6 +50,7 @@
   ISeq
   (-first [coll]
     (aget node off))
+
   (-rest [coll]
     (if (< (inc off) (alength node))
       (let [s (rrb-chunked-seq vec node i (inc off))]
@@ -76,6 +79,7 @@
   IChunkedSeq
   (-chunked-first [coll]
     (array-chunk node off))
+
   (-chunked-rest [coll]
     (let [l (alength node)
           s (when (< (+ i l) (-count vec))
@@ -92,6 +96,7 @@
       (if (nil? s)
         nil
         s)))
+
   IHash
   (-hash [coll] (caching-hash coll hash-coll __hash)))
 
