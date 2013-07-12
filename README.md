@@ -65,6 +65,29 @@ to keywords naming primitive types.
 
  5. ClojureScript version.
 
+## Releases and dependency information
+
+core.rrb-vector releases are available from Maven Central. Development
+snapshots are available from the Sonatype OSS repository.
+
+ * [Released versions](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22org.clojure%22%20AND%20a%3A%22core.rrb-vector%22)
+
+ * [Development snapshots](https://oss.sonatype.org/index.html#nexus-search;gav~org.clojure~core.rrb-vector~~~)
+
+Follow the first link above to discover the current release number.
+
+[Leiningen](http://leiningen.org/) dependency information:
+
+  [org.clojure/core.rrb-vector "${version}"]
+
+[Maven](http://maven.apache.org/) dependency information:
+
+  <dependency>
+    <groupId>org.clojure</groupId>
+    <artifactId>core.rrb-vector</artifactId>
+    <version>${version}</version>
+  </dependency>
+
 ## Developer information
 
 core.rrb-vector is being developed as a Clojure Contrib project, see
