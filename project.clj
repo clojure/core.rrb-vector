@@ -14,4 +14,4 @@
                                              "src/test/cljs"]
                               :compiler {:optimizations :advanced
                                          :output-to "out/test.js"}}}}
-  :profiles {:dev {:dependencies [[org.clojure/clojurescript "0.0-1835"]]}})
+  :profiles {:dev {:dependencies [[org.clojure/clojurescript "0.0-1843"]]}})
