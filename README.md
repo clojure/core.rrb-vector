@@ -69,7 +69,7 @@ to keywords naming primitive types.
 ## Releases and dependency information
 
 core.rrb-vector requires Clojure >= 1.5.0. The ClojureScript version
-currently requires ClojureScript master.
+requires ClojureScript >= r1843.
 
 core.rrb-vector releases are available from Maven Central. Development
 snapshots are available from the Sonatype OSS repository.
