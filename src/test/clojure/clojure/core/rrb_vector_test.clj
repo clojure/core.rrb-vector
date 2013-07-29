@@ -48,3 +48,7 @@
       (is (chunked-seq? s)))
     (testing "internal-reduce"
       (is (satisfies? clojure.core.protocols/InternalReduce s)))))
+
+(deftest test-relaxed
+  (is (= (into (fv/catvec (vec (range 123)) (vec (range 68))) (range 64))
+         (concat (range 123) (range 68) (range 64)))))
