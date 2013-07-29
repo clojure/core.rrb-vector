@@ -10,8 +10,9 @@
   :test-paths ["src/test/clojure"]
   :warn-on-reflection true
   :jvm-opts ^:replace []
+  :profiles {:dev {:dependencies [[org.clojure/clojurescript "0.0-1847"]]
+                   :plugins [[lein-cljsbuild "0.3.2"]]}}
   :cljsbuild {:builds {:test {:source-paths ["src/main/cljs"
                                              "src/test/cljs"]
                               :compiler {:optimizations :advanced
-                                         :output-to "out/test.js"}}}}
-  :profiles {:dev {:dependencies [[org.clojure/clojurescript "0.0-1843"]]}})
+                                         :output-to "out/test.js"}}}})
