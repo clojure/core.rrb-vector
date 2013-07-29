@@ -136,18 +136,17 @@
 (defn do-assoc! [shift root-edit current-node i val]
   (let [ret (ensure-editable root-edit current-node)]
     (if (regular? ret)
-      (let [node ret]
-        (loop [shift shift
-               node  node]
-          (if (zero? shift)
-            (let [arr (.-arr node)]
-              (aset arr (bit-and i 0x1f) val))
-            (let [arr    (.-arr node)
-                  subidx (bit-and (bit-shift-right i shift) 0x1f)
-                  child  (ensure-editable root-edit (aget arr subidx))]
-              (aset arr subidx child)
-              (recur (- shift 5) child))))
-        node)
+      (do (loop [shift shift
+                 node  ret]
+            (if (zero? shift)
+              (let [arr (.-arr node)]
+                (aset arr (bit-and i 0x1f) val))
+              (let [arr    (.-arr node)
+                    subidx (bit-and (bit-shift-right i shift) 0x1f)
+                    child  (ensure-editable root-edit (aget arr subidx))]
+                (aset arr subidx child)
+                (recur (- shift 5) child))))
+          ret)
       (let [arr    (.-arr ret)
             rngs   (ranges ret)
             subidx (bit-and (bit-shift-right i shift) 0x1f)
