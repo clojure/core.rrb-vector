@@ -82,15 +82,15 @@ Follow the first link above to discover the current release number.
 
 [Leiningen](http://leiningen.org/) dependency information:
 
-  [org.clojure/core.rrb-vector "${version}"]
+    [org.clojure/core.rrb-vector "${version}"]
 
 [Maven](http://maven.apache.org/) dependency information:
 
-  <dependency>
-    <groupId>org.clojure</groupId>
-    <artifactId>core.rrb-vector</artifactId>
-    <version>${version}</version>
-  </dependency>
+    <dependency>
+      <groupId>org.clojure</groupId>
+      <artifactId>core.rrb-vector</artifactId>
+      <version>${version}</version>
+    </dependency>
 
 ## Developer information
 
