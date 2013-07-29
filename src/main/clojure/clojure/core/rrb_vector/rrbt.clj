@@ -574,8 +574,7 @@
             li   (unchecked-dec-int (aget rngs 32))
             ret  (.node nm (.edit nm node) arr)
             cret (if (== shift (int 5))
-                   (if (< li 31)
-                     tail-node)
+                   nil
                    (let [child (aget ^objects arr li)
                          ccnt  (if (pos? li)
                                  (unchecked-subtract-int
@@ -598,6 +597,7 @@
                               tail-node))
               (aset rngs (unchecked-inc-int li)
                     (unchecked-add-int (aget rngs li) (int 32)))
+              (aset rngs 32 (unchecked-inc-int (aget rngs 32)))
               ret)))))
 
   (popTail [this shift cnt node]

@@ -43,8 +43,7 @@
             rngs (ranges ret)
             li   (dec (aget rngs 32))
             cret (if (== shift 5)
-                   (if (< li 31)
-                     tail-node)
+                   nil
                    (let [child (ensure-editable root-edit (aget arr li))
                          ccnt  (if (pos? li)
                                  (- (aget rngs li) (aget rngs (dec li)))
@@ -63,6 +62,7 @@
                               (- shift 5)
                               tail-node))
               (aset rngs (inc li) (+ (aget rngs li) 32))
+              (aset rngs 32 (inc (aget rngs 32)))
               ret))))))
 
 (defn pop-tail! [shift cnt root-edit current-node]
