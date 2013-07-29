@@ -951,9 +951,6 @@
   (^Object remove [_ ^int i] (throw (UnsupportedOperationException.)))
   (set [_ i e] (throw (UnsupportedOperationException.))))
 
-(defmethod print-method ::Vector [v w]
-  ((get (methods print-method) clojure.lang.IPersistentVector) v w))
-
 (extend-protocol AsRRBT
   Vec
   (as-rrbt [^Vec this]
