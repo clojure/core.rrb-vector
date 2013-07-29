@@ -1,5 +1,5 @@
 (ns cljs.core.rrb-vector.transients
-  (:refer-clojure :exclude [editable-array-for new-path])
+  (:refer-clojure :exclude [new-path])
   (:require [cljs.core.rrb-vector.nodes
              :refer [regular? clone ranges last-range]]
             [cljs.core.rrb-vector.trees :refer [tail-offset new-path]]))
@@ -19,40 +19,6 @@
   (let [ret (make-array 32)]
     (array-copy tail 0 ret 0 (alength tail))
     ret))
-
-(defn editable-array-for [cnt shift root tail i]
-  (if (and (<= 0 i) (< i cnt))
-    (if (>= i (tail-offset cnt tail))
-      tail
-      (let [edit (.-edit root)]
-        (loop [i i node root shift shift]
-          (if (zero? shift)
-            (.-arr node)
-            (if (regular? node)
-              (loop [node  (ensure-editable
-                            edit
-                            (aget (.-arr node)
-                                  (bit-and (bit-shift-right i shift) 0x1f)))
-                     shift (- shift 5)]
-                (if (zero? shift)
-                  (.-arr node)
-                  (recur (ensure-editable
-                          edit
-                          (aget (.-arr node)
-                                (bit-and (bit-shift-right i shift) 0x1f)))
-                         (- shift 5))))
-              (let [rngs (ranges node)
-                    j    (loop [j (bit-and (bit-shift-right i shift) 0x1f)]
-                           (if (< i (aget rngs j))
-                             j
-                             (recur (inc j))))
-                    i    (if (pos? j)
-                           (- i (aget rngs (dec j)))
-                           i)]
-                (recur i
-                       (ensure-editable edit (aget (.-arr node) j))
-                       (- shift 5))))))))
-    (vector-index-out-of-bounds i cnt)))
 
 (defn push-tail! [shift cnt root-edit current-node tail-node]
   (let [ret (ensure-editable root-edit current-node)]
