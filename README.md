@@ -129,4 +129,7 @@ copyright notice:
 
 Copyright © 2012 Michał Marczyk, Rich Hickey
 
-Distributed under the Eclipse Public License, the same as Clojure.
+Distributed under the
+[Eclipse Public License 1.0](http://opensource.org/licenses/eclipse-1.0.php),
+the same as Clojure. The licence text can be found in the
+`epl-v10.html` file at the root of this distribution.
