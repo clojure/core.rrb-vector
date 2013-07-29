@@ -701,7 +701,9 @@
                             (regular-ranges (- shift 5) r)
                             (ranges c))
                      gcs  (if rngs (aget rngs 32) (index-of-nil arr))]
-                 (map list (take gcs arr) (take gcs (map - rngs (cons 0 rngs))))))]
+                 (map list
+                      (take gcs arr)
+                      (take gcs (map - rngs (cons 0 rngs))))))]
     (mapcat cseq (take cs arr) (take cs (map - rngs (cons 0 rngs))))))
 
 (defn rebalance
