@@ -49,8 +49,8 @@
         v2 (reduce (fn [out [k v]]
                      (assoc out k v))
                    (assoc v1 40000 :foo)
-                   (map vector v1 (rseq v1)))]
-    (= (cons :foo v1) v2)))
+                   (map-indexed vector (rseq v1)))]
+    (assert (= (concat (rseq v1) [:foo]) v2))))
 
 (defn test-assoc! []
   (let [v1 (fv/vec (range 40000))
@@ -58,8 +58,8 @@
             (reduce (fn [out [k v]]
                       (assoc! out k v))
                     (assoc! (transient v1) 40000 :foo)
-                    (map vector v1 (rseq v1))))]
-    (= (cons :foo v1) v2)))
+                    (map-indexed vector (rseq v1))))]
+    (assert (= (concat (rseq v1) [:foo]) v2))))
 
 (defn test-relaxed []
   (assert (= (into (fv/catvec (vec (range 123)) (vec (range 68))) (range 64))
