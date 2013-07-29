@@ -105,3 +105,6 @@
         (throw
          (ex-info "check-catvec failure w/o Exception" {:cnts cnts})))))
   true)
+
+(defn slow-into [to from]
+  (reduce conj to from))

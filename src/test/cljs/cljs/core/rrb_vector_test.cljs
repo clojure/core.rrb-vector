@@ -63,6 +63,8 @@
 
 (defn test-relaxed []
   (assert (= (into (fv/catvec (vec (range 123)) (vec (range 68))) (range 64))
+             (concat (range 123) (range 68) (range 64))))
+  (assert (= (dv/slow-into (fv/catvec (vec (range 123)) (vec (range 68))) (range 64))
              (concat (range 123) (range 68) (range 64)))))
 
 (defn run-tests []
