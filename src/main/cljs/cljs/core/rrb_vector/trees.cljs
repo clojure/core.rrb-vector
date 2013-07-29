@@ -177,7 +177,7 @@
   (if (regular? current-node)
     (let [node (clone shift current-node)]
       (loop [shift shift
-             node  current-node]
+             node  node]
         (if (zero? shift)
           (let [arr (.-arr node)]
             (aset arr (bit-and i 0x1f) val))
