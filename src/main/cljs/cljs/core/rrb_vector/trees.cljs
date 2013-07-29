@@ -87,7 +87,7 @@
                                (aget rngs 0))]
                    (if-not (== ccnt (bit-shift-left 1 shift))
                      (push-tail (- shift 5) (inc ccnt) root-edit
-                                current-node
+                                child
                                 tail-node))))]
       (if cret
         (do (aset arr li cret)

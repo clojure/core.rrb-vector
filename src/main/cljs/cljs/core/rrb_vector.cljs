@@ -78,6 +78,8 @@
   ([x1 x2 x3 x4]
      (gen-vector-method x1 x2 x3 x4))
   ([x1 x2 x3 x4 & xn]
+     (into (vector x1 x2 x3 x4) xn)
+     #_
      (loop [v  (vector x1 x2 x3 x4)
             xn xn]
        (if xn

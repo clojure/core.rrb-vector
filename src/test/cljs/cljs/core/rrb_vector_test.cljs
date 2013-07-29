@@ -44,6 +44,27 @@
     (assert (chunked-seq? s))
     (assert (satisfies? IReduce s))))
 
+(defn test-assoc []
+  (let [v1 (fv/vec (range 40000))
+        v2 (reduce (fn [out [k v]]
+                     (assoc out k v))
+                   (assoc v1 40000 :foo)
+                   (map vector v1 (rseq v1)))]
+    (= (cons :foo v1) v2)))
+
+(defn test-assoc! []
+  (let [v1 (fv/vec (range 40000))
+        v2 (persistent!
+            (reduce (fn [out [k v]]
+                      (assoc! out k v))
+                    (assoc! (transient v1) 40000 :foo)
+                    (map vector v1 (rseq v1))))]
+    (= (cons :foo v1) v2)))
+
+(defn test-relaxed []
+  (assert (= (into (fv/catvec (vec (range 123)) (vec (range 68))) (range 64))
+             (concat (range 123) (range 68) (range 64)))))
+
 (defn run-tests []
   (test-slicing)
   (test-slicing-generative)
@@ -51,6 +72,9 @@
   (test-splicing-generative)
   (test-reduce)
   (test-seq)
+  (test-assoc)
+  (test-assoc!)
+  (test-relaxed)
   (println "Tests completed without exception."))
 
 (run-tests)

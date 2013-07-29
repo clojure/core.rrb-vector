@@ -10,7 +10,10 @@
                      fold-tail new-path* index-of-nil]]
             [cljs.core.rrb-vector.trees
              :refer [tail-offset array-for push-tail pop-tail new-path
-                     do-assoc]]))
+                     do-assoc]]
+            [cljs.core.rrb-vector.transients
+             :refer [ensure-editable editable-root editable-tail push-tail!
+                     pop-tail! do-assoc!]]))
 
 (def ^:const rrbt-concat-threshold 33)
 (def ^:const max-extra-search-steps 2)
@@ -260,7 +263,7 @@
           (aset new-arr 32 new-rngs)
           (->VectorNode (.-edit node) new-arr))))))
 
-(declare splice-rrbts)
+(declare splice-rrbts ->Transient)
 
 (deftype Vector [cnt shift root tail meta ^:mutable __hash]
   Object
@@ -496,6 +499,14 @@
   IComparable
   (-compare [this that]
     (compare-indexed this that))
+
+  IEditableCollection
+  (-as-transient [this]
+    (->Transient cnt
+                 shift
+                 (editable-root root)
+                 (editable-tail tail)
+                 (alength tail)))
 
   PSliceableVector
   (-slicev [this start end]
@@ -911,3 +922,136 @@
             (recur (aget (.-arr r) 0) (- s 5))
             (Vector. (+ (count v1) (count v2)) s r (.-tail v2)
                      nil nil)))))))
+
+(deftype Transient [^:mutable cnt
+                    ^:mutable shift
+                    ^:mutable root
+                    ^:mutable tail
+                    ^:mutable tidx]
+  ITransientCollection
+  (-conj! [this o]
+    (if ^boolean (.-edit root)
+      (if (< tidx 32)
+        (do (aset tail tidx o)
+            (set! cnt  (inc cnt))
+            (set! tidx (inc tidx))
+            this)
+        (let [tail-node (->VectorNode (.-edit root) tail)
+              new-tail  (make-array 32)]
+          (aset new-tail 0 o)
+          (set! tail new-tail)
+          (set! tidx 1)
+          (if (overflow? root shift cnt)
+            (if (regular? root)
+              (let [new-arr (make-array 32)]
+                (doto new-arr
+                  (aset 0 root)
+                  (aset 1 (new-path tail (.-edit root) shift tail-node)))
+                (set! root  (->VectorNode (.-edit root) new-arr))
+                (set! shift (+ shift 5))
+                (set! cnt   (inc cnt))
+                this)
+              (let [new-arr  (make-array 33)
+                    new-rngs (make-array 33)
+                    new-root (->VectorNode (.-edit root) new-arr)
+                    root-total-range (aget (ranges root) 31)]
+                (doto new-arr
+                  (aset 0  root)
+                  (aset 1  (new-path tail (.-edit root) shift tail-node))
+                  (aset 32 new-rngs))
+                (doto new-rngs
+                  (aset 0  root-total-range)
+                  (aset 1  (+ root-total-range 32))
+                  (aset 32 2))
+                (set! root  new-root)
+                (set! shift (+ shift 5))
+                (set! cnt   (inc cnt))
+                this))
+            (let [new-root (push-tail! shift cnt (.-edit root) root tail-node)]
+              (set! root new-root)
+              (set! cnt  (inc cnt))
+              this))))
+      (throw (js/Error. "conj! after persistent!"))))
+
+  (-persistent! [this]
+    (if ^boolean (.-edit root)
+      (do (set! (.-edit root) nil)
+          (let [trimmed-tail (make-array tidx)]
+            (array-copy tail 0 trimmed-tail 0 tidx)
+            (Vector. cnt shift root trimmed-tail nil nil)))
+      (throw (js/Error. "persistent! called twice"))))
+
+  ITransientAssociative
+  (-assoc! [this key val]
+    (-assoc-n! this key val))
+
+  ITransientVector
+  (-assoc-n! [this i val]
+    (if ^boolean (.-edit root)
+      (cond
+        (and (<= 0 i) (< i cnt))
+        (let [tail-off (- cnt tidx)]
+          (if (<= tail-off i)
+            (do (aset tail (- i tail-off) val)
+                this)
+            (do (set! root (do-assoc! shift (.-edit root) root i val))
+                this)))
+
+        (== cnt cnt) (-conj! this val)
+
+        :else (vector-index-out-of-bounds i cnt))
+      (throw (js/Error. "assoc! after persistent!"))))
+
+  (-pop! [this]
+    (if ^boolean (.-edit root)
+      (cond
+        (zero? cnt)
+        (throw (js/Error. "Can't pop empty vector"))
+
+        (== 1 cnt)
+        (do (set! cnt  0)
+            (set! tidx 0)
+            (aset tail 0 nil)
+            this)
+
+        (> tidx 1)
+        (do (set! cnt  (dec cnt))
+            (set! tidx (dec tidx))
+            (aset tail tidx nil)
+            this)
+
+        :else
+        (let [new-tail-base (array-for cnt shift root tail (- cnt 2))
+              new-tail      (aclone new-tail-base)
+              new-tidx      (alength new-tail-base)
+              new-root      (pop-tail! shift cnt (.-edit root) root)]
+          (cond
+            (nil? new-root)
+            (do (set! cnt  (dec cnt))
+                (set! root (ensure-editable (.-edit root) empty-node))
+                (set! tail new-tail)
+                (set! tidx new-tidx)
+                this)
+
+            (and (> shift 5)
+                 (nil? (aget (.-arr new-root) 1)))
+            (do (set! cnt   (dec cnt))
+                (set! shift (- shift 5))
+                (set! root  (aget (.-arr new-root) 0))
+                (set! tail  new-tail)
+                (set! tidx  new-tidx)
+                this)
+
+            :else
+            (do (set! cnt  (dec cnt))
+                (set! root new-root)
+                (set! tail new-tail)
+                (set! tidx new-tidx)
+                this))))
+      (throw (js/Error. "count after persistent!"))))
+
+  ICounted
+  (-count [this]
+    (if ^boolean (.-edit root)
+      cnt
+      (throw (js/Error. "count after persistent!")))))
