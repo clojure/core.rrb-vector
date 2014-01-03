@@ -1559,6 +1559,9 @@
 
   ;; temporary kludge
   IVecImpl
+  (tailoff [_]
+    (unchecked-subtract-int cnt tidx))
+
   (arrayFor [this i]
     (if (and (<= (int 0) i) (< i cnt))
       (if (>= i (.tailoff this))
