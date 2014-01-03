@@ -72,7 +72,13 @@ namespace.
   </div><div style="margin-left: 1em;" class="toc-section">
     <a href="#clojure.core.rrb-vector.rrbt" style="margin-top: 3px;">clojure.core.rrb-vector.rrbt</a>
     <div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.core.rrb-vector.rrbt/Transient">Transient</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
       <a class="toc-entry-anchor" href="#clojure.core.rrb-vector.rrbt/Vector">Vector</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.core.rrb-vector.rrbt/-&gt;Transient">-&gt;Transient</a>
       
     </div><div style="margin-left: 1em;" class="toc-entry">
       <a class="toc-entry-anchor" href="#clojure.core.rrb-vector.rrbt/-&gt;Vector">-&gt;Vector</a>
@@ -141,7 +147,7 @@ to keywords naming primitive types.</pre>
     <pre id="var-docstr">Concatenates the given vectors in logarithmic time.</pre>
     
     
-    <a href="https://github.com/clojure/core.rrb-vector/blob/55f0797ea687ced9fe663baafb3a3f762aff4533/src/main/clojure/clojure/core/rrb_vector.clj#L45" id="var-source">Source</a>
+    <a href="https://github.com/clojure/core.rrb-vector/blob/5902ae9c9cee46fdb72905534fdb4517b1e98c72/src/main/clojure/clojure/core/rrb_vector.clj#L45" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -158,7 +164,7 @@ any elements of the original vector lying outside the given index
 range.</pre>
     
     
-    <a href="https://github.com/clojure/core.rrb-vector/blob/55f0797ea687ced9fe663baafb3a3f762aff4533/src/main/clojure/clojure/core/rrb_vector.clj#L61" id="var-source">Source</a>
+    <a href="https://github.com/clojure/core.rrb-vector/blob/5902ae9c9cee46fdb72905534fdb4517b1e98c72/src/main/clojure/clojure/core/rrb_vector.clj#L61" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -166,10 +172,13 @@ range.</pre>
     <span id="var-type">function</span><br />
     <pre id="var-usage">Usage: (vec coll)
 </pre>
-    <pre id="var-docstr">Returns a new vector containing the contents of coll.</pre>
+    <pre id="var-docstr">Returns a vector containing the contents of coll.
+
+If coll is a vector, returns an RRB vector using the internal tree
+of coll.</pre>
     
     
-    <a href="https://github.com/clojure/core.rrb-vector/blob/55f0797ea687ced9fe663baafb3a3f762aff4533/src/main/clojure/clojure/core/rrb_vector.clj#L104" id="var-source">Source</a>
+    <a href="https://github.com/clojure/core.rrb-vector/blob/5902ae9c9cee46fdb72905534fdb4517b1e98c72/src/main/clojure/clojure/core/rrb_vector.clj#L104" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -185,7 +194,7 @@ range.</pre>
     <pre id="var-docstr">Creates a new vector containing the args.</pre>
     
     
-    <a href="https://github.com/clojure/core.rrb-vector/blob/55f0797ea687ced9fe663baafb3a3f762aff4533/src/main/clojure/clojure/core/rrb_vector.clj#L84" id="var-source">Source</a>
+    <a href="https://github.com/clojure/core.rrb-vector/blob/5902ae9c9cee46fdb72905534fdb4517b1e98c72/src/main/clojure/clojure/core/rrb_vector.clj#L84" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -205,7 +214,7 @@ which should be one of :object, :int, :long, :float, :double, :byte,
 Optionally takes one or more elements to populate the vector.</pre>
     
     
-    <a href="https://github.com/clojure/core.rrb-vector/blob/55f0797ea687ced9fe663baafb3a3f762aff4533/src/main/clojure/clojure/core/rrb_vector.clj#L125" id="var-source">Source</a>
+    <a href="https://github.com/clojure/core.rrb-vector/blob/5902ae9c9cee46fdb72905534fdb4517b1e98c72/src/main/clojure/clojure/core/rrb_vector.clj#L130" id="var-source">Source</a>
   </div>
 </div>
 <br />
@@ -221,18 +230,38 @@ Optionally takes one or more elements to populate the vector.</pre>
   <div id="type-entry">
     <br />
     <hr />
+    <h2 id="clojure.core.rrb-vector.rrbt/Transient">Transient</h2>
+    <span id="type-type">type</span><br />
+    <pre id="type-docstr"></pre>
+    Fields: <span id="type-fields">[nm am objects? cnt shift root tail tidx]</span><br />
+    Protocols: <span id="type-protocols"></span><br />
+    Interfaces: <span id="type-interfaces">clojure.core.rrb_vector.rrbt.IVecImpl, clojure.lang.Counted, clojure.lang.IFn, clojure.lang.ILookup, clojure.lang.ITransientAssociative, clojure.lang.ITransientCollection, clojure.lang.ITransientVector, clojure.lang.Indexed</span><br />
+  </div><div id="type-entry">
+    <br />
+    <hr />
     <h2 id="clojure.core.rrb-vector.rrbt/Vector">Vector</h2>
     <span id="type-type">type</span><br />
     <pre id="type-docstr"></pre>
     Fields: <span id="type-fields">[nm am cnt shift root tail _meta _hash _hasheq]</span><br />
     Protocols: <span id="type-protocols">clojure.core.protocols/IKVReduce, clojure.core.reducers/CollFold, clojure.core.rrb-vector.protocols/PSliceableVector, clojure.core.rrb-vector.protocols/PSpliceableVector, <a href="#clojure.core.rrb-vector.rrbt/AsRRBT">AsRRBT</a></span><br />
-    Interfaces: <span id="type-interfaces">clojure.core.IVecImpl, clojure.core.rrb_vector.rrbt.IVecImpl, clojure.lang.Associative, clojure.lang.Counted, clojure.lang.IFn, clojure.lang.IHashEq, clojure.lang.ILookup, clojure.lang.IMeta, clojure.lang.IObj, clojure.lang.IPersistentCollection, clojure.lang.IPersistentStack, clojure.lang.IPersistentVector, clojure.lang.Indexed, clojure.lang.Reversible, clojure.lang.Seqable, clojure.lang.Sequential, java.io.Serializable, java.lang.Comparable, java.lang.Iterable, java.util.Collection, java.util.List, java.util.RandomAccess</span><br />
+    Interfaces: <span id="type-interfaces">clojure.core.IVecImpl, clojure.core.rrb_vector.rrbt.IVecImpl, clojure.lang.Associative, clojure.lang.Counted, clojure.lang.IEditableCollection, clojure.lang.IFn, clojure.lang.IHashEq, clojure.lang.ILookup, clojure.lang.IMeta, clojure.lang.IObj, clojure.lang.IPersistentCollection, clojure.lang.IPersistentStack, clojure.lang.IPersistentVector, clojure.lang.Indexed, clojure.lang.Reversible, clojure.lang.Seqable, clojure.lang.Sequential, java.io.Serializable, java.lang.Comparable, java.lang.Iterable, java.util.Collection, java.util.List, java.util.RandomAccess</span><br />
   </div>
 </div>
 <div id="var-section">
   <p></p>
   <h2>Public Variables and Functions</h2>
   <div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.core.rrb-vector.rrbt/-&gt;Transient">-&gt;Transient</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (-&gt;Transient nm am objects? cnt shift root tail tidx)
+</pre>
+    <pre id="var-docstr">Positional factory function for class clojure.core.rrb_vector.rrbt.Transient.</pre>
+    
+    
+    <a href="https://github.com/clojure/core.rrb-vector/blob/8653b1eca52c2f558506074266c4d6eb4018792a/src/main/clojure/clojure/core/rrb_vector/rrbt.clj#L1340" id="var-source">Source</a>
+  </div><div id="var-entry">
     <br />
     <hr />
     <h2 id="clojure.core.rrb-vector.rrbt/-&gt;Vector">-&gt;Vector</h2>
@@ -242,7 +271,7 @@ Optionally takes one or more elements to populate the vector.</pre>
     <pre id="var-docstr">Positional factory function for class clojure.core.rrb_vector.rrbt.Vector.</pre>
     
     
-    <a href="https://github.com/clojure/core.rrb-vector/blob/1f18d2cad13c33c990d6d75963acb12b1ec6411b/src/main/clojure/clojure/core/rrb_vector/rrbt.clj#L211" id="var-source">Source</a>
+    <a href="https://github.com/clojure/core.rrb-vector/blob/8653b1eca52c2f558506074266c4d6eb4018792a/src/main/clojure/clojure/core/rrb_vector/rrbt.clj#L212" id="var-source">Source</a>
   </div>
 </div>
 
