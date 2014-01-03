@@ -724,31 +724,24 @@
               (aset ^objects arr subidx child)
               (recur (unchecked-subtract-int shift (int 5)) child))))
         node)
-      (if (zero? shift)
-        (let [arr  (.aclone am (.array nm node))
-              rngs (ranges nm node)
-              i    (loop [i i]
-                     (if (or (zero? (aget rngs (unchecked-inc-int i)))
-                             (== i (int 31)))
-                       i
-                       (recur (unchecked-inc-int i))))]
-          (.aset am arr (bit-and i (int 0x1f)) val)
-          (.node nm (.edit nm node) arr))
-        (let [arr    (aclone ^objects (.array nm node))
-              rngs   (ranges nm node)
-              subidx (bit-and (bit-shift-right i shift) (int 0x1f))
-              subidx (loop [subidx subidx]
-                       (if (or (zero? (aget rngs (unchecked-inc-int subidx)))
-                               (== subidx (int 31)))
-                         subidx
-                         (recur (unchecked-inc-int subidx))))]
-          (aset arr subidx
-                (.doAssoc this
-                          (unchecked-subtract-int (int shift) (int 5))
-                          (aget arr subidx)
-                          i
-                          val))
-          (.node nm (.edit nm node) arr)))))
+      (let [arr    (aclone ^objects (.array nm node))
+            rngs   (ranges nm node)
+            subidx (bit-and (bit-shift-right i shift) (int 0x1f))
+            subidx (loop [subidx subidx]
+                     (if (< i (aget rngs subidx))
+                       subidx
+                       (recur (unchecked-inc-int subidx))))
+            i      (if (zero? subidx)
+                     i
+                     (unchecked-subtract-int
+                      i (aget rngs (unchecked-dec-int subidx))))]
+        (aset arr subidx
+              (.doAssoc this
+                        (unchecked-subtract-int (int shift) (int 5))
+                        (aget arr subidx)
+                        i
+                        val))
+        (.node nm (.edit nm node) arr))))
 
   IKVReduce
   (kv-reduce [this f init]
