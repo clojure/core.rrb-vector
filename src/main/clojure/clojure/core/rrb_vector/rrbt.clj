@@ -847,6 +847,8 @@
   (as-rrbt [this]
     this)
 
+  java.io.Serializable
+
   java.lang.Comparable
   (compareTo [this that]
     (if (identical? this that)
@@ -903,6 +905,7 @@
   (removeAll [_ c] (throw (UnsupportedOperationException.)))
   (retainAll [_ c] (throw (UnsupportedOperationException.)))
 
+  java.util.RandomAccess
   java.util.List
   (get [this i] (.nth this i))
 
