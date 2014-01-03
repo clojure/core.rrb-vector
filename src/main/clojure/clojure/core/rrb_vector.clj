@@ -36,7 +36,7 @@
             [clojure.core.rrb-vector.nodes
              :refer [ams object-am object-nm primitive-nm
                      empty-pv-node empty-gvec-node]]
-            clojure.core.rrb-vector.rrbt
+            [clojure.core.rrb-vector.rrbt :refer [as-rrbt]]
             clojure.core.rrb-vector.interop)
   (:import (clojure.core.rrb_vector.rrbt Vector)
            (clojure.core.rrb_vector.nodes NodeManager)
@@ -102,9 +102,14 @@
          v))))
 
 (defn vec
-  "Returns a new vector containing the contents of coll."
+  "Returns a vector containing the contents of coll.
+
+  If coll is a vector, returns an RRB vector using the internal tree
+  of coll."
   [coll]
-  (apply vector coll))
+  (if (vector? coll)
+    (as-rrbt coll)
+    (apply vector coll)))
 
 (defmacro ^:private gen-vector-of-method [t & params]
   (let [am  (gensym "am__")
