@@ -1,6 +1,6 @@
-(ns cljs.core.rrb-vector.trees
+(ns clojure.core.rrb-vector.trees
   (:refer-clojure :exclude [array-for push-tail pop-tail new-path do-assoc])
-  (:require [cljs.core.rrb-vector.nodes
+  (:require [clojure.core.rrb-vector.nodes
              :refer [regular? clone ranges last-range]]))
 
 (defn tail-offset [cnt tail]
@@ -187,24 +187,16 @@
             (aset arr subidx child)
             (recur (- shift 5) child))))
       node)
-    (if (zero? shift)
-      (let [arr  (aclone (.-arr current-node))
-            rngs (ranges current-node)
-            i    (loop [i i]
-                   (if (or (zero? (int (aget rngs (inc i))))
-                           (== i 31))
-                     i
-                     (recur (inc i))))]
-        (aset arr (bit-and i 0x1f) val)
-        (->VectorNode (.-edit current-node) arr))
-      (let [arr    (aclone (.-arr current-node))
-            rngs   (ranges current-node)
-            subidx (bit-and (bit-shift-right i shift) 0x1f)
-            subidx (loop [subidx subidx]
-                     (if (or (zero? (int (aget rngs (inc subidx))))
-                             (== subidx 31))
-                       subidx
-                       (recur (inc subidx))))]
-        (aset arr subidx
-              (do-assoc (- shift 5) (aget arr subidx) i val))
-        (->VectorNode (.-edit current-node) arr)))))
+    (let [arr    (aclone (.-arr current-node))
+          rngs   (ranges current-node)
+          subidx (bit-and (bit-shift-right i shift) 0x1f)
+          subidx (loop [subidx subidx]
+                   (if (< i (int (aget rngs subidx)))
+                     #_(or (zero? (int (aget rngs (inc subidx))))
+                           (== subidx 31))
+                     subidx
+                     (recur (inc subidx))))
+          i      (if (zero? subidx) i (- i (aget rngs (dec subidx))))]
+      (aset arr subidx
+            (do-assoc (- shift 5) (aget arr subidx) i val))
+      (->VectorNode (.-edit current-node) arr))))

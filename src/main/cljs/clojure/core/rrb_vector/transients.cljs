@@ -1,8 +1,8 @@
-(ns cljs.core.rrb-vector.transients
+(ns clojure.core.rrb-vector.transients
   (:refer-clojure :exclude [new-path])
-  (:require [cljs.core.rrb-vector.nodes
+  (:require [clojure.core.rrb-vector.nodes
              :refer [regular? clone ranges last-range]]
-            [cljs.core.rrb-vector.trees :refer [tail-offset new-path]]))
+            [clojure.core.rrb-vector.trees :refer [tail-offset new-path]]))
 
 (defn ensure-editable [edit node]
   (if (identical? (.-edit node) edit)
@@ -136,25 +136,26 @@
 (defn do-assoc! [shift root-edit current-node i val]
   (let [ret (ensure-editable root-edit current-node)]
     (if (regular? ret)
-      (do (loop [shift shift
-                 node  ret]
-            (if (zero? shift)
-              (let [arr (.-arr node)]
-                (aset arr (bit-and i 0x1f) val))
-              (let [arr    (.-arr node)
-                    subidx (bit-and (bit-shift-right i shift) 0x1f)
-                    child  (ensure-editable root-edit (aget arr subidx))]
-                (aset arr subidx child)
-                (recur (- shift 5) child))))
-          ret)
+      (loop [shift shift
+             node  ret]
+        (if (zero? shift)
+          (let [arr (.-arr node)]
+            (aset arr (bit-and i 0x1f) val))
+          (let [arr    (.-arr node)
+                subidx (bit-and (bit-shift-right i shift) 0x1f)
+                child  (ensure-editable root-edit (aget arr subidx))]
+            (aset arr subidx child)
+            (recur (- shift 5) child))))
       (let [arr    (.-arr ret)
             rngs   (ranges ret)
             subidx (bit-and (bit-shift-right i shift) 0x1f)
             subidx (loop [subidx subidx]
-                     (if (or (zero? (int (aget rngs (inc subidx))))
-                             (== subidx 31))
+                     (if (< i (int (aget rngs subidx)))
+                       #_(or (zero? (int (aget rngs (inc subidx))))
+                               (== subidx 31))
                        subidx
-                       (recur (inc subidx))))]
+                       (recur (inc subidx))))
+            i      (if (zero? subidx) i (- i (aget rngs (dec subidx))))]
         (aset arr subidx
-              (do-assoc! (- shift 5) (aget arr subidx) i val))
-        ret))))
+              (do-assoc! (- shift 5) root-edit (aget arr subidx) i val))))
+    ret))

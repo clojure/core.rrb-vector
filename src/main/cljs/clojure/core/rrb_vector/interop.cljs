@@ -1,23 +1,23 @@
-(ns cljs.core.rrb-vector.interop
-  (:require [cljs.core.rrb-vector.protocols
+(ns clojure.core.rrb-vector.interop
+  (:require [clojure.core.rrb-vector.protocols
              :refer [PSliceableVector -slicev
                      PSpliceableVector -splicev]]
-            [cljs.core.rrb-vector.rrbt :refer [-as-rrbt]]))
+            [clojure.core.rrb-vector.rrbt :refer [-as-rrbt]]))
 
 (extend-protocol PSliceableVector
-  cljs.core.PersistentVector
+  cljs.core/PersistentVector
   (-slicev [v start end]
     (-slicev (-as-rrbt v) start end))
 
-  cljs.core.Subvec
+  cljs.core/Subvec
   (-slicev [v start end]
     (-slicev (-as-rrbt v) start end)))
 
 (extend-protocol PSpliceableVector
-  cljs.core.PersistentVector
+  cljs.core/PersistentVector
   (-splicev [v1 v2]
     (-splicev (-as-rrbt v1) v2))
 
-  cljs.core.Subvec
+  cljs.core/Subvec
   (-splicev [v1 v2]
     (-splicev (-as-rrbt v1) v2)))

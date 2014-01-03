@@ -1,7 +1,12 @@
-(ns cljs.core.rrb-vector.debug
-  (:require cljs.core.rrb-vector.rrbt
-            [cljs.core.rrb-vector.nodes :refer [regular? ranges]]
-            [cljs.core.rrb-vector :as fv]))
+(ns clojure.core.rrb-vector.debug
+  (:require clojure.core.rrb-vector.rrbt
+            [clojure.core.rrb-vector.nodes :refer [regular? ranges]]
+            [clojure.core.rrb-vector :as fv]
+            [goog.string :as gstring]
+            goog.string.format))
+
+(defn printf [& args]
+  (print (apply gstring/format args)))
 
 (defn dbg-vec [v]
   (let [root  (.-root v)

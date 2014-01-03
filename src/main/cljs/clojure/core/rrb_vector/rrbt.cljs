@@ -1,17 +1,17 @@
-(ns cljs.core.rrb-vector.rrbt
+(ns clojure.core.rrb-vector.rrbt
   (:refer-clojure :exclude [array-for push-tail pop-tail new-path do-assoc])
-  (:require [cljs.core.rrb-vector.protocols
+  (:require [clojure.core.rrb-vector.protocols
              :refer [PSliceableVector -slicev
                      PSpliceableVector -splicev]]
-            [cljs.core.rrb-vector.nodes
+            [clojure.core.rrb-vector.nodes
              :refer [regular? empty-node ranges overflow? last-range
                      regular-ranges first-child last-child remove-leftmost-child
                      replace-leftmost-child replace-rightmost-child
                      fold-tail new-path* index-of-nil]]
-            [cljs.core.rrb-vector.trees
+            [clojure.core.rrb-vector.trees
              :refer [tail-offset array-for push-tail pop-tail new-path
                      do-assoc]]
-            [cljs.core.rrb-vector.transients
+            [clojure.core.rrb-vector.transients
              :refer [ensure-editable editable-root editable-tail push-tail!
                      pop-tail! do-assoc!]]))
 
@@ -77,7 +77,7 @@
 
   IEmptyableCollection
   (-empty [coll]
-    (with-meta cljs.core.List/EMPTY meta))
+    (with-meta cljs.core.List.EMPTY meta))
 
   IChunkedSeq
   (-chunked-first [coll]
@@ -105,7 +105,7 @@
 
   IReduce
   (-reduce [coll f]
-    (ci-reduce (clsj.core/subvec vec (+ i off) (count vec)) f))
+    (ci-reduce (cljs.core/subvec vec (+ i off) (count vec)) f))
 
   (-reduce [coll f start]
     (ci-reduce (cljs.core/subvec vec (+ i off) (count vec)) f start)))
@@ -388,7 +388,7 @@
 
   IEmptyableCollection
   (-empty [_]
-    (with-meta cljs.core.PersistentVector/EMPTY meta))
+    (with-meta cljs.core.PersistentVector.EMPTY meta))
 
   IStack
   (-peek [this]
@@ -401,7 +401,7 @@
       (throw (js/Error. "Can't pop empty vector"))
 
       (== 1 cnt)
-      (-with-meta cljs.core.PersistentVector/EMPTY meta)
+      (-with-meta cljs.core.PersistentVector.EMPTY meta)
 
       (> (alength tail) 1)
       (let [new-tail (make-array (dec (alength tail)))]

@@ -1,4 +1,4 @@
-(ns cljs.core.rrb-vector
+(ns clojure.core.rrb-vector
 
   "An implementation of the confluently persistent vector data
   structure introduced in Bagwell, Rompf, \"RRB-Trees: Efficient
@@ -7,35 +7,31 @@
   RRB-Trees build upon Clojure's PersistentVectors, adding logarithmic
   time concatenation and slicing.
 
-  The main API entry points are cljs.core.rrb-vector/catvec,
-  performing vector concatenation, and cljs.core.rrb-vector/subvec,
+  The main API entry points are clojure.core.rrb-vector/catvec,
+  performing vector concatenation, and clojure.core.rrb-vector/subvec,
   which produces a new vector containing the appropriate subrange of
-  the input vector (in contrast to cljs.core/subvec, which returns
-  a view on the input vector).
+  the input vector (in contrast to cljs.core/subvec, which returns a
+  view on the input vector).
 
-  core.rrb-vector's vectors can store objects or unboxed primitives.
   The implementation allows for seamless interoperability with
-  clojure.lang.PersistentVector, cljs.core.Vec (more commonly known
-  as gvec) and clojure.lang.APersistentVector$SubVector instances:
-  cljs.core.rrb-vector/catvec and cljs.core.rrb-vector/subvec
-  convert their inputs to cljs.core.rrb-vector.rrbt.Vector
+  cljs.core/PersistentVector and cljs.core.Subvec instances:
+  clojure.core.rrb-vector/catvec and clojure.core.rrb-vector/subvec
+  convert their inputs to clojure.core.rrb-vector.rrbt/Vector
   instances whenever necessary (this is a very fast constant time
-  operation for PersistentVector and gvec; for SubVector it is O(log
-  n), where n is the size of the underlying vector).
+  operation for PersistentVector; for Subvec it is O(log n), where n
+  is the size of the underlying vector).
 
-  cljs.core.rrb-vector also exports its own versions of vector and
-  vector-of and vec which always produce
-  cljs.core.rrb-vector.rrbt.Vector instances. Note that vector-of
-  accepts :object as one of the possible type arguments, in addition
-  to keywords naming primitive types."
+  clojure.core.rrb-vector also exports its own versions of vector and
+  vec which always produce clojure.core.rrb-vector.rrbt.Vector
+  instances."
 
   {:author "Michał Marczyk"}
 
   (:refer-clojure :exclude [vector vec subvec])
-  (:require [cljs.core.rrb-vector.protocols :refer [-slicev -splicev]]
-            cljs.core.rrb-vector.rrbt
-            cljs.core.rrb-vector.interop)
-  (:require-macros [cljs.core.rrb-vector.macros :refer [gen-vector-method]]))
+  (:require [clojure.core.rrb-vector.protocols :refer [-slicev -splicev]]
+            clojure.core.rrb-vector.rrbt
+            clojure.core.rrb-vector.interop)
+  (:require-macros [clojure.core.rrb-vector.macros :refer [gen-vector-method]]))
 
 (defn catvec
   "Concatenates the given vectors in logarithmic time."

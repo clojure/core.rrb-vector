@@ -1,4 +1,4 @@
-(ns cljs.core.rrb-vector.macros
+(ns clojure.core.rrb-vector.macros
   (:refer-clojure :exclude [assert]))
 
 (def ^:const elide-assertions? true)
@@ -20,6 +20,6 @@
        ~@(map-indexed (fn [i param]
                         `(cljs.core/aset ~arr ~i ~param))
                       params)
-       (cljs.core.rrb_vector.rrbt.Vector.
-        ~(count params) 5 cljs.core.PersistentVector/EMPTY_NODE ~arr nil
+       (clojure.core.rrb_vector.rrbt.Vector.
+        ~(count params) 5 cljs.core.PersistentVector.EMPTY_NODE ~arr nil
         ~(if params nil 0)))))

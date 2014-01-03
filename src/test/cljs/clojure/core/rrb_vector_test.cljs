@@ -1,8 +1,13 @@
-(ns cljs.core.rrb-vector-test
-  (:require [cljs.core.rrb-vector :as fv]
-            [cljs.core.rrb-vector.debug :as dv]))
+(ns clojure.core.rrb-vector-test
+  (:require [clojure.core.rrb-vector :as fv]
+            [clojure.core.rrb-vector.debug :as dv]
+            [goog.string :as gstring]
+            goog.string.format))
 
 (set-print-fn! js/print)
+
+(defn format [& args]
+  (apply gstring/format args))
 
 (defn test-slicing []
   (assert (dv/check-subvec 32000 10 29999 1234 18048 10123 10191)))
@@ -50,7 +55,15 @@
                      (assoc out k v))
                    (assoc v1 40000 :foo)
                    (map-indexed vector (rseq v1)))]
-    (assert (= (concat (rseq v1) [:foo]) v2))))
+    (assert (= (concat (rseq v1) [:foo]) v2)))
+  (loop [i 1]
+    (if (< i 35000)
+      (let [v (-> (range 40000)
+                  (fv/vec)
+                  (fv/subvec i)
+                  (assoc 10 :foo))]
+        (assert (= :foo (nth v 10)))
+        (recur (* i 32))))))
 
 (defn test-assoc! []
   (let [v1 (fv/vec (range 40000))
@@ -59,7 +72,17 @@
                       (assoc! out k v))
                     (assoc! (transient v1) 40000 :foo)
                     (map-indexed vector (rseq v1))))]
-    (assert (= (concat (rseq v1) [:foo]) v2))))
+    (assert (= (concat (rseq v1) [:foo]) v2)))
+  (loop [i 1]
+    (if (< i 35000)
+      (let [v (-> (range 40000)
+                  (fv/vec)
+                  (fv/subvec i)
+                  (transient)
+                  (assoc! 10 :foo)
+                  (persistent!))]
+        (assert (= :foo (nth v 10)))
+        (recur (* i 32))))))
 
 (defn test-relaxed []
   (assert (= (into (fv/catvec (vec (range 123)) (vec (range 68))) (range 64))

@@ -1,8 +1,9 @@
-(ns cljs.core.rrb-vector.nodes)
+(ns clojure.core.rrb-vector.nodes
+  (:refer-clojure :exclude [clone]))
 
 ;;; node ops
 
-(def empty-node cljs.core.PersistentVector/EMPTY_NODE)
+(def empty-node cljs.core.PersistentVector.EMPTY_NODE)
 
 (defn clone [shift node]
   (VectorNode. (.-edit node) (aclone (.-arr node))))
