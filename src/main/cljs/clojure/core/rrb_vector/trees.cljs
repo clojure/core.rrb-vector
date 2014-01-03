@@ -192,8 +192,6 @@
           subidx (bit-and (bit-shift-right i shift) 0x1f)
           subidx (loop [subidx subidx]
                    (if (< i (int (aget rngs subidx)))
-                     #_(or (zero? (int (aget rngs (inc subidx))))
-                           (== subidx 31))
                      subidx
                      (recur (inc subidx))))
           i      (if (zero? subidx) i (- i (aget rngs (dec subidx))))]
