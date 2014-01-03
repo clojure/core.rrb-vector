@@ -52,6 +52,8 @@
               ret  (->VectorNode edit arr)]
           (aset arr 0 n)
           (aset arr 32 rngs)
+          (aset rngs 32 1)
+          (aset rngs 0 (alength tail))
           (recur (+ s 5) ret))))))
 
 (defn push-tail [shift cnt root-edit current-node tail-node]

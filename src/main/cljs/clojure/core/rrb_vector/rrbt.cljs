@@ -994,12 +994,11 @@
         (and (<= 0 i) (< i cnt))
         (let [tail-off (- cnt tidx)]
           (if (<= tail-off i)
-            (do (aset tail (- i tail-off) val)
-                this)
-            (do (set! root (do-assoc! shift (.-edit root) root i val))
-                this)))
+            (aset tail (- i tail-off) val)
+            (set! root (do-assoc! shift (.-edit root) root i val)))
+          this)
 
-        (== cnt cnt) (-conj! this val)
+        (== i cnt) (-conj! this val)
 
         :else (vector-index-out-of-bounds i cnt))
       (throw (js/Error. "assoc! after persistent!"))))
