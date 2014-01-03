@@ -55,7 +55,14 @@
                      (assoc out k v))
                    (assoc v1 40000 :foo)
                    (map-indexed vector (rseq v1)))]
-    (is (= (concat (rseq v1) [:foo]) v2))))
+    (is (= (concat (rseq v1) [:foo]) v2)))
+  (are [i] (= :foo
+              (-> (range 40000)
+                  (fv/vec)
+                  (fv/subvec i)
+                  (assoc 10 :foo)
+                  (nth 10)))
+       1 32 1024 32768))
 
 (deftest test-relaxed
   (is (= (into (fv/catvec (vec (range 123)) (vec (range 68))) (range 64))
