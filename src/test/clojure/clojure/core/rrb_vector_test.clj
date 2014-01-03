@@ -64,6 +64,24 @@
                   (nth 10)))
        1 32 1024 32768))
 
+(deftest test-assoc! []
+  (let [v1 (fv/vec (range 40000))
+        v2 (persistent!
+            (reduce (fn [out [k v]]
+                      (assoc! out k v))
+                    (assoc! (transient v1) 40000 :foo)
+                    (map-indexed vector (rseq v1))))]
+    (is (= (concat (rseq v1) [:foo]) v2)))
+  (are [i] (= :foo
+              (-> (range 40000)
+                  (fv/vec)
+                  (fv/subvec i)
+                  (transient)
+                  (assoc! 10 :foo)
+                  (persistent!)
+                  (nth 10)))
+       1 32 1024 32768))
+
 (deftest test-relaxed
   (is (= (into (fv/catvec (vec (range 123)) (vec (range 68))) (range 64))
          (concat (range 123) (range 68) (range 64)))))

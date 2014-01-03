@@ -9,6 +9,7 @@
                      replace-leftmost-child replace-rightmost-child
                      fold-tail new-path index-of-nil
                      object-am object-nm primitive-nm]]
+            [clojure.core.rrb-vector.transients :refer [transient-helper]]
             [clojure.core.rrb-vector.fork-join :as fj]
             [clojure.core.protocols :refer [IKVReduce]]
             [clojure.core.reducers :as r :refer [CollFold coll-fold]])
@@ -206,7 +207,7 @@
             (aset new-arr 32 new-rngs)
             (.node nm (.edit nm node) new-arr)))))))
 
-(declare splice-rrbts)
+(declare splice-rrbts ->Transient)
 
 (deftype Vector [^NodeManager nm ^ArrayManager am ^int cnt ^int shift root tail
                  ^clojure.lang.IPersistentMap _meta
@@ -514,6 +515,16 @@
 
   clojure.lang.Sequential
 
+  clojure.lang.IEditableCollection
+  (asTransient [this]
+    (->Transient nm am
+                 (identical? am object-am)
+                 cnt
+                 shift
+                 (.editableRoot transient-helper nm am root)
+                 (.editableTail transient-helper am tail)
+                 (.alength am tail)))
+
   IVecImpl
   (tailoff [_]
     (unchecked-subtract-int cnt (.alength am tail)))
@@ -708,6 +719,8 @@
                   ret  (.node nm edit arr)]
               (aset arr 0 node)
               (aset arr 32 rngs)
+              (aset rngs 32 1)
+              (aset rngs 0 (.alength am tail))
               (recur (unchecked-add-int s (int 5)) ret)))))))
 
   (doAssoc [this shift node i val]
@@ -1313,3 +1326,265 @@
                    (unchecked-subtract-int s (int 5)))
             (Vector. nm am (+ (count v1) (count v2)) s r (.-tail v2)
                      nil -1 -1)))))))
+
+(defn array-copy [^ArrayManager am from i to j len]
+  (loop [i   (int i)
+         j   (int j)
+         len (int len)]
+    (when (pos? len)
+      (.aset am to j (.aget am from i))
+      (recur (unchecked-inc-int i)
+             (unchecked-inc-int j)
+             (unchecked-dec-int len)))))
+
+(deftype Transient [^NodeManager nm ^ArrayManager am
+                    ^boolean objects?
+                    ^:unsynchronized-mutable ^int cnt
+                    ^:unsynchronized-mutable ^int shift
+                    ^:unsynchronized-mutable root
+                    ^:unsynchronized-mutable tail
+                    ^:unsynchronized-mutable ^int tidx]
+  clojure.lang.Counted
+  (count [this]
+    (.ensureEditable transient-helper nm root)
+    cnt)
+
+  clojure.lang.Indexed
+  (nth [this i]
+    (.ensureEditable transient-helper nm root)
+    (if (and (<= (int 0) i) (< i cnt))
+      (let [tail-off (unchecked-subtract-int cnt (.alength am tail))]
+        (if (<= tail-off i)
+          (.aget am tail (unchecked-subtract-int i tail-off))
+          (loop [i i node root shift shift]
+            (if (zero? shift)
+              (let [arr (.array nm node)]
+                (.aget am arr (bit-and (bit-shift-right i shift) (int 0x1f))))
+              (if (.regular nm node)
+                (let [arr (.array nm node)
+                      idx (bit-and (bit-shift-right i shift) (int 0x1f))]
+                  (loop [i     i
+                         node  (aget ^objects arr idx)
+                         shift (unchecked-subtract-int shift (int 5))]
+                    (let [arr (.array nm node)
+                          idx (bit-and (bit-shift-right i shift) (int 0x1f))]
+                      (if (zero? shift)
+                        (.aget am arr idx)
+                        (recur i
+                               (aget ^objects arr idx)
+                               (unchecked-subtract-int shift (int 5)))))))
+                (let [arr  (.array nm node)
+                      rngs (ranges nm node)
+                      idx  (loop [j (bit-and (bit-shift-right i shift) (int 0x1f))]
+                             (if (< i (aget rngs j))
+                               j
+                               (recur (unchecked-inc-int j))))
+                      i    (if (zero? idx)
+                             (int i)
+                             (unchecked-subtract-int
+                              (int i) (aget rngs (unchecked-dec-int idx))))]
+                  (recur i
+                         (aget ^objects arr idx)
+                         (unchecked-subtract-int shift (int 5)))))))))
+      (throw (IndexOutOfBoundsException.))))
+
+  (nth [this i not-found]
+    (.ensureEditable transient-helper nm root)
+    (if (and (>= i (int 0)) (< i cnt))
+      (.nth this i)
+      not-found))
+
+  clojure.lang.ILookup
+  (valAt [this k not-found]
+    (.ensureEditable transient-helper nm root)
+    (if (Util/isInteger k)
+      (let [i (int k)]
+        (if (and (>= i (int 0)) (< i cnt))
+          (.nth this i)
+          not-found))
+      not-found))
+
+  (valAt [this k]
+    (.valAt this k nil))
+
+  clojure.lang.IFn
+  (invoke [this k]
+    (.ensureEditable transient-helper nm root)
+    (if (Util/isInteger k)
+      (let [i (int k)]
+        (if (and (>= i (int 0)) (< i cnt))
+          (.nth this i)
+          (throw (IndexOutOfBoundsException.))))
+      (throw (IllegalArgumentException. "Key must be integer"))))
+
+  (applyTo [this args]
+    (.ensureEditable transient-helper nm root)
+    (let [n (RT/boundedLength args 1)]
+      (case n
+        0 (throw (clojure.lang.ArityException.
+                  n (.. this (getClass) (getSimpleName))))
+        1 (.invoke this (first args))
+        2 (throw (clojure.lang.ArityException.
+                  n (.. this (getClass) (getSimpleName)))))))
+
+  clojure.lang.ITransientCollection
+  (conj [this val]
+    (.ensureEditable transient-helper nm root)
+    (if (< tidx 32)
+      (do (.aset am tail tidx val)
+          (set! cnt  (unchecked-inc-int cnt))
+          (set! tidx (unchecked-inc-int tidx))
+          this)
+      (let [tail-node (.node nm (.edit nm root) tail)
+            new-tail  (.array am 32)]
+        (.aset am new-tail 0 val)
+        (set! tail new-tail)
+        (set! tidx (int 1))
+        (if (overflow? nm root shift cnt)
+          (if (.regular nm root)
+            (let [new-arr (object-array 32)]
+              (doto new-arr
+                (aset 0 root)
+                (aset 1 (.newPath transient-helper nm am
+                                  tail (.edit nm root) shift tail-node)))
+              (set! root  (.node nm (.edit nm root) new-arr))
+              (set! shift (unchecked-add-int shift (int 5)))
+              (set! cnt   (unchecked-inc-int cnt))
+              this)
+            (let [new-arr  (object-array 33)
+                  new-rngs (int-array 33)
+                  new-root (.node nm (.edit nm root) new-arr)
+                  root-total-range (aget (ranges nm root) 31)]
+              (doto new-arr
+                (aset 0  root)
+                (aset 1  (.newPath transient-helper nm am
+                                   tail (.edit nm root) shift tail-node))
+                (aset 32 new-rngs))
+              (doto new-rngs
+                (aset 0  root-total-range)
+                (aset 1  (unchecked-add-int root-total-range (int 32)))
+                (aset 32 2))
+              (set! root  new-root)
+              (set! shift (unchecked-add-int shift (int 5)))
+              (set! cnt   (unchecked-inc-int cnt))
+              this))
+          (let [new-root (.pushTail transient-helper nm am
+                                    shift cnt (.edit nm root) root tail-node)]
+            (set! root new-root)
+            (set! cnt  (unchecked-inc-int cnt))
+            this)))))
+
+  (persistent [this]
+    (.ensureEditable transient-helper nm root)
+    (.set (.edit nm root) nil)
+    (let [trimmed-tail (.array am tidx)]
+      (array-copy am tail 0 trimmed-tail 0 tidx)
+      (Vector. nm am cnt shift root trimmed-tail nil -1 -1)))
+
+  clojure.lang.ITransientVector
+  (assocN [this i val]
+    (.ensureEditable transient-helper nm root)
+    (cond
+      (and (<= 0 i) (< i cnt))
+      (let [tail-off (unchecked-subtract-int cnt tidx)]
+        (if (<= tail-off i)
+          (.aset am tail (unchecked-subtract-int i tail-off) val)
+          (set! root (.doAssoc transient-helper nm am
+                               shift (.edit nm root) root i val)))
+        this)
+
+      (== i cnt) (.conj this val)
+
+      :else (throw (IndexOutOfBoundsException.))))
+
+  (pop [this]
+    (.ensureEditable transient-helper nm root)
+    (cond
+      (zero? cnt)
+      (throw (IllegalStateException. "Can't pop empty vector"))
+
+      (== 1 cnt)
+      (do (set! cnt (int 0))
+          (set! tidx (int 0))
+          (if objects?
+            (.aset am tail 0 nil))
+          this)
+
+      (> tidx 1)
+      (do (set! cnt  (unchecked-dec-int cnt))
+          (set! tidx (unchecked-dec-int tidx))
+          (if objects?
+            (.aset am tail tidx nil))
+          this)
+
+      :else
+      (let [new-tail-base (.arrayFor this (unchecked-subtract-int cnt (int 2)))
+            new-tail      (.aclone am new-tail-base)
+            new-tidx      (.alength am new-tail-base)
+            new-root      (.popTail transient-helper nm am
+                                    shift
+                                    cnt
+                                    (.edit nm root)
+                                    root)]
+        (cond
+          (nil? new-root)
+          (do (set! cnt  (unchecked-dec-int cnt))
+              (set! root (.ensureEditable transient-helper nm am
+                                          (.edit nm root)
+                                          (.empty nm)
+                                          5))
+              (set! tail new-tail)
+              (set! tidx new-tidx)
+              this)
+
+          (and (> shift 5)
+               (nil? (aget ^objects (.array nm new-root) 1)))
+          (do (set! cnt   (unchecked-dec-int cnt))
+              (set! shift (unchecked-subtract-int shift (int 5)))
+              (set! root  (aget ^objects (.array nm new-root) 0))
+              (set! tail  new-tail)
+              (set! tidx  new-tidx)
+              this)
+
+          :else
+          (do (set! cnt  (unchecked-dec-int cnt))
+              (set! root new-root)
+              (set! tail new-tail)
+              (set! tidx new-tidx)
+              this)))))
+
+  clojure.lang.ITransientAssociative
+  (assoc [this k v]
+    (.assocN this k v))
+
+  ;; temporary kludge
+  IVecImpl
+  (arrayFor [this i]
+    (if (and (<= (int 0) i) (< i cnt))
+      (if (>= i (.tailoff this))
+        tail
+        (loop [i (int i) node root shift shift]
+          (if (zero? shift)
+            (.array nm node)
+            (if (.regular nm node)
+              (loop [node  (aget ^objects (.array nm node)
+                                 (bit-and (bit-shift-right i shift) (int 0x1f)))
+                     shift (unchecked-subtract-int shift (int 5))]
+                (if (zero? shift)
+                  (.array nm node)
+                  (recur (aget ^objects (.array nm node)
+                               (bit-and (bit-shift-right i shift) (int 0x1f)))
+                         (unchecked-subtract-int shift (int 5)))))
+              (let [rngs (ranges nm node)
+                    j    (loop [j (bit-and (bit-shift-right i shift) (int 0x1f))]
+                           (if (< i (aget rngs j))
+                             j
+                             (recur (unchecked-inc-int j))))
+                    i    (if (pos? j)
+                           (unchecked-subtract-int
+                            i (aget rngs (unchecked-dec-int j)))
+                           i)]
+                (recur (int i)
+                       (aget ^objects (.array nm node) j)
+                       (unchecked-subtract-int shift (int 5)))))))) 
+      (throw (IndexOutOfBoundsException.)))))
