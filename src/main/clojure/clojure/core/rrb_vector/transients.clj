@@ -47,7 +47,9 @@
 (def ^ITransientHelper transient-helper
   (reify ITransientHelper
     (editableRoot [this nm am root]
-      (.node nm (AtomicReference. (Thread/currentThread)) (.array nm root)))
+      (.node nm
+             (AtomicReference. (Thread/currentThread))
+             (.aclone am (.array nm root))))
 
     (editableTail [this am tail]
       (let [ret (.array am 32)]
