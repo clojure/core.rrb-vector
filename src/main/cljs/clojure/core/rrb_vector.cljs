@@ -29,7 +29,7 @@
 
   (:refer-clojure :exclude [vector vec subvec])
   (:require [clojure.core.rrb-vector.protocols :refer [-slicev -splicev]]
-            clojure.core.rrb-vector.rrbt
+            [clojure.core.rrb-vector.rrbt :refer [-as-rrbt]]
             clojure.core.rrb-vector.interop)
   (:require-macros [clojure.core.rrb-vector.macros :refer [gen-vector-method]]))
 
@@ -84,6 +84,11 @@
          v))))
 
 (defn vec
-  "Returns a new vector containing the contents of coll."
+  "Returns a vector containing the contents of coll.
+
+  If coll is a vector, returns an RRB vector using the internal tree
+  of coll."
   [coll]
-  (apply vector coll))
+  (if (vector? coll)
+    (-as-rrbt coll)
+    (apply vector coll)))
