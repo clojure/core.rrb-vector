@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <artifactId>core.rrb-vector</artifactId>
-  <version>0.0.10</version>
+  <version>0.0.11-SNAPSHOT</version>
   <name>${artifactId}</name>
   <description>RRB-Trees for Clojure(Script) -- see Bagwell &amp; Rompf</description>
 
@@ -31,7 +31,7 @@
     <connection>scm:git:git://github.com/clojure/core.rrb-vector.git</connection>
     <developerConnection>scm:git:git://github.com/clojure/core.rrb-vector.git</developerConnection>
     <url>https://github.com/clojure/core.rrb-vector</url>
-    <tag>core.rrb-vector-0.0.10</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <properties>
