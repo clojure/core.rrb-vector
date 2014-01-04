@@ -11,7 +11,9 @@
   :test-paths ["src/test/clojure"]
   :global-vars {*warn-on-reflection* true}
   :jvm-opts ^:replace []
-  :profiles {:dev {:dependencies [[org.clojure/clojurescript "0.0-2138"]]
+  :profiles {:dev {:test-paths ["src/test_local/clojure"]
+                   :dependencies [[org.clojure/clojurescript "0.0-2138"]
+                                  [collection-check "0.1.1"]]
                    :plugins [[lein-cljsbuild "1.0.1"]]}}
   :cljsbuild {:builds {:test {:source-paths ["src/main/cljs"
                                              "src/test/cljs"]
