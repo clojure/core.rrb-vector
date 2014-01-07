@@ -88,6 +88,10 @@ Follow the first link above to discover the current release number.
       <version>${version}</version>
     </dependency>
 
+[Gradle](http://www.gradle.org/) dependency information:
+
+    compile "org.clojure:core.rrb-vector:${version}"
+
 ## Developer information
 
 core.rrb-vector is being developed as a Clojure Contrib project, see
