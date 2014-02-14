@@ -35,6 +35,11 @@
 
 (defmacro dbg- [& args])
 
+(defmacro compile-if [test then else]
+  (if (eval test)
+    then
+    else))
+
 (definterface IVecImpl
   (^int tailoff [])
   (arrayFor [^int i])
@@ -251,13 +256,17 @@
   clojure.lang.IHashEq
   (hasheq [this]
     (if (== _hasheq (int -1))
-      (loop [h (int 1) xs (seq this)]
-        (if xs
-          (recur (unchecked-add-int (unchecked-multiply-int (int 31) h)
-                                    (Util/hasheq (first xs)))
-                 (next xs))
+      (compile-if (resolve 'clojure.core/hash-ordered-coll)
+        (let [h (hash-ordered-coll this)]
           (do (set! _hasheq (int h))
-              h)))
+              h))
+        (loop [h (int 1) xs (seq this)]
+          (if xs
+            (recur (unchecked-add-int (unchecked-multiply-int (int 31) h)
+                                      (Util/hasheq (first xs)))
+                   (next xs))
+            (do (set! _hasheq (int h))
+                h))))
       _hasheq))
 
   clojure.lang.Counted

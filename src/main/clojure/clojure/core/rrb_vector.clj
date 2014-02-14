@@ -79,7 +79,7 @@
        (Vector. ^NodeManager object-nm ^ArrayManager object-am
                 ~(count params) 5 empty-pv-node ~arr nil
                 ~(if params -1 1)
-                ~(if params -1 1)))))
+                ~(if params -1 (hash []))))))
 
 (defn vector
   "Creates a new vector containing the args."
@@ -125,7 +125,7 @@
                 (if (identical? ~t :object) empty-pv-node empty-gvec-node)
                 ~arr nil
                 ~(if params -1 1)
-                ~(if params -1 1)))))
+                ~(if params -1 (hash []))))))
 
 (defn vector-of
   "Creates a new vector capable of storing homogenous items of type t,
