@@ -2,7 +2,8 @@
   (:require clojure.core.rrb-vector.rrbt
             [clojure.core.rrb-vector.nodes
              :refer [ranges object-nm primitive-nm]]
-            [clojure.core.rrb-vector :as fv])
+            [clojure.core.rrb-vector :as fv]
+            [clojure.test :refer [is]])
   (:import (clojure.lang PersistentVector)
            (clojure.core Vec)
            (clojure.core.rrb_vector.rrbt Vector)
@@ -69,6 +70,32 @@
         i
         -1))))
 
+(defn is-same-coll [a b]
+  (let [msg (format "(class a)=%s (class b)=%s (count a)=%s (count b)=%s first 100 elems: a=%s b=%s"
+                    (.getName (class a)) (.getName (class b))
+                    (count a) (count b)
+                    (take 100 (if (instance? clojure.lang.LazySeq a) (seq a) a))
+                    (take 100 (if (instance? clojure.lang.LazySeq b) (seq b) b)))]
+    (is (= (count a) (count b)
+           (.size ^java.util.Collection a) (.size ^java.util.Collection b)) msg)
+    (is (= a b) msg)
+    (is (= b a) msg)
+    ;; .equals not implemented for VecSeq objects, so comment these
+    ;; .equals tests out until that is resolved.
+    ;; http://dev.clojure.org/jira/browse/CLJ-1346
+    ;;(is (.equals ^Object a b) msg)
+    ;;(is (.equals ^Object b a) msg)
+    (is (= (hash a) (hash b)) msg)
+    (is (= (.hashCode ^Object a) (.hashCode ^Object b)) msg))
+  (and (= (count a) (count b)
+          (.size ^java.util.Collection a) (.size ^java.util.Collection b))
+       (= a b)
+       (= b a)
+       ;;(.equals ^Object a b)
+       ;;(.equals ^Object b a)
+       (= (hash a) (hash b))
+       (= (.hashCode ^Object a) (.hashCode ^Object b))))
+
 (defn check-subvec [init & starts-and-ends]
   (let [v1 (loop [v   (vec (range init))
                   ses (seq starts-and-ends)]
@@ -82,13 +109,13 @@
                (let [[s e] ses]
                  (recur (fv/subvec v s e) (nnext ses)))
                v))]
-    (= v1 v2)))
+    (is-same-coll v1 v2)))
 
 (defn check-catvec [& counts]
   (let [ranges (map range counts)
         v1 (apply concat ranges)
         v2 (apply fv/catvec (map fv/vec ranges))]
-    (= v1 v2)))
+    (is-same-coll v1 v2)))
 
 (defn generative-check-subvec [iterations max-init-cnt slices]
   (dotimes [_ iterations]
