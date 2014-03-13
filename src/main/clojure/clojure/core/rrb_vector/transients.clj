@@ -49,7 +49,7 @@
     (editableRoot [this nm am root]
       (.node nm
              (AtomicReference. (Thread/currentThread))
-             (.aclone am (.array nm root))))
+             (clojure.core/aclone ^objects (.array nm root))))
 
     (editableTail [this am tail]
       (let [ret (.array am 32)]
