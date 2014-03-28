@@ -15,7 +15,7 @@
                    :dependencies [[org.clojure/clojurescript "0.0-2156"]
                                   [collection-check "0.1.1"]]
                    :plugins [[lein-cljsbuild "1.0.1"]]}
-             :1.6 {:dependencies [[org.clojure/clojure "1.6.0-beta1"]]}}
+             :1.6 {:dependencies [[org.clojure/clojure "1.6.0"]]}}
   :cljsbuild {:builds {:test {:source-paths ["src/main/cljs"
                                              "src/test/cljs"]
                               :compiler {:optimizations :advanced
