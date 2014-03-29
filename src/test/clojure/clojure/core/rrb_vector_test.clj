@@ -1,6 +1,7 @@
 (ns clojure.core.rrb-vector-test
   (:require [clojure.core.rrb-vector :as fv]
-            [clojure.core.rrb-vector.debug :as dv])
+            [clojure.core.rrb-vector.debug :as dv]
+            [clojure.core.reducers :as r])
   (:use clojure.test)
   (:import (clojure.lang ExceptionInfo)))
 
@@ -85,3 +86,11 @@
 (deftest test-relaxed
   (is (= (into (fv/catvec (vec (range 123)) (vec (range 68))) (range 64))
          (concat (range 123) (range 68) (range 64)))))
+
+(deftest test-reduce
+  (let [v1 (fv/subvec (vec (range 1003)) 500)
+        v2 (vec (range 500 1003))]
+    (is (= (reduce + 0 v1)
+           (reduce + 0 v2)
+           (reduce + 0 (r/map identity (seq v1)))
+           (reduce + 0 (r/map identity (seq v2)))))))
