@@ -1,7 +1,9 @@
+custom-template =  #<File params/contrib/templates/layout.html>
+custom-template =  #<File params/contrib/templates/sub-namespace-api.html>
 <html>
   <head>
     <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-    <title>clojure.core.rrb-vector - RRB-Tree-based Vectors 0.0.11 API documentation</title>
+    <title>clojure.core.rrb-vector - RRB-Tree-based Vectors 0.0.12 API documentation</title>
     <link href="static/favicon.png" rel="icon" />
     <link href="static/favicon.png" rel="shortcut icon" />
     <link media="all" type="text/css" href="static/clojure.css" rel="stylesheet" />
@@ -25,7 +27,7 @@ namespace.
       <div id="leftcolumn"><div style="text-align: center;"></div>
 <div class="menu">
   <div class="WikiCustomNav WikiElement wiki">
-    <span class="toc-header"><span id="project-name">RRB-Tree-based Vectors</span> <span id="version">0.0.11</span> API</span><br />
+    <span class="toc-header"><span id="project-name">RRB-Tree-based Vectors</span> <span id="version">0.0.12</span> API</span><br />
     <ul>
       <li><a class="wiki_link" href="index.html">Overview</a></li>
       <li><a class="wiki_link" href="api-index.html">API Index</a></li>
@@ -75,10 +77,16 @@ namespace.
       <a class="toc-entry-anchor" href="#clojure.core.rrb-vector.rrbt/Transient">Transient</a>
       
     </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.core.rrb-vector.rrbt/VecSeq">VecSeq</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
       <a class="toc-entry-anchor" href="#clojure.core.rrb-vector.rrbt/Vector">Vector</a>
       
     </div><div style="margin-left: 1em;" class="toc-entry">
       <a class="toc-entry-anchor" href="#clojure.core.rrb-vector.rrbt/-&gt;Transient">-&gt;Transient</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.core.rrb-vector.rrbt/-&gt;VecSeq">-&gt;VecSeq</a>
       
     </div><div style="margin-left: 1em;" class="toc-entry">
       <a class="toc-entry-anchor" href="#clojure.core.rrb-vector.rrbt/-&gt;Vector">-&gt;Vector</a>
@@ -88,7 +96,7 @@ namespace.
 </div>
 </div>
                 <div id="content-tag"><h1 id="overview">API for <span id="clojure.core.rrb-vector">clojure.core.rrb-vector</span>
-  - <span id="header-project">RRB-Tree-based Vectors</span> <span id="header-version">0.0.11</span><span id="header-status-block"> (<span id="header-status">in development</span>)</span>
+  - <span id="header-project">RRB-Tree-based Vectors</span> <span id="header-version">0.0.12</span><span id="header-status-block"> (<span id="header-status">in development</span>)</span>
   </h1>
 <span id="author-line">by <span id="author-name">Michał Marczyk</span><br /></span>
 <br />Full namespace name: <span id="long-name">clojure.core.rrb-vector</span>
@@ -239,12 +247,21 @@ Optionally takes one or more elements to populate the vector.</pre>
   </div><div id="type-entry">
     <br />
     <hr />
+    <h2 id="clojure.core.rrb-vector.rrbt/VecSeq">VecSeq</h2>
+    <span id="type-type">type</span><br />
+    <pre id="type-docstr"></pre>
+    Fields: <span id="type-fields">[am vec anode i offset]</span><br />
+    Protocols: <span id="type-protocols">clojure.core.protocols/InternalReduce</span><br />
+    Interfaces: <span id="type-interfaces">clojure.lang.IChunkedSeq, clojure.lang.ISeq, clojure.lang.Seqable</span><br />
+  </div><div id="type-entry">
+    <br />
+    <hr />
     <h2 id="clojure.core.rrb-vector.rrbt/Vector">Vector</h2>
     <span id="type-type">type</span><br />
     <pre id="type-docstr"></pre>
     Fields: <span id="type-fields">[nm am cnt shift root tail _meta _hash _hasheq]</span><br />
     Protocols: <span id="type-protocols">clojure.core.protocols/IKVReduce, clojure.core.reducers/CollFold, clojure.core.rrb-vector.protocols/PSliceableVector, clojure.core.rrb-vector.protocols/PSpliceableVector, <a href="#clojure.core.rrb-vector.rrbt/AsRRBT">AsRRBT</a></span><br />
-    Interfaces: <span id="type-interfaces">clojure.core.IVecImpl, clojure.core.rrb_vector.rrbt.IVecImpl, clojure.lang.Associative, clojure.lang.Counted, clojure.lang.IEditableCollection, clojure.lang.IFn, clojure.lang.IHashEq, clojure.lang.ILookup, clojure.lang.IMeta, clojure.lang.IObj, clojure.lang.IPersistentCollection, clojure.lang.IPersistentStack, clojure.lang.IPersistentVector, clojure.lang.Indexed, clojure.lang.Reversible, clojure.lang.Seqable, clojure.lang.Sequential, java.io.Serializable, java.lang.Comparable, java.lang.Iterable, java.util.Collection, java.util.List, java.util.RandomAccess</span><br />
+    Interfaces: <span id="type-interfaces">clojure.core.rrb_vector.rrbt.IVecImpl, clojure.lang.Associative, clojure.lang.Counted, clojure.lang.IEditableCollection, clojure.lang.IFn, clojure.lang.IHashEq, clojure.lang.ILookup, clojure.lang.IMeta, clojure.lang.IObj, clojure.lang.IPersistentCollection, clojure.lang.IPersistentStack, clojure.lang.IPersistentVector, clojure.lang.Indexed, clojure.lang.Reversible, clojure.lang.Seqable, clojure.lang.Sequential, java.io.Serializable, java.lang.Comparable, java.lang.Iterable, java.util.Collection, java.util.List, java.util.RandomAccess</span><br />
   </div>
 </div>
 <div id="var-section">
@@ -260,7 +277,18 @@ Optionally takes one or more elements to populate the vector.</pre>
     <pre id="var-docstr">Positional factory function for class clojure.core.rrb_vector.rrbt.Transient.</pre>
     
     
-    <a href="https://github.com/clojure/core.rrb-vector/blob/a869c9dcc48be3894ee14ba23a7b4e32a7658a54/src/main/clojure/clojure/core/rrb_vector/rrbt.clj#L1349" id="var-source">Source</a>
+    <a href="https://github.com/clojure/core.rrb-vector/blob/d8941e8b064bebe2b0f13535d39faeb3341d6459/src/main/clojure/clojure/core/rrb_vector/rrbt.clj#L1411" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.core.rrb-vector.rrbt/-&gt;VecSeq">-&gt;VecSeq</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (-&gt;VecSeq am vec anode i offset)
+</pre>
+    <pre id="var-docstr">Positional factory function for class clojure.core.rrb_vector.rrbt.VecSeq.</pre>
+    
+    
+    <a href="https://github.com/clojure/core.rrb-vector/blob/d8941e8b064bebe2b0f13535d39faeb3341d6459/src/main/clojure/clojure/core/rrb_vector/rrbt.clj#L51" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -271,7 +299,7 @@ Optionally takes one or more elements to populate the vector.</pre>
     <pre id="var-docstr">Positional factory function for class clojure.core.rrb_vector.rrbt.Vector.</pre>
     
     
-    <a href="https://github.com/clojure/core.rrb-vector/blob/a869c9dcc48be3894ee14ba23a7b4e32a7658a54/src/main/clojure/clojure/core/rrb_vector/rrbt.clj#L217" id="var-source">Source</a>
+    <a href="https://github.com/clojure/core.rrb-vector/blob/d8941e8b064bebe2b0f13535d39faeb3341d6459/src/main/clojure/clojure/core/rrb_vector/rrbt.clj#L282" id="var-source">Source</a>
   </div>
 </div>
 
@@ -282,7 +310,7 @@ Optionally takes one or more elements to populate the vector.</pre>
           </div>
 	</div>
 	<div id="foot">
-	  <div style="text-align: center;" id="copyright">Copyright 2007-2013 by Rich Hickey and the various contributors</div>
+	  <div style="text-align: center;" id="copyright">Copyright 2007-2014 by Rich Hickey and the various contributors</div>
 	</div>
       </div>
       <div id="DesignedBy">Logo &amp; site design by <a title="Visit Tom Hickey's website." href="http://www.tomhickey.com">Tom Hickey</a>.<br />
