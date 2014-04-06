@@ -12,9 +12,9 @@
   :global-vars {*warn-on-reflection* true}
   :jvm-opts ^:replace []
   :profiles {:dev {:test-paths ["src/test_local/clojure"]
-                   :dependencies [[org.clojure/clojurescript "0.0-2197"]
+                   :dependencies [[org.clojure/clojurescript "0.0-2202"]
                                   [collection-check "0.1.1"]]
-                   :plugins [[lein-cljsbuild "1.0.1"]]}
+                   :plugins [[lein-cljsbuild "1.0.3"]]}
              :1.6 {:dependencies [[org.clojure/clojure "1.6.0"]]}}
   :cljsbuild {:builds {:test {:source-paths ["src/main/cljs"
                                              "src/test/cljs"]
