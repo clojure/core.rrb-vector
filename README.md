@@ -33,21 +33,53 @@ to keywords naming primitive types.
 
 ## Usage
 
+core.rrb-vector exports one public namespace:
+
     (require '[clojure.core.rrb-vector :as fv])
 
-    ;; read the overview at the REPL
+Note that the ClojureScript version uses the same namespace name (it
+*does not* use the alternative `cljs.*` prefix!). This is because the
+API is precisely the same (except `clojure.core.rrb-vector/vector-of`
+only makes sense on the JVM and is therefore not available in
+ClojureScript).
+
+The docstring attached to the namespace provides an overview of the
+available functionality (as found at the top of this README):
+
     (doc clojure.core.rrb-vector)
 
-    ;; functions meant for public consumption
+The new functionality is accessible through two functions:
+`clojure.core.rrb-vector/subvec`, which provides logarithmic-time
+non-view slicing (in contrast to `clojure.core/subvec`, which is a
+constant-time operation producing view vectors that prevent the
+underlying vector from becoming eligible for garbage collection), and
+`clojure.core.rrb-vector/catvec`, which provides logarithmic-time
+concatenation. Crucially, these can be applied to regular
+Clojure(Script) vectors.
+
     (doc fv/subvec)
     (doc fv/catvec)
+
+    ;; apply catvec and subvec to regular Clojure(Script) vectors
+    (fv/catvec (vec (range 1234)) (vec (range 8765)))
+    (fv/subvec (vec (range 1024)) 123 456)
+
+Additionally, several functions for constructing RRB vectors are
+provided. There is rarely any reason to use them, since, as mentioned
+above, the interesting functions exported by core.rrb-vector work with
+regular vectors. Note that `clojure.core.rrb-vector/vec`, in contrast
+to `clojure.core/vec`, reuses the internal tree of its input if it
+already is a vector (of any type) and does not alias short arrays.
+When passed a non-vector argument, it returns an RRB vector.
+
     (doc fv/vector)
     (doc fv/vector-of)
     (doc fv/vec)
 
-    ;; apply catvec and subvec to regular Clojure vectors
-    (fv/catvec (vec (range 1234)) (vec (range 8765)))
-    (fv/subvec (vec (range 1024)) 123 456)
+The debug namespace bundled with core.rrb-vector provides several
+utilities used by the test suite, as well as a function for
+visualizing the internal structure of vectors that works with regular
+Clojure(Script) vectors and RRB vectors.
 
     ;; for peeking under the hood
     (require '[clojure.core.rrb-vector.debug :as dv])
