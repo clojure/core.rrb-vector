@@ -1070,7 +1070,11 @@
     (let [v     (.-v this)
           start (.-start this)
           end   (.-end this)]
-      (slicev (as-rrbt v) start end))))
+      (slicev (as-rrbt v) start end)))
+
+  java.util.Map$Entry
+  (as-rrbt [^java.util.Map$Entry this]
+    (as-rrbt [(.getKey this) (.getValue this)])))
 
 (defn shift-from-to [^NodeManager nm node from to]
   (cond
