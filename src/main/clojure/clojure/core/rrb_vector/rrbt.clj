@@ -66,6 +66,27 @@
          (recur result (+ aidx alen)))
        result)))
 
+  Object
+  (toString [this]
+    (pr-str this))
+
+  (hashCode [this]
+    (caching-hash this hash-gvec-seq _hash))
+
+  (equals [this that]
+    (cond
+      (identical? this that) true
+      (not (or (sequential? that) (instance? java.util.List that))) false
+      :else
+      (loop [xs this ys (seq that)]
+        (if xs
+          (if ys
+            (if (clojure.lang.Util/equals (first xs) (first ys))
+              (recur (next xs) (next ys))
+              false)
+            false)
+          (nil? ys)))))
+
   clojure.lang.ISeq
   (first [_] (.aget am anode offset))
   (next [this]
