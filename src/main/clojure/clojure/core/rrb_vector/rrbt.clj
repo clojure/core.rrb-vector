@@ -40,6 +40,24 @@
     then
     else))
 
+(defmacro ^:private caching-hash [coll hash-fn hash-key]
+  `(let [h# ~hash-key]
+     (if-not (== h# (int -1))
+       h#
+       (let [h# (~hash-fn ~coll)]
+         (set! ~hash-key (int h#))
+         h#))))
+
+(defn ^:private hash-gvec-seq [xs]
+  (let [cnt (count xs)]
+    (loop [h (int 1) xs (seq xs)]
+      (if xs
+        (let [x (first xs)]
+          (recur (unchecked-add-int (unchecked-multiply-int 31 h)
+                                    (clojure.lang.Util/hash x))
+                 (next xs)))
+        h))))
+
 (definterface IVecImpl
   (^int tailoff [])
   (arrayFor [^int i])
@@ -48,7 +66,8 @@
   (newPath [^java.util.concurrent.atomic.AtomicReference edit ^int shift node])
   (doAssoc [^int shift node ^int i val]))
 
-(deftype VecSeq [^ArrayManager am ^IVecImpl vec anode ^int i ^int offset]
+(deftype VecSeq [^ArrayManager am ^IVecImpl vec anode ^int i ^int offset
+                 ^:unsynchronized-mutable ^int _hash]
   clojure.core.protocols.InternalReduce
   (internal-reduce
    [_ f val]
@@ -91,7 +110,7 @@
   (first [_] (.aget am anode offset))
   (next [this]
     (if (< (inc offset) (.alength am anode))
-      (new VecSeq am vec anode i (inc offset))
+      (new VecSeq am vec anode i (inc offset) -1)
       (.chunkedNext this)))
   (more [this]
     (let [s (.next this)]
@@ -129,7 +148,7 @@
   (chunkedNext [_]
    (let [nexti (+ i (.alength am anode))]
      (when (< nexti (count vec))
-       (VecSeq. am vec (.arrayFor vec nexti) nexti 0))))
+       (VecSeq. am vec (.arrayFor vec nexti) nexti 0 -1))))
   (chunkedMore [this]
     (let [s (.chunkedNext this)]
       (or s (clojure.lang.PersistentList/EMPTY)))))
@@ -603,7 +622,7 @@
   (seq [this]
     (if (zero? cnt)
       nil
-      (VecSeq. am this (.arrayFor this 0) 0 0)))
+      (VecSeq. am this (.arrayFor this 0) 0 0 -1)))
 
   clojure.lang.Sequential
 
