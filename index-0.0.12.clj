@@ -8,7 +8,7 @@
    :doc
    "An implementation of the confluently persistent vector data\nstructure introduced in Bagwell, Rompf, \"RRB-Trees: Efficient\nImmutable Vectors\", EPFL-REPORT-169879, September, 2011.\n\nRRB-Trees build upon Clojure's PersistentVectors, adding logarithmic\ntime concatenation and slicing.\n\nThe main API entry points are clojure.core.rrb-vector/catvec,\nperforming vector concatenation, and clojure.core.rrb-vector/subvec,\nwhich produces a new vector containing the appropriate subrange of\nthe input vector (in contrast to clojure.core/subvec, which returns\na view on the input vector).\n\ncore.rrb-vector's vectors can store objects or unboxed primitives.\nThe implementation allows for seamless interoperability with\nclojure.lang.PersistentVector, clojure.core.Vec (more commonly known\nas gvec) and clojure.lang.APersistentVector$SubVector instances:\nclojure.core.rrb-vector/catvec and clojure.core.rrb-vector/subvec\nconvert their inputs to clojure.core.rrb-vector.rrbt.Vector\ninstances whenever necessary (this is a very fast constant time\noperation for PersistentVector and gvec; for SubVector it is O(log\nn), where n is the size of the underlying vector).\n\nclojure.core.rrb-vector also exports its own versions of vector and\nvector-of and vec which always produce\nclojure.core.rrb-vector.rrbt.Vector instances. Note that vector-of\naccepts :object as one of the possible type arguments, in addition\nto keywords naming primitive types."}
   {:source-url
-   "https://github.com/clojure/core.rrb-vector/blob/43f117c618dc764d43f715af7490fb8b77e1f4b3/src/main/clojure/clojure/core/rrb_vector/rrbt.clj",
+   "https://github.com/clojure/core.rrb-vector/blob/863c72b7c056db7b99317d53feacf791a0e2b45b/src/main/clojure/clojure/core/rrb_vector/rrbt.clj",
    :wiki-url
    "http://clojure.github.com/core.rrb-vector/clojure.core.rrb-vector.rrbt-api.html",
    :name "clojure.core.rrb-vector.rrbt",
@@ -94,23 +94,23 @@
    :name "->Transient",
    :namespace "clojure.core.rrb-vector.rrbt",
    :source-url
-   "https://github.com/clojure/core.rrb-vector/blob/43f117c618dc764d43f715af7490fb8b77e1f4b3/src/main/clojure/clojure/core/rrb_vector/rrbt.clj#L1455",
+   "https://github.com/clojure/core.rrb-vector/blob/863c72b7c056db7b99317d53feacf791a0e2b45b/src/main/clojure/clojure/core/rrb_vector/rrbt.clj#L1471",
    :raw-source-url
-   "https://github.com/clojure/core.rrb-vector/raw/43f117c618dc764d43f715af7490fb8b77e1f4b3/src/main/clojure/clojure/core/rrb_vector/rrbt.clj",
+   "https://github.com/clojure/core.rrb-vector/raw/863c72b7c056db7b99317d53feacf791a0e2b45b/src/main/clojure/clojure/core/rrb_vector/rrbt.clj",
    :wiki-url
    "http://clojure.github.com/core.rrb-vector//clojure.core.rrb-vector-api.html#clojure.core.rrb-vector.rrbt/->Transient",
    :doc
    "Positional factory function for class clojure.core.rrb_vector.rrbt.Transient.",
    :var-type "function",
-   :line 1455,
+   :line 1471,
    :file "src/main/clojure/clojure/core/rrb_vector/rrbt.clj"}
-  {:arglists ([am vec anode i offset _hash]),
+  {:arglists ([am vec anode i offset _hash _hasheq]),
    :name "->VecSeq",
    :namespace "clojure.core.rrb-vector.rrbt",
    :source-url
-   "https://github.com/clojure/core.rrb-vector/blob/43f117c618dc764d43f715af7490fb8b77e1f4b3/src/main/clojure/clojure/core/rrb_vector/rrbt.clj#L69",
+   "https://github.com/clojure/core.rrb-vector/blob/863c72b7c056db7b99317d53feacf791a0e2b45b/src/main/clojure/clojure/core/rrb_vector/rrbt.clj#L69",
    :raw-source-url
-   "https://github.com/clojure/core.rrb-vector/raw/43f117c618dc764d43f715af7490fb8b77e1f4b3/src/main/clojure/clojure/core/rrb_vector/rrbt.clj",
+   "https://github.com/clojure/core.rrb-vector/raw/863c72b7c056db7b99317d53feacf791a0e2b45b/src/main/clojure/clojure/core/rrb_vector/rrbt.clj",
    :wiki-url
    "http://clojure.github.com/core.rrb-vector//clojure.core.rrb-vector-api.html#clojure.core.rrb-vector.rrbt/->VecSeq",
    :doc
@@ -122,15 +122,15 @@
    :name "->Vector",
    :namespace "clojure.core.rrb-vector.rrbt",
    :source-url
-   "https://github.com/clojure/core.rrb-vector/blob/43f117c618dc764d43f715af7490fb8b77e1f4b3/src/main/clojure/clojure/core/rrb_vector/rrbt.clj#L322",
+   "https://github.com/clojure/core.rrb-vector/blob/863c72b7c056db7b99317d53feacf791a0e2b45b/src/main/clojure/clojure/core/rrb_vector/rrbt.clj#L338",
    :raw-source-url
-   "https://github.com/clojure/core.rrb-vector/raw/43f117c618dc764d43f715af7490fb8b77e1f4b3/src/main/clojure/clojure/core/rrb_vector/rrbt.clj",
+   "https://github.com/clojure/core.rrb-vector/raw/863c72b7c056db7b99317d53feacf791a0e2b45b/src/main/clojure/clojure/core/rrb_vector/rrbt.clj",
    :wiki-url
    "http://clojure.github.com/core.rrb-vector//clojure.core.rrb-vector-api.html#clojure.core.rrb-vector.rrbt/->Vector",
    :doc
    "Positional factory function for class clojure.core.rrb_vector.rrbt.Vector.",
    :var-type "function",
-   :line 322,
+   :line 338,
    :file "src/main/clojure/clojure/core/rrb_vector/rrbt.clj"}
   {:file nil,
    :raw-source-url nil,
