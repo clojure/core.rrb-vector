@@ -167,7 +167,26 @@
        (VecSeq. am vec (.arrayFor vec nexti) nexti 0 -1 -1))))
   (chunkedMore [this]
     (let [s (.chunkedNext this)]
-      (or s (clojure.lang.PersistentList/EMPTY)))))
+      (or s (clojure.lang.PersistentList/EMPTY))))
+
+  java.lang.Iterable
+  (iterator [this]
+    (let [xs (clojure.lang.Box. (seq this))]
+      (reify java.util.Iterator
+        (next [this]
+          (locking xs
+            (if-let [v (.-val xs)]
+              (let [x (first v)]
+                (set! (.-val xs) (next v))
+                x)
+              (throw
+                (java.util.NoSuchElementException.
+                  "no more elements in VecSeq iterator")))))
+        (hasNext [this]
+          (locking xs
+            (not (nil? (.-val xs)))))
+        (remove [this]
+          (throw (UnsupportedOperationException.)))))))
 
 (defprotocol AsRRBT
   (as-rrbt [v]))
