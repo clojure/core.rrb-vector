@@ -94,3 +94,15 @@
            (reduce + 0 v2)
            (reduce + 0 (r/map identity (seq v1)))
            (reduce + 0 (r/map identity (seq v2)))))))
+
+(deftest test-hasheq
+  (let [v1 (vec (range 1024))
+        v2 (vec (range 1024))
+        v3 (fv/catvec (vec (range 512)) (vec (range 512 1024)))
+        s1 (seq v1)
+        s2 (seq v2)
+        s3 (seq v3)]
+    (is (= (hash v1) (hash v2) (hash v3) (hash s1) (hash s2) (hash s3)))
+    (is (= (hash (nthnext s1 120))
+           (hash (nthnext s2 120))
+           (hash (nthnext s3 120))))))

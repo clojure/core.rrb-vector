@@ -67,7 +67,8 @@
   (doAssoc [^int shift node ^int i val]))
 
 (deftype VecSeq [^ArrayManager am ^IVecImpl vec anode ^int i ^int offset
-                 ^:unsynchronized-mutable ^int _hash]
+                 ^:unsynchronized-mutable ^int _hash
+                 ^:unsynchronized-mutable ^int _hasheq]
   clojure.core.protocols.InternalReduce
   (internal-reduce
    [_ f val]
@@ -106,11 +107,27 @@
             false)
           (nil? ys)))))
 
+  clojure.lang.IHashEq
+  (hasheq [this]
+    (if (== _hasheq (int -1))
+      (compile-if (resolve 'clojure.core/hash-ordered-coll)
+        (let [h (hash-ordered-coll this)]
+          (do (set! _hasheq (int h))
+              h))
+        (loop [h (int 1) xs (seq this)]
+          (if xs
+            (recur (unchecked-add-int (unchecked-multiply-int (int 31) h)
+                                      (Util/hasheq (first xs)))
+                   (next xs))
+            (do (set! _hasheq (int h))
+                h))))
+      _hasheq))
+
   clojure.lang.ISeq
   (first [_] (.aget am anode offset))
   (next [this]
     (if (< (inc offset) (.alength am anode))
-      (new VecSeq am vec anode i (inc offset) -1)
+      (new VecSeq am vec anode i (inc offset) -1 -1)
       (.chunkedNext this)))
   (more [this]
     (let [s (.next this)]
@@ -139,7 +156,6 @@
   (empty [_]
     clojure.lang.PersistentList/EMPTY)
 
-
   clojure.lang.Seqable
   (seq [this] this)
 
@@ -148,7 +164,7 @@
   (chunkedNext [_]
    (let [nexti (+ i (.alength am anode))]
      (when (< nexti (count vec))
-       (VecSeq. am vec (.arrayFor vec nexti) nexti 0 -1))))
+       (VecSeq. am vec (.arrayFor vec nexti) nexti 0 -1 -1))))
   (chunkedMore [this]
     (let [s (.chunkedNext this)]
       (or s (clojure.lang.PersistentList/EMPTY)))))
@@ -622,7 +638,7 @@
   (seq [this]
     (if (zero? cnt)
       nil
-      (VecSeq. am this (.arrayFor this 0) 0 0 -1)))
+      (VecSeq. am this (.arrayFor this 0) 0 0 -1 -1)))
 
   clojure.lang.Sequential
 
