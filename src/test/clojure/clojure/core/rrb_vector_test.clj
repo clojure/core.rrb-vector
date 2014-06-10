@@ -106,3 +106,14 @@
     (is (= (hash (nthnext s1 120))
            (hash (nthnext s2 120))
            (hash (nthnext s3 120))))))
+
+(deftest test-iterators
+  (let [v (fv/catvec (vec (range 1000)) (vec (range 1000 2048)))]
+    (is (= (iterator-seq (.iterator ^Iterable v))
+           (iterator-seq (.iterator ^Iterable (seq v)))
+           (iterator-seq (.listIterator ^java.util.List v))
+           (iterator-seq (.listIterator ^java.util.List (seq v)))
+           (range 2048)))
+    (is (= (iterator-seq (.listIterator ^java.util.List v 100))
+           (iterator-seq (.listIterator ^java.util.List (seq v) 100))
+           (range 100 2048)))))
