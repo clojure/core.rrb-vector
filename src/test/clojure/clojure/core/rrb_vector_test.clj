@@ -2,8 +2,10 @@
   (:require [clojure.core.rrb-vector :as fv]
             [clojure.core.rrb-vector.debug :as dv]
             [clojure.core.reducers :as r])
-  (:use clojure.test)
-  (:import (clojure.lang ExceptionInfo)))
+  (:use clojure.test
+        clojure.template)
+  (:import (clojure.lang ExceptionInfo)
+           (java.util NoSuchElementException)))
 
 (deftest test-slicing
   (testing "slicing"
@@ -116,4 +118,22 @@
            (range 2048)))
     (is (= (iterator-seq (.listIterator ^java.util.List v 100))
            (iterator-seq (.listIterator ^java.util.List (seq v) 100))
-           (range 100 2048)))))
+           (range 100 2048)))
+    (letfn [(iterator [xs]
+              (.iterator ^Iterable xs))
+            (list-iterator
+              ([xs]
+                 (.listIterator ^java.util.List xs))
+              ([xs start]
+                 (.listIterator ^java.util.List xs start)))]
+      (do-template [iexpr cnt]
+        (is (thrown? NoSuchElementException
+              (let [iter iexpr]
+                (dotimes [_ (inc cnt)]
+                  (.next ^java.util.Iterator iter)))))
+        (iterator v)                2048
+        (iterator (seq v))          2048
+        (list-iterator v)           2048
+        (list-iterator (seq v))     2048
+        (list-iterator v 100)       1948
+        (list-iterator (seq v) 100) 1948))))
