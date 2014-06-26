@@ -260,9 +260,14 @@
       (reify java.util.ListIterator
         (hasNext [_] (< (.get n) (count this)))
         (hasPrevious [_] (pos? n))
-        (next [_] (nth vec (unchecked-add-int i
-                             (unchecked-add-int offset
-                               (unchecked-dec-int (.incrementAndGet n))))))
+        (next [_]
+          (try
+            (nth vec (unchecked-add-int i
+                       (unchecked-add-int offset
+                         (unchecked-dec-int (.incrementAndGet n)))))
+            (catch IndexOutOfBoundsException e
+              (throw (java.util.NoSuchElementException.
+                       "no more elements in VecSeq list iterator")))))
         (nextIndex [_] (.get n))
         (previous [_] (nth vec (unchecked-add i
                                  (unchecked-add offset
@@ -1126,7 +1131,12 @@
     (let [i (java.util.concurrent.atomic.AtomicInteger. 0)]
       (reify java.util.Iterator
         (hasNext [_] (< (.get i) cnt))
-        (next [_] (.nth this (unchecked-dec-int (.incrementAndGet i))))
+        (next [_]
+          (try
+            (.nth this (unchecked-dec-int (.incrementAndGet i)))
+            (catch IndexOutOfBoundsException e
+              (throw (java.util.NoSuchElementException.
+                       "no more elements in RRB vector iterator")))))
         (remove [_] (throw-unsupported)))))
 
   java.util.Collection
@@ -1184,7 +1194,12 @@
       (reify java.util.ListIterator
         (hasNext [_] (< (.get i) cnt))
         (hasPrevious [_] (pos? i))
-        (next [_] (.nth this (unchecked-dec-int (.incrementAndGet i))))
+        (next [_]
+          (try
+            (.nth this (unchecked-dec-int (.incrementAndGet i)))
+            (catch IndexOutOfBoundsException e
+              (throw (java.util.NoSuchElementException.
+                       "no more elements in RRB vector list iterator")))))
         (nextIndex [_] (.get i))
         (previous [_] (.nth this (.decrementAndGet i)))
         (previousIndex [_] (unchecked-dec-int (.get i)))
