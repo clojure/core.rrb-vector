@@ -101,7 +101,7 @@
         s)))
 
   IHash
-  (-hash [coll] (caching-hash coll hash-coll __hash))
+  (-hash [coll] (caching-hash coll hash-ordered-coll __hash))
 
   IReduce
   (-reduce [coll f]
@@ -289,7 +289,7 @@
 
   IHash
   (-hash [this]
-    (caching-hash this hash-coll __hash))
+    (caching-hash this hash-ordered-coll __hash))
 
   ISeqable
   (-seq [this]
