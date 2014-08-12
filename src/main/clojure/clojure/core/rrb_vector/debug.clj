@@ -8,21 +8,24 @@
            (clojure.core.rrb_vector.rrbt Vector)
            (clojure.core.rrb_vector.nodes NodeManager)))
 
+(defn accessors-for [v]
+  (condp identical? (class v)
+    PersistentVector [#(.-root ^PersistentVector %)
+                      #(.-shift ^PersistentVector %)
+                      #(.-tail ^PersistentVector %)
+                      object-nm]
+    Vec              [#(.-root ^Vec %)
+                      #(.-shift ^Vec %)
+                      #(.-tail ^Vec %)
+                      primitive-nm]
+    Vector           [#(.-root ^Vector %)
+                      #(.-shift ^Vector %)
+                      #(.-tail ^Vector %)
+                      (.-nm ^Vector v)]))
+
 (defn dbg-vec [v]
   (let [[extract-root extract-shift extract-tail ^NodeManager nm]
-        (condp identical? (class v)
-          PersistentVector [#(.-root ^PersistentVector %)
-                            #(.-shift ^PersistentVector %)
-                            #(.-tail ^PersistentVector %)
-                            object-nm]
-          Vec              [#(.-root ^Vec %)
-                            #(.-shift ^Vec %)
-                            #(.-tail ^Vec %)
-                            primitive-nm]
-          Vector           [#(.-root ^Vector %)
-                            #(.-shift ^Vector %)
-                            #(.-tail ^Vector %)
-                            (.-nm ^Vector v)])
+        (accessors-for v)
         root  (extract-root v)
         shift (extract-shift v)
         tail  (extract-tail v)]
@@ -137,3 +140,19 @@
         (throw
          (ex-info "check-catvec failure w/o Exception" {:cnts cnts})))))
   true)
+
+(defn count-nodes [& vs]
+  (let [m (java.util.IdentityHashMap.)]
+    (doseq [v vs]
+      (let [[extract-root extract-shift extract-tail ^NodeManager nm]
+            (accessors-for v)]
+        (letfn [(go [n shift]
+                  (when n
+                    (.put m n n)
+                    (if-not (zero? shift)
+                      (let [arr (.array nm n)
+                            ns  (take 32 arr)]
+                        (doseq [n ns]
+                          (go n (- shift 5)))))))]
+          (go (extract-root v) (extract-shift v)))))
+    (.size m)))
