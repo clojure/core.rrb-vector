@@ -73,7 +73,7 @@
                  ^clojure.lang.IPersistentMap _meta
                  ^:unsynchronized-mutable ^int _hash
                  ^:unsynchronized-mutable ^int _hasheq]
-  clojure.core.protocols.InternalReduce
+  clojure.core.protocols/InternalReduce
   (internal-reduce
    [_ f val]
    (loop [result val
@@ -84,10 +84,14 @@
              result (loop [result result
                            node-idx 0]
                       (if (< node-idx alen)
-                        (recur (f result (.aget am node node-idx))
-                               (inc node-idx))
+                        (let [result (f result (.aget am node node-idx))]
+                          (if (reduced? result)
+                            result
+                            (recur result (inc node-idx))))
                         result))]
-         (recur result (+ aidx alen)))
+         (if (reduced? result)
+           @result
+           (recur result (+ aidx alen))))
        result)))
 
   Object
