@@ -12,7 +12,7 @@
   :global-vars {*warn-on-reflection* true}
   :jvm-opts ^:replace []
   :profiles {:dev {:test-paths ["src/test_local/clojure"]
-                   :dependencies [[org.clojure/clojurescript "0.0-2311"]
+                   :dependencies [[org.clojure/clojurescript "0.0-2371"]
                                   [collection-check "0.1.3"]]
                    :plugins [[lein-cljsbuild "1.0.3"]]}
              :1.6 {:dependencies [[org.clojure/clojure "1.6.0"]]}}
