@@ -67,7 +67,7 @@
                   (nth 10)))
        1 32 1024 32768))
 
-(deftest test-assoc! []
+(deftest test-assoc!
   (let [v1 (fv/vec (range 40000))
         v2 (persistent!
             (reduce (fn [out [k v]]
@@ -89,7 +89,7 @@
   (is (= (into (fv/catvec (vec (range 123)) (vec (range 68))) (range 64))
          (concat (range 123) (range 68) (range 64)))))
 
-(deftest test-reduce
+(deftest test-reduce-2
   (let [v1 (fv/subvec (vec (range 1003)) 500)
         v2 (vec (range 500 1003))]
     (is (= (reduce + 0 v1)
