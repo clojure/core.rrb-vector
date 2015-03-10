@@ -672,8 +672,8 @@
             new-n2   (->VectorNode nil new-arr2)]
         (loop [i  0
                bs (partition-all 32
-                                 (concat (leaf-seq (make-array n1))
-                                         (leaf-seq (make-array n2))))]
+                                 (concat (leaf-seq (.-arr n1))
+                                         (leaf-seq (.-arr n2))))]
           (when-first [block bs]
             (let [a (make-array (count block))]
               (loop [i 0 xs (seq block)]
