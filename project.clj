@@ -13,9 +13,10 @@
   :jvm-opts ^:replace []
   :profiles {:dev {:test-paths ["src/test_local/clojure"]
                    :dependencies [[org.clojure/clojurescript "0.0-3058"]
-                                  [collection-check "0.1.3"]]
+                                  [collection-check "0.1.5"]]
                    :plugins [[lein-cljsbuild "1.0.3"]]}
-             :1.6 {:dependencies [[org.clojure/clojure "1.6.0"]]}}
+             :1.6 {:dependencies [[org.clojure/clojure "1.6.0"]]}
+             :1.7 {:dependencies [[org.clojure/clojure "1.7.0-alpha5"]]}}
   :cljsbuild {:builds {:test {:source-paths ["src/main/cljs"
                                              "src/test/cljs"]
                               :compiler {:optimizations :advanced
