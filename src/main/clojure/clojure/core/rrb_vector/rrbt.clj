@@ -37,7 +37,7 @@
 
 (defmacro dbg- [& args])
 
-(defn ^:private throw-unsupported []
+(defn throw-unsupported []
   (throw (UnsupportedOperationException.)))
 
 (defmacro compile-if [test then else]
