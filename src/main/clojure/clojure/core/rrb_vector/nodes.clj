@@ -3,6 +3,8 @@
            (clojure.lang PersistentVector PersistentVector$Node)
            (java.util.concurrent.atomic AtomicReference)))
 
+(set! *unchecked-math* :warn-on-boxed)
+
 ;;; array managers
 
 (defmacro mk-am [t]

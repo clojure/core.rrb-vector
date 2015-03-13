@@ -4,6 +4,8 @@
            (clojure.core ArrayManager)
            (java.util.concurrent.atomic AtomicReference)))
 
+(set! *unchecked-math* :warn-on-boxed)
+
 (definterface ITransientHelper
   (editableRoot [^clojure.core.rrb_vector.nodes.NodeManager nm
                  ^clojure.core.ArrayManager am

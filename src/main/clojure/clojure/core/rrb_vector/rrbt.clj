@@ -19,6 +19,8 @@
            (clojure.core.rrb_vector.nodes NodeManager)
            (java.util.concurrent.atomic AtomicReference)))
 
+(set! *unchecked-math* :warn-on-boxed)
+
 (def ^:const rrbt-concat-threshold 33)
 (def ^:const max-extra-search-steps 2)
 
