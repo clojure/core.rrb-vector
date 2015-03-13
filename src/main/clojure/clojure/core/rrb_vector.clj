@@ -94,12 +94,12 @@
   ([x1 x2 x3 x4]
      (gen-vector-method x1 x2 x3 x4))
   ([x1 x2 x3 x4 & xn]
-     (loop [v  (vector x1 x2 x3 x4)
+     (loop [v  (transient (vector x1 x2 x3 x4))
             xn xn]
        (if xn
-         (recur (.cons ^clojure.lang.IPersistentCollection v (first xn))
+         (recur (.conj ^clojure.lang.ITransientCollection v (first xn))
                 (next xn))
-         v))))
+         (persistent! v)))))
 
 (defn vec
   "Returns a vector containing the contents of coll.
@@ -144,9 +144,9 @@
   ([t x1 x2 x3 x4]
      (gen-vector-of-method t x1 x2 x3 x4))
   ([t x1 x2 x3 x4 & xn]
-     (loop [v  (vector-of t x1 x2 x3 x4)
+     (loop [v  (transient (vector-of t x1 x2 x3 x4))
             xn xn]
        (if xn
-         (recur (.cons ^clojure.lang.IPersistentCollection v (first xn))
+         (recur (.conj ^clojure.lang.ITransientCollection v (first xn))
                 (next xn))
-         v))))
+         (persistent! v)))))
