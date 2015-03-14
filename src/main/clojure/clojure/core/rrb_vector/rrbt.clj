@@ -79,12 +79,13 @@
   (internal-reduce
    [_ f val]
    (loop [result val
-          aidx offset]
+          aidx i
+          off offset]
      (if (< aidx (count vec))
        (let [node (.arrayFor vec aidx)
              alen (.alength am node)
              result (loop [result result
-                           node-idx 0]
+                           node-idx off]
                       (if (< node-idx alen)
                         (let [result (f result (.aget am node node-idx))]
                           (if (reduced? result)
@@ -93,7 +94,7 @@
                         result))]
          (if (reduced? result)
            @result
-           (recur result (+ aidx alen))))
+           (recur result (+ aidx alen) 0)))
        result)))
 
   Object
