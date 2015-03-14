@@ -10,7 +10,7 @@
                  "src/main/cljs"]
   :test-paths ["src/test/clojure"]
   :global-vars {*warn-on-reflection* true}
-  :jvm-opts ^:replace []
+  :jvm-opts ^:replace ["-XX:+UseG1GC"]
   :profiles {:dev {:test-paths ["src/test_local/clojure"]
                    :dependencies [[org.clojure/clojurescript "0.0-3058"]
                                   [collection-check "0.1.5"]]
