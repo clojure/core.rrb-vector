@@ -5,6 +5,6 @@
   (:use clojure.test))
 
 (deftest collection-check
-  (is (assert-vector-like (fv/vector) gen/int))
+  (is (assert-vector-like 250 (fv/vector) gen/int))
   (is (every? nil? (.-array ^clojure.lang.PersistentVector$Node
                             (.-root ^clojure.lang.PersistentVector (vector))))))
