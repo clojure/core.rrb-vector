@@ -42,6 +42,14 @@
     (testing "reduce-kv"
       (is (= (reduce-kv + 0 v1) (reduce-kv + 0 v2))))))
 
+(deftest test-reduce-2
+  (let [v1 (fv/subvec (vec (range 1003)) 500)
+        v2 (vec (range 500 1003))]
+    (is (= (reduce + 0 v1)
+           (reduce + 0 v2)
+           (reduce + 0 (r/map identity (seq v1)))
+           (reduce + 0 (r/map identity (seq v2)))))))
+
 (deftest test-seq
   (let [v (fv/vec (range 128))
         s (seq v)]
@@ -88,14 +96,6 @@
 (deftest test-relaxed
   (is (= (into (fv/catvec (vec (range 123)) (vec (range 68))) (range 64))
          (concat (range 123) (range 68) (range 64)))))
-
-(deftest test-reduce-2
-  (let [v1 (fv/subvec (vec (range 1003)) 500)
-        v2 (vec (range 500 1003))]
-    (is (= (reduce + 0 v1)
-           (reduce + 0 v2)
-           (reduce + 0 (r/map identity (seq v1)))
-           (reduce + 0 (r/map identity (seq v2)))))))
 
 (deftest test-hasheq
   (let [v1 (vec (range 1024))
