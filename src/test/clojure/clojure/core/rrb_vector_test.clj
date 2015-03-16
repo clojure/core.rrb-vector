@@ -137,3 +137,10 @@
         (list-iterator (seq v))     2048
         (list-iterator v 100)       1948
         (list-iterator (seq v) 100) 1948))))
+
+(deftest test-reduce-subvec-catvec
+  (letfn [(insert-by-sub-catvec [v n]
+            (fv/catvec (fv/subvec v 0 n) (fv/vec ['x]) (fv/subvec v n)))
+          (repeated-subvec-catvec [i]
+            (reduce insert-by-sub-catvec (fv/vec (range i)) (range i 0 -1)))]
+    (is (= (repeated-subvec-catvec 2371) (interleave (range 2371) (repeat 'x))))))

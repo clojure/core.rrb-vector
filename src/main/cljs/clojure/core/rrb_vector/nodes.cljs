@@ -161,7 +161,7 @@
               (aset rngs j r)
               (recur (inc j) (+ r step))))
           (aset rngs i (last-range child))
-          (->VectorNode nil arr))))
+          (->VectorNode nil new-arr))))
     (let [rngs     (ranges parent)
           new-rngs (aclone rngs)
           i        (dec (aget rngs 32))

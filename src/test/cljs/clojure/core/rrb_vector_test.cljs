@@ -99,6 +99,14 @@
         expected (concat (repeat 779 \a) [1] [3] (repeat 366 \a))]
     (assert (= res expected))))
 
+(defn test-reduce-subvec-catvec []
+  (letfn [(insert-by-sub-catvec [v n]
+            (fv/catvec (fv/subvec v 0 n) (fv/vec ['x]) (fv/subvec v n)))
+          (repeated-subvec-catvec [i]
+            (reduce insert-by-sub-catvec (fv/vec (range i)) (range i 0 -1)))]
+    (assert (= (repeated-subvec-catvec 2371) (interleave (range 2371) (repeat 'x))))))
+
+
 (defn run-tests []
   (test-slicing)
   (test-slicing-generative)
@@ -110,6 +118,7 @@
   (test-assoc!)
   (test-relaxed)
   (test-splice-high-subtree-branch-count)
+  (test-reduce-subvec-catvec)
   (println "Tests completed without exception."))
 
 (run-tests)

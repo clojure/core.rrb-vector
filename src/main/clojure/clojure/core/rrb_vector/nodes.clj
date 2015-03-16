@@ -224,7 +224,7 @@
               (aset rngs j r)
               (recur (inc j) (+ r step))))
           (aset rngs i (int (last-range nm child)))
-          (.node nm nil arr))))
+          (.node nm nil new-arr))))
     (let [rngs     (ranges nm parent)
           new-rngs (aclone rngs)
           i        (dec (aget rngs 32))
@@ -306,3 +306,4 @@
                         (.node nm nil tail)))
         (aset new-arr (if (== shift 5) li (dec li)) cret))
       (.node nm nil new-arr))))
+
