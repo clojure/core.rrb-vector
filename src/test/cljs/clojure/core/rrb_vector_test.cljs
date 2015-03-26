@@ -106,7 +106,6 @@
             (reduce insert-by-sub-catvec (fv/vec (range i)) (range i 0 -1)))]
     (assert (= (repeated-subvec-catvec 2371) (interleave (range 2371) (repeat 'x))))))
 
-
 (defn run-tests []
   (test-slicing)
   (test-slicing-generative)

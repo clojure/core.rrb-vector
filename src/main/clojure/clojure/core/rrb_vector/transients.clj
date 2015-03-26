@@ -4,6 +4,7 @@
            (clojure.core ArrayManager)
            (java.util.concurrent.atomic AtomicReference)))
 
+(set! *warn-on-reflection* true)
 (set! *unchecked-math* :warn-on-boxed)
 
 (definterface ITransientHelper

@@ -3,6 +3,7 @@
            (clojure.lang PersistentVector PersistentVector$Node)
            (java.util.concurrent.atomic AtomicReference)))
 
+(set! *warn-on-reflection* true)
 (set! *unchecked-math* :warn-on-boxed)
 
 ;;; array managers
@@ -306,4 +307,3 @@
                         (.node nm nil tail)))
         (aset new-arr (if (== shift 5) li (dec li)) cret))
       (.node nm nil new-arr))))
-

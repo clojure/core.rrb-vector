@@ -19,6 +19,7 @@
            (clojure.core.rrb_vector.nodes NodeManager)
            (java.util.concurrent.atomic AtomicReference)))
 
+(set! *warn-on-reflection* true)
 (set! *unchecked-math* :warn-on-boxed)
 
 (def ^:const rrbt-concat-threshold 33)
@@ -1863,4 +1864,3 @@
                        (aget ^objects (.array nm node) j)
                        (unchecked-subtract-int shift (int 5)))))))) 
       (throw (IndexOutOfBoundsException.)))))
-

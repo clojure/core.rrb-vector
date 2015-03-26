@@ -42,6 +42,9 @@
            (clojure.core.rrb_vector.nodes NodeManager)
            (clojure.core ArrayManager)))
 
+(set! *warn-on-reflection* true)
+(set! *unchecked-math* :warn-on-boxed)
+
 (defn catvec
   "Concatenates the given vectors in logarithmic time."
   ([]
