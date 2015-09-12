@@ -11,12 +11,12 @@
   :test-paths ["src/test/clojure"]
   :jvm-opts ^:replace ["-XX:+UseG1GC"]
   :profiles {:dev {:test-paths ["src/test_local/clojure"]
-                   :dependencies [[org.clojure/clojurescript "0.0-3153"]
+                   :dependencies [[org.clojure/clojurescript "0.0-3269"]
                                   [org.clojure/test.check "0.7.0"]
-                                  [collection-check "0.1.5"]]
+                                  [collection-check "0.1.6"]]
                    :plugins [[lein-cljsbuild "1.0.3"]]}
              :1.6 {:dependencies [[org.clojure/clojure "1.6.0"]]}
-             :1.7 {:dependencies [[org.clojure/clojure "1.7.0-alpha5"]]}}
+             :1.7 {:dependencies [[org.clojure/clojure "1.7.0"]]}}
   :cljsbuild {:builds {:test {:source-paths ["src/main/cljs"
                                              "src/test/cljs"]
                               :compiler {:optimizations :advanced
