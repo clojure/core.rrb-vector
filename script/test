@@ -1,12 +1,21 @@
 #!/bin/bash
 
-if [ "${V8_HOME}" = "" ]; then
-    echo "V8_HOME not set, cannot run tests"
+if [ "${V8_HOME}" = "" -a "${SPIDERMONKEY_HOME}" = "" ]; then
+    echo "Neither V8_HOME nor SPIDERMONKEY_HOME is set, cannot run tests"
     exit 1
 fi
 
 rm -rf out
 mkdir -p out
-lein with-profile +1.6 cljsbuild once test
+lein with-profile +1.7 cljsbuild once test
 echo "Launching test runner..."
-"${V8_HOME}/d8" out/test.js
+
+if [ "${V8_HOME}" != "" ]; then
+    echo "Testing with V8:"
+    "${V8_HOME}/d8" out/test.js
+fi
+
+if [ "${SPIDERMONKEY_HOME}" != "" ]; then
+    echo "Testing with SpiderMonkey:"
+    "${SPIDERMONKEY_HOME}/js" -f out/test.js
+fi
