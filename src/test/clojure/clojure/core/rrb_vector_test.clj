@@ -143,9 +143,9 @@
 
 (deftest test-reduce-subvec-catvec
   (letfn [(insert-by-sub-catvec [v n]
-            (fv/catvec (fv/subvec v 0 n) (fv/vec ['x]) (fv/subvec v n)))
+            (fv/catvec (fv/subvec v 0 n) ['x] (fv/subvec v n)))
           (repeated-subvec-catvec [i]
-            (reduce insert-by-sub-catvec (fv/vec (range i)) (range i 0 -1)))]
+            (reduce insert-by-sub-catvec (vec (range i)) (range i 0 -1)))]
     (is (= (repeated-subvec-catvec 2371) (interleave (range 2371) (repeat 'x))))
     (is (tc/quick-check 100
           (prop/for-all [cnt (gen/fmap
