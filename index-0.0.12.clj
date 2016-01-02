@@ -135,6 +135,7 @@
   {:name "Transient",
    :var-type "type",
    :namespace "clojure.core.rrb-vector.rrbt",
+   :arglists nil,
    :wiki-url
    "http://clojure.github.com/core.rrb-vector//clojure.core.rrb-vector-api.html#clojure.core.rrb-vector.rrbt/Transient",
    :source-url nil,
@@ -143,6 +144,7 @@
   {:name "VecSeq",
    :var-type "type",
    :namespace "clojure.core.rrb-vector.rrbt",
+   :arglists nil,
    :wiki-url
    "http://clojure.github.com/core.rrb-vector//clojure.core.rrb-vector-api.html#clojure.core.rrb-vector.rrbt/VecSeq",
    :source-url nil,
@@ -151,6 +153,7 @@
   {:name "Vector",
    :var-type "type",
    :namespace "clojure.core.rrb-vector.rrbt",
+   :arglists nil,
    :wiki-url
    "http://clojure.github.com/core.rrb-vector//clojure.core.rrb-vector-api.html#clojure.core.rrb-vector.rrbt/Vector",
    :source-url nil,
