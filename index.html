@@ -70,6 +70,9 @@ namespace.
       
     </div>
   </div><div class="toc-section" style="margin-left: 1em;">
+    <a style="margin-top: 3px;" href="#"></a>
+    
+  </div><div class="toc-section" style="margin-left: 1em;">
     <a style="margin-top: 3px;" href="#clojure.core.rrb-vector.rrbt">clojure.core.rrb-vector.rrbt</a>
     <div class="toc-entry" style="margin-left: 1em;">
       <a href="#clojure.core.rrb-vector.rrbt/Transient" class="toc-entry-anchor">Transient</a>
@@ -151,6 +154,7 @@ to keywords naming primitive types.</pre>
        (catvec v1 v2 v3 v4 &amp; vn)
 </pre>
     <pre id="var-docstr">Concatenates the given vectors in logarithmic time.</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/core.rrb-vector/blob/4e8584914f7e71c2733412de10ff81558aabeb95/src/main/clojure/clojure/core/rrb_vector.clj#L48">Source</a>
@@ -168,6 +172,7 @@ logarithmic time. end defaults to end of vector. The resulting
 vector shares structure with the original, but does not hold on to
 any elements of the original vector lying outside the given index
 range.</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/core.rrb-vector/blob/4e8584914f7e71c2733412de10ff81558aabeb95/src/main/clojure/clojure/core/rrb_vector.clj#L64">Source</a>
@@ -182,6 +187,7 @@ range.</pre>
 
 If coll is a vector, returns an RRB vector using the internal tree
 of coll.</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/core.rrb-vector/blob/4e8584914f7e71c2733412de10ff81558aabeb95/src/main/clojure/clojure/core/rrb_vector.clj#L107">Source</a>
@@ -198,6 +204,7 @@ of coll.</pre>
        (vector x1 x2 x3 x4 &amp; xn)
 </pre>
     <pre id="var-docstr">Creates a new vector containing the args.</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/core.rrb-vector/blob/4e8584914f7e71c2733412de10ff81558aabeb95/src/main/clojure/clojure/core/rrb_vector.clj#L87">Source</a>
@@ -218,11 +225,13 @@ which should be one of :object, :int, :long, :float, :double, :byte,
 :short, :char, :boolean. Primitives are stored unboxed.
 
 Optionally takes one or more elements to populate the vector.</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/core.rrb-vector/blob/4e8584914f7e71c2733412de10ff81558aabeb95/src/main/clojure/clojure/core/rrb_vector.clj#L133">Source</a>
   </div>
 </div>
+
 <br />
 <h2 id="clojure.core.rrb-vector.rrbt">clojure.core.rrb-vector.rrbt</h2>
 <pre id="namespace-docstr"></pre>
@@ -273,6 +282,7 @@ Optionally takes one or more elements to populate the vector.</pre>
     <pre id="var-usage">Usage: (-&gt;Transient nm am objects? cnt shift root tail tidx)
 </pre>
     <pre id="var-docstr">Positional factory function for class clojure.core.rrb_vector.rrbt.Transient.</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/core.rrb-vector/blob/4e8584914f7e71c2733412de10ff81558aabeb95/src/main/clojure/clojure/core/rrb_vector/rrbt.clj#L1613">Source</a>
@@ -284,6 +294,7 @@ Optionally takes one or more elements to populate the vector.</pre>
     <pre id="var-usage">Usage: (-&gt;VecSeq am vec anode i offset _meta _hash _hasheq)
 </pre>
     <pre id="var-docstr">Positional factory function for class clojure.core.rrb_vector.rrbt.VecSeq.</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/core.rrb-vector/blob/4e8584914f7e71c2733412de10ff81558aabeb95/src/main/clojure/clojure/core/rrb_vector/rrbt.clj#L75">Source</a>
@@ -295,6 +306,7 @@ Optionally takes one or more elements to populate the vector.</pre>
     <pre id="var-usage">Usage: (-&gt;Vector nm am cnt shift root tail _meta _hash _hasheq)
 </pre>
     <pre id="var-docstr">Positional factory function for class clojure.core.rrb_vector.rrbt.Vector.</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/core.rrb-vector/blob/4e8584914f7e71c2733412de10ff81558aabeb95/src/main/clojure/clojure/core/rrb_vector/rrbt.clj#L465">Source</a>
