@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <artifactId>core.rrb-vector</artifactId>
   <version>0.0.12-SNAPSHOT</version>
-  <name>${artifactId}</name>
+  <name>core.rrb-vector</name>
   <description>RRB-Trees for Clojure(Script) -- see Bagwell &amp; Rompf</description>
 
   <licenses>
