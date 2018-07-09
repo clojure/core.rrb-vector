@@ -221,7 +221,7 @@
   (toArray [this]
     (into-array Object this))
 
-  (toArray [this arr]
+  (^"[Ljava.lang.Object;" toArray [this ^"[Ljava.lang.Object;" arr]
     (let [cnt (count this)]
       (if (>= (count arr) cnt)
         (do (dotimes [i cnt]
@@ -1161,7 +1161,7 @@
   (toArray [this]
     (into-array Object this))
 
-  (toArray [this arr]
+  (^"[Ljava.lang.Object;" toArray [this ^"[Ljava.lang.Object;" arr]
     (if (>= (count arr) cnt)
       (do (dotimes [i cnt]
             (aset arr i (.nth this i)))
