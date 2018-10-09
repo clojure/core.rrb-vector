@@ -43,7 +43,7 @@
            (clojure.core ArrayManager)))
 
 (set! *warn-on-reflection* true)
-(set! *unchecked-math* :warn-on-boxed)
+(set! *unchecked-math* true) ;; :warn-on-boxed
 
 (defn catvec
   "Concatenates the given vectors in logarithmic time."

@@ -20,7 +20,7 @@
            (java.util.concurrent.atomic AtomicReference)))
 
 (set! *warn-on-reflection* true)
-(set! *unchecked-math* :warn-on-boxed)
+(set! *unchecked-math* true) ;; :warn-on-boxed
 
 (def ^:const rrbt-concat-threshold 33)
 (def ^:const max-extra-search-steps 2)

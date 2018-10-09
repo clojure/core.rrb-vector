@@ -5,7 +5,7 @@
            (java.util.concurrent.atomic AtomicReference)))
 
 (set! *warn-on-reflection* true)
-(set! *unchecked-math* :warn-on-boxed)
+(set! *unchecked-math* true) ;; :warn-on-boxed
 
 (definterface ITransientHelper
   (editableRoot [^clojure.core.rrb_vector.nodes.NodeManager nm
