@@ -4,7 +4,7 @@
              :refer [PSliceableVector -slicev
                      PSpliceableVector -splicev]]
             [clojure.core.rrb-vector.nodes
-             :refer [regular? empty-node ranges overflow? last-range
+             :refer [regular? empty-node node-ranges overflow? last-range
                      regular-ranges first-child last-child remove-leftmost-child
                      replace-leftmost-child replace-rightmost-child
                      fold-tail new-path* index-of-nil]]
@@ -133,7 +133,7 @@
       (array-copy arr 0 new-arr 0 end)
       (->VectorNode nil new-arr))
     (let [reg? (regular? node)
-          rngs (if-not reg? (ranges node))
+          rngs (if-not reg? (node-ranges node))
           i    (bit-and (bit-shift-right (dec end) shift) 0x1f)
           i    (if reg?
                  i
@@ -185,7 +185,7 @@
       (->VectorNode nil new-arr))
     (let [reg? (regular? node)
           arr  (.-arr node)
-          rngs (if-not reg? (ranges node))
+          rngs (if-not reg? (node-ranges node))
           i    (bit-and (bit-shift-right start shift) 0x1f)
           i    (if reg?
                  i
@@ -325,7 +325,7 @@
                         (aget arr idx)
                         (recur i (aget arr idx) (- shift 5))))))
                 (let [arr  (.-arr node)
-                      rngs (ranges node)
+                      rngs (node-ranges node)
                       idx  (loop [j (bit-and (bit-shift-right i shift) 0x1f)]
                              (if (< i (aget rngs j))
                                j
@@ -371,7 +371,7 @@
             (let [new-arr  (make-array 33)
                   new-rngs (make-array 33)
                   new-root (->VectorNode (.-edit root) new-arr)
-                  root-total-range (aget (ranges root) 31)]
+                  root-total-range (aget (node-ranges root) 31)]
               (doto new-arr
                 (aset 0  root)
                 (aset 1  (new-path tail (.-edit root) shift tail-node))
@@ -607,7 +607,7 @@
       (alength arr)
       (if (regular? node)
         (index-of-nil arr)
-        (let [rngs (ranges node)]
+        (let [rngs (node-ranges node)]
           (aget rngs 32))))))
 
 (defn subtree-branch-count [node shift]
@@ -621,7 +621,7 @@
           (if-let [child (aget arr i)]
             (recur (inc i) (+ sbc (slot-count child cs)))
             sbc)))
-      (let [lim (aget (ranges node) 32)]
+      (let [lim (aget (node-ranges node) 32)]
         (loop [i 0 sbc 0]
           (if (== i lim)
             sbc
@@ -694,13 +694,13 @@
   (let [arr  (.-arr node)
         rngs (if (regular? node)
                (regular-ranges shift cnt)
-               (ranges node))
+               (node-ranges node))
         cs   (if rngs (aget rngs 32) (index-of-nil arr))
         cseq (fn cseq [c r]
                (let [arr  (.-arr c)
                      rngs (if (regular? c)
                             (regular-ranges (- shift 5) r)
-                            (ranges c))
+                            (node-ranges c))
                      gcs  (if rngs (aget rngs 32) (index-of-nil arr))]
                  (map list
                       (take gcs arr)
@@ -801,7 +801,7 @@
           ccnt1 (if (regular? n1)
                   (let [m (mod cnt1 (bit-shift-left 1 shift))]
                     (if (zero? m) (bit-shift-left 1 shift) m))
-                  (let [rngs (ranges n1)
+                  (let [rngs (node-ranges n1)
                         i    (dec (aget rngs 32))]
                     (if (zero? i)
                       (aget rngs 0)
@@ -809,7 +809,7 @@
           ccnt2 (if (regular? n2)
                   (let [m (mod cnt2 (bit-shift-left 1 shift))]
                     (if (zero? m) (bit-shift-left 1 shift) m))
-                  (aget (ranges n2) 0))
+                  (aget (node-ranges n2) 0))
           next-transferred-leaves (Box. 0)
           [new-c1 new-c2] (zippath (- shift 5) c1 ccnt1 c2 ccnt2
                                    next-transferred-leaves)
@@ -840,10 +840,10 @@
             new-arr  (make-array 33)
             rngs1    (take li1 (if (regular? n1)
                                  (regular-ranges shift cnt1)
-                                 (ranges n1)))
+                                 (node-ranges n1)))
             rngs2    (take li2 (if (regular? n2)
                                  (regular-ranges shift cnt2)
-                                 (ranges n2)))
+                                 (node-ranges n2)))
             rngs2    (let [r (last rngs1)]
                        (map #(+ % r) rngs2))
             rngs     (concat rngs1 rngs2)]
@@ -957,7 +957,7 @@
               (let [new-arr  (make-array 33)
                     new-rngs (make-array 33)
                     new-root (->VectorNode (.-edit root) new-arr)
-                    root-total-range (aget (ranges root) 31)]
+                    root-total-range (aget (node-ranges root) 31)]
                 (doto new-arr
                   (aset 0  root)
                   (aset 1  (new-path tail (.-edit root) shift tail-node))

@@ -13,11 +13,11 @@
 
 ;;; ranges
 
-(defn ranges [node]
+(defn node-ranges [node]
   (aget (.-arr node) 32))
 
 (defn last-range [node]
-  (let [rngs (ranges node)
+  (let [rngs (node-ranges node)
         i    (dec (aget rngs 32))]
     (aget rngs i)))
 
@@ -38,7 +38,7 @@
   (if (regular? root)
     (> (bit-shift-right cnt 5)
        (bit-shift-left 1 shift))
-    (let [rngs (ranges root)
+    (let [rngs (node-ranges root)
           slc  (aget rngs 32)]
       (and (== slc 32)
            (or (== shift 5)
@@ -83,7 +83,7 @@
   (let [arr (.-arr node)]
     (if (regular? node)
       (aget arr (dec (index-of-nil arr)))
-      (aget arr (dec (aget (ranges node) 32))))))
+      (aget arr (dec (aget (node-ranges node) 32))))))
 
 (defn remove-leftmost-child [shift parent]
   (let [arr (.-arr parent)]
@@ -93,7 +93,7 @@
             new-arr (make-array (if r? 32 33))]
         (array-copy arr 1 new-arr 0 31)
         (if-not r?
-          (let [rngs     (ranges parent)
+          (let [rngs     (node-ranges parent)
                 rng0     (aget rngs 0)
                 new-rngs (make-array 33)
                 lim      (aget rngs 32)]
@@ -128,7 +128,7 @@
           (recur (inc i))))
       (->VectorNode nil new-arr))
     (let [new-arr  (aclone (.-arr parent))
-          rngs     (ranges parent)
+          rngs     (node-ranges parent)
           new-rngs (make-array 33)
           li       (dec (aget rngs 32))]
       (aset new-rngs 32 (aget rngs 32))
@@ -162,7 +162,7 @@
               (recur (inc j) (+ r step))))
           (aset rngs i (last-range child))
           (->VectorNode nil new-arr))))
-    (let [rngs     (ranges parent)
+    (let [rngs     (node-ranges parent)
           new-rngs (aclone rngs)
           i        (dec (aget rngs 32))
           new-arr  (aclone (.-arr parent))]
@@ -201,7 +201,7 @@
         arr      (.-arr node)
         li       (index-of-nil arr)
         new-arr  (make-array (if reg? 32 33))
-        rngs     (if-not (regular? node) (ranges node))
+        rngs     (if-not (regular? node) (node-ranges node))
         cret     (if (== shift 5)
                    (->VectorNode nil tail)
                    (fold-tail (aget arr (dec li))

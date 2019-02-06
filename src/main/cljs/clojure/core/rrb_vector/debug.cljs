@@ -1,6 +1,6 @@
 (ns clojure.core.rrb-vector.debug
   (:require clojure.core.rrb-vector.rrbt
-            [clojure.core.rrb-vector.nodes :refer [regular? ranges]]
+            [clojure.core.rrb-vector.nodes :refer [regular? node-ranges]]
             [clojure.core.rrb-vector :as fv]
             [goog.string :as gstring]
             goog.string.format))
@@ -18,7 +18,7 @@
                   (print "  "))
                 (printf "%02d:%02d %s" shift i (pr-str (type node)))
                 (if-not (or (zero? shift) (regular? node))
-                  (print ":" (seq (ranges node))))
+                  (print ":" (seq (node-ranges node))))
                 (if (zero? shift)
                   (print ":" (vec (.-arr node))))
                 (println)

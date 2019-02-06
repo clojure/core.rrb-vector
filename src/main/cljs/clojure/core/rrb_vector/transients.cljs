@@ -1,7 +1,7 @@
 (ns clojure.core.rrb-vector.transients
   (:refer-clojure :exclude [new-path])
   (:require [clojure.core.rrb-vector.nodes
-             :refer [regular? clone ranges last-range]]
+             :refer [regular? clone node-ranges last-range]]
             [clojure.core.rrb-vector.trees :refer [tail-offset new-path]]))
 
 (defn ensure-editable [edit node]
@@ -40,7 +40,7 @@
                       (recur editable-child (- shift 5))))))))
           ret)
       (let [arr  (.-arr ret)
-            rngs (ranges ret)
+            rngs (node-ranges ret)
             li   (dec (aget rngs 32))
             cret (if (== shift 5)
                    nil
@@ -87,7 +87,7 @@
             (aset arr subidx nil)
             ret)))
       (let [subidx (bit-and (bit-shift-right (dec cnt) shift) 0x1f)
-            rngs   (ranges ret)
+            rngs   (node-ranges ret)
             subidx (loop [subidx subidx]
                      (if (or (zero? (int (aget rngs (inc subidx))))
                              (== subidx 31))
@@ -147,7 +147,7 @@
             (aset arr subidx child)
             (recur (- shift 5) child))))
       (let [arr    (.-arr ret)
-            rngs   (ranges ret)
+            rngs   (node-ranges ret)
             subidx (bit-and (bit-shift-right i shift) 0x1f)
             subidx (loop [subidx subidx]
                      (if (< i (int (aget rngs subidx)))

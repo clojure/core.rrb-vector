@@ -7,7 +7,7 @@ fi
 
 rm -rf out
 mkdir -p out
-lein with-profile +1.7 cljsbuild once test
+lein with-profile +cljs cljsbuild once test
 echo "Launching test runner..."
 
 if [ "${V8_HOME}" != "" ]; then
