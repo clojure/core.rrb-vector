@@ -1,5 +1,6 @@
 (ns clojure.core.rrb-vector-test
-  (:require [clojure.core.rrb-vector :as fv]
+  (:require clojure.core.rrb-test-infra
+            [clojure.core.rrb-vector :as fv]
             [clojure.core.rrb-vector.debug :as dv]
             [clojure.core.reducers :as r]
             [clojure.test.check :as tc]
