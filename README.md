@@ -177,8 +177,10 @@ runtimes, but no Clojure tests:
 $ lein with-profile +cljs cljsbuild test
 ```
 Add `nodejs` or `spidermonkey` as a separate argument after `test` to
-restrict the JavaScript runtime tested with to only the one you
-specify.
+restrict the JavaScript runtime used to only the one you specify.  You
+may need to adjust the command names in the `:test-commands` section
+of the `project.clj` file if the command for running those JavaScript
+runtimes have a different name on your system than what is used there.
 
 To run normal Clojure tests, plus the collection-check tests, but no
 ClojureScript tests:
@@ -190,6 +192,9 @@ because collection-check and/or its dependencies require that.
 
 There is no existing command configured to run collection-check tests
 with ClojureScript.
+
+To start a REPL from Leiningen with Clojure versions 1.6.0 and older,
+you must use Leiningen 2.8.0 (likely some other versions work, too).
 
 
 ## Clojure(Script) code reuse
