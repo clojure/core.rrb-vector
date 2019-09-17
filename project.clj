@@ -10,7 +10,9 @@
                  "src/main/cljs"]
   :test-paths ["src/test/clojure"]
   :jvm-opts ^:replace ["-XX:+UseG1GC"]
-  :profiles {:dev {:test-paths ["src/test_local/clojure"]
+  :profiles {:dev {:dependencies [[org.clojure/test.check "0.7.0"]]
+                   :plugins [[lein-cljsbuild "1.1.7"]]}
+             :coll {:test-paths ["src/test_local/clojure"]
                    :dependencies [[org.clojure/test.check "0.9.0"]
                                   [collection-check "0.1.7"]]
                    :plugins [[lein-cljsbuild "1.1.7"]]}
@@ -19,8 +21,15 @@
              :1.6 {:dependencies [[org.clojure/clojure "1.6.0"]]}
              :1.7 {:dependencies [[org.clojure/clojure "1.7.0"]]}
              :1.8 {:dependencies [[org.clojure/clojure "1.8.0"]]}
-             :1.9 {:dependencies [[org.clojure/clojure "1.9.0"]]}}
+             :1.9 {:dependencies [[org.clojure/clojure "1.9.0"]]}
+             :1.10 {:dependencies [[org.clojure/clojure "1.10.1"]]}
+             :master {:dependencies [[org.clojure/clojure "1.11.0-master-SNAPSHOT"]]}}
   :cljsbuild {:builds {:test {:source-paths ["src/main/cljs"
                                              "src/test/cljs"]
                               :compiler {:optimizations :advanced
-                                         :output-to "out/test.js"}}}})
+                                         :output-to "out/test.js"}}}
+              :test-commands
+              {"nodejs" ["nodejs" "-e"
+                       "require(\"./out/test\"); clojure.core.rrb_vector.test_cljs.run()"]
+               "spidermonkey" ["js52" "-f" "out/test.js"
+                               "--execute=clojure.core.rrb_vector.test_cljs.run()"]}})
