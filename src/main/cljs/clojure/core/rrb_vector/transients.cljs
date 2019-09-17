@@ -1,7 +1,7 @@
 (ns clojure.core.rrb-vector.transients
   (:refer-clojure :exclude [new-path])
   (:require [clojure.core.rrb-vector.nodes
-             :refer [regular? clone node-ranges last-range]]
+             :refer [regular? clone node-ranges last-range overflow?]]
             [clojure.core.rrb-vector.trees :refer [tail-offset new-path]]))
 
 (defn ensure-editable [edit node]
@@ -20,6 +20,18 @@
     (array-copy tail 0 ret 0 (alength tail))
     ret))
 
+;; Note 1: This condition check and exception are a little bit closer
+;; to the source of the cause for what was issue CRRBV-20, added in
+;; case there is still some remaining way to cause this condition to
+;; occur.
+
+;; Note 2: In the worst case, when the tree is nearly full, calling
+;; overflow? here takes run time O(tree_depth^2) here.  That could be
+;; made O(tree_depth).  One way would be to call push-tail! in hopes
+;; that it succeeds, but return some distinctive value indicating a
+;; failure on the full condition, and create the node via a new-path
+;; call at most recent recursive push-tail! call that has an empty
+;; slot available.
 (defn push-tail! [shift cnt root-edit current-node tail-node]
   (let [ret (ensure-editable root-edit current-node)]
     (if (regular? ret)
@@ -48,7 +60,8 @@
                          ccnt  (if (pos? li)
                                  (- (aget rngs li) (aget rngs (dec li)))
                                  (aget rngs 0))]
-                     (if-not (== ccnt (bit-shift-left 1 shift))
+                     ;; See Note 2
+                     (if-not (overflow? child (- shift 5) ccnt)
                        (push-tail! (- shift 5) (inc ccnt) root-edit
                                    child
                                    tail-node))))]
@@ -56,7 +69,18 @@
           (do (aset arr  li cret)
               (aset rngs li (+ (aget rngs li) 32))
               ret)
-          (do (aset arr (inc li)
+          (do (when (>= li 31)
+                ;; See Note 1
+                (let [msg (str "Assigning index " (inc li) " of vector"
+                               " object array to become a node, when that"
+                               " index should only be used for storing"
+                               " range arrays.")
+                      data {:shift shift, :cnd cnt,
+                            :current-node current-node,
+                            :tail-node tail-node, :rngs rngs, :li li,
+                            :cret cret}]
+                  (throw (ex-info msg data))))
+              (aset arr (inc li)
                     (new-path (.-arr tail-node)
                               root-edit
                               (- shift 5)
