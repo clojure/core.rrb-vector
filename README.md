@@ -163,17 +163,30 @@ $ mvn -DCLOJURE_VERSION=1.10.1 -Dclojure.version=1.10.1 clean package
 
 ### Useful Leiningen commands
 
-To run Clojure tests:
+To run Clojure tests, but no ClojureScript tests:
 ```bash
+$ lein with-profile +1.10 test
 ```
+You can test with Clojure versions 1.6 through 1.10 by specifying that
+version number after the `+`.  You can test with Clojure 1.5.1 using
+`lein test`.
 
-To run ClojureScript tests:
+To run ClojureScript tests with Node.js and Spidermonkey JavaScript
+runtimes, but no Clojure tests:
 ```bash
+$ lein with-profile +cljs cljsbuild test
 ```
+Add `nodejs` or `spidermonkey` as a separate argument after `test` to
+restrict the JavaScript runtime tested with to only the one you
+specify.
 
-To run normal Clojure tests, plus the collection-check tests.
+To run normal Clojure tests, plus the collection-check tests, but no
+ClojureScript tests:
 ```bash
+$ lein with-profile +coll,+1.7 test
 ```
+The collection-check tests require Clojure 1.7.0 or later, I believe
+because collection-check and/or its dependencies require that.
 
 There is no existing command configured to run collection-check tests
 with ClojureScript.
