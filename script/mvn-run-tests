@@ -1,0 +1,28 @@
+#! /bin/bash
+
+# Example of a command run by the build.clojure.org Jenkins machine to
+# run Clojure/Java and ClojureScript tests for data.xml library:
+
+# /var/lib/jenkins/tools/hudson.tasks.Maven_MavenInstallation/Maven_3.2.5/bin/mvn "-Djdk=Oracle 11 EA" -DCLOJURE_VERSION=1.7.0 -Dclojure.version=1.7.0 clean test
+
+prog_name=`basename $0`
+
+usage() {
+    1>&2 echo "usage: $prog_name <clojure_version>"
+    1>&2 echo ""
+    1>&2 echo "Examples:"
+    1>&2 echo ""
+    1>&2 echo "    $prog_name 1.7.0"
+    1>&2 echo "    $prog_name 1.10.1"
+}
+
+if [ $# -ne 1 ]
+then
+    usage
+    exit 1
+fi
+
+CLOJURE_VERSION="$1"
+
+set -x
+mvn -DCLOJURE_VERSION=${CLOJURE_VERSION} -Dclojure.version=${CLOJURE_VERSION} clean test
