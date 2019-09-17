@@ -64,6 +64,14 @@
         </executions>
       </plugin>
     </plugins>
+    <testResources>
+      <testResource>
+        <directory>${project.basedir}/src/test/resources</directory>
+      </testResource>
+      <testResource>
+        <directory>${project.basedir}/src/test/cljs</directory>
+      </testResource>
+    </testResources>
   </build>
 
   <dependencies>
@@ -77,6 +85,12 @@
       <groupId>org.clojure</groupId>
       <artifactId>test.check</artifactId>
       <version>0.7.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.clojure</groupId>
+      <artifactId>clojurescript</artifactId>
+      <version>1.10.439</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

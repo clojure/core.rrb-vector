@@ -11,6 +11,12 @@
   (:import (clojure.lang ExceptionInfo)
            (java.util NoSuchElementException)))
 
+;; medium: 50 to 60 sec
+;; short: 2 to 3 sec
+(def medium-check-catvec-params [250 30 10 60000])
+(def short-check-catvec-params [10 30 10 60000])
+(def check-catvec-params medium-check-catvec-params)
+
 (deftest test-slicing
   (testing "slicing"
     (is (dv/check-subvec 32000 10 29999 1234 18048 10123 10191)))
@@ -30,7 +36,7 @@
     (is (dv/check-catvec 10 40 40 40 40 40 40 40 40))
     (is (apply dv/check-catvec (repeat 30 33))))
   (testing "splicing (generative)"
-    (is (try (dv/generative-check-catvec 250 30 10 60000)
+    (is (try (apply dv/generative-check-catvec check-catvec-params)
              (catch ExceptionInfo e
                (throw (ex-info (format "%s: %s"
                                        (.getMessage e)
