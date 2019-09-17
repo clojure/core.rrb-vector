@@ -43,3 +43,6 @@
     (println "Running Basic Tests")
     (test/run-tests 'clojure.core.rrb-vector.test-cljs-basic)
     (pr-str *results*)))
+
+(defn ^:export run []
+  (test/run-all-tests #"clojure.core.rrb-vector.*test-.*"))

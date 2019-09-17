@@ -1,7 +1,17 @@
 #!/bin/bash
 
-if [ "${V8_HOME}" = "" -a "${SPIDERMONKEY_HOME}" = "" ]; then
-    echo "Neither V8_HOME nor SPIDERMONKEY_HOME is set, cannot run tests"
+# Quick install instructions for Ubuntu 18.04 Linux:
+
+# Spidermonkey:
+# sudo apt install libmozjs-52-0 libmozjs-52-dev
+# installs as /usr/bin/js52
+
+# Node.js, which uses V8 as its JavaScript engine:
+# sudo apt install nodejs
+# installs as /usr/bin/nodejs
+
+if [ "${NODEJS_CMD}" = "" -a "${SPIDERMONKEY_CMD}" = "" ]; then
+    echo "Neither NODEJS_CMD nor SPIDERMONKEY_CMD is set, cannot run tests"
     exit 1
 fi
 
@@ -10,12 +20,12 @@ mkdir -p out
 lein with-profile +cljs cljsbuild once test
 echo "Launching test runner..."
 
-if [ "${V8_HOME}" != "" ]; then
-    echo "Testing with V8:"
-    "${V8_HOME}/d8" out/test.js
+if [ "${NODEJS_CMD}" != "" ]; then
+    echo "Testing with Node.js:"
+    "${NODEJS_CMD}" -e 'require("./out/test"); clojure.core.rrb_vector.test_cljs.run()'
 fi
 
-if [ "${SPIDERMONKEY_HOME}" != "" ]; then
+if [ "${SPIDERMONKEY_CMD}" != "" ]; then
     echo "Testing with SpiderMonkey:"
-    "${SPIDERMONKEY_HOME}/js" -f out/test.js
+    "${SPIDERMONKEY_CMD}" -f out/test.js "--execute=clojure.core.rrb_vector.test_cljs.run()"
 fi

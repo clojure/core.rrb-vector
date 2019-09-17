@@ -142,6 +142,43 @@ have signed the Clojure Contributor Agreement.
 
 * [Compatibility Test Matrix](http://build.clojure.org/job/core.rrb-vector-test-matrix/)
 
+
+### Useful Maven commands
+
+To run Clojure and ClojureScript tests:
+```bash
+$ mvn -DCLOJURE_VERSION=1.10.1 -Dclojure.version=1.10.1 clean test
+```
+
+Clojure versions as old as 1.5.1 can be tested with such a command,
+but the ClojureScript tests only work when using Clojure 1.8.0 or
+later.
+
+To run tests and, if successful, create a JAR file in the targets
+directory:
+```bash
+$ mvn -DCLOJURE_VERSION=1.10.1 -Dclojure.version=1.10.1 clean package
+```
+
+
+### Useful Leiningen commands
+
+To run Clojure tests:
+```bash
+```
+
+To run ClojureScript tests:
+```bash
+```
+
+To run normal Clojure tests, plus the collection-check tests.
+```bash
+```
+
+There is no existing command configured to run collection-check tests
+with ClojureScript.
+
+
 ## Clojure(Script) code reuse
 
 core.rrb-vector's vectors support the same basic functionality regular
