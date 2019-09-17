@@ -15,7 +15,8 @@
 ;; short: 2 to 3 sec
 (def medium-check-catvec-params [250 30 10 60000])
 (def short-check-catvec-params [10 30 10 60000])
-(def check-catvec-params medium-check-catvec-params)
+;;(def check-catvec-params medium-check-catvec-params)
+(def check-catvec-params short-check-catvec-params)
 
 (deftest test-slicing
   (testing "slicing"

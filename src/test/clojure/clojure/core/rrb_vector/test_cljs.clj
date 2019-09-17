@@ -16,7 +16,7 @@
 ;; core.rrb-vector, so that core.rrb-vector's ClojureScript tests
 ;; could also be run on build.clojure.org via a mvn command.
 
-(deftest clojurescript-test-suite
+(deftest ^:cljs-nashorn clojurescript-test-suite
   (try
     (require 'clojure.core.rrb-vector.cljs-testsuite)
     (eval '(clojure.core.rrb-vector.cljs-testsuite/run-testsuite! "target/cljs-test-nashorn"))
