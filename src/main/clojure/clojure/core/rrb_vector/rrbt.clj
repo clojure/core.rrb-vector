@@ -846,7 +846,10 @@
                                   (aget rngs li)
                                   (aget rngs (unchecked-dec-int li)))
                                  (aget rngs 0))]
-                     (if-not (== ccnt (bit-shift-left 1 shift))
+                     ;; See Note 2 in file transients.clj
+                     (if-not (overflow? nm child
+                                        (unchecked-subtract-int shift (int 5))
+                                        ccnt)
                        (.pushTail this
                                   (unchecked-subtract-int shift (int 5))
                                   (unchecked-inc-int ccnt)
@@ -856,7 +859,17 @@
           (do (aset ^objects arr li cret)
               (aset rngs li (unchecked-add-int (aget rngs li) (int 32)))
               ret)
-          (do (aset ^objects arr (unchecked-inc-int li)
+          (do (when (>= li 31)
+                ;; See Note 1 in file transients.clj
+                (let [msg (str "Assigning index " (inc li) " of vector"
+                               " object array to become a node, when that"
+                               " index should only be used for storing"
+                               " range arrays.")
+                      data {:shift shift, :cnd cnt, :node node,
+                            :tail-node tail-node, :rngs rngs, :li li,
+                            :cret cret}]
+                  (throw (ex-info msg data))))
+              (aset ^objects arr (unchecked-inc-int li)
                     (.newPath this (.edit nm root)
                               (unchecked-subtract-int shift (int 5))
                               tail-node))

@@ -1,6 +1,7 @@
 (ns clojure.core.rrb-vector.test-cljs
   (:require [cljs.test :as test]
             [clojure.core.rrb-vector :as fv]
+            clojure.core.rrb-vector.test-common
             clojure.core.rrb-vector.test-cljs-basic))
 
 ;; This file was copied from namespace clojure.data.xml.test-cljs
@@ -41,8 +42,8 @@
   (set! *print-err-fn* js/print)
   (binding [*results* nil]
     (println "Running Basic Tests")
-    (test/run-tests 'clojure.core.rrb-vector.test-cljs-basic)
+    (test/run-all-tests #"clojure\.core\.rrb-vector\.test-.*")
     (pr-str *results*)))
 
 (defn ^:export run []
-  (test/run-all-tests #"clojure.core.rrb-vector.*test-.*"))
+  (test/run-all-tests #"clojure\.core\.rrb-vector\.test-.*"))
