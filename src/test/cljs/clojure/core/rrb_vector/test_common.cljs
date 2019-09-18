@@ -162,6 +162,8 @@
       (is (= (repeated-subvec-catvec 2371)
              (interleave (range 2371) (repeat 'x)))))))
 
+(def pos-infinity ##Inf)
+
 (deftest test-reduce-subvec-catvec2
   (let [my-catvec fv/catvec
         my-subvec fv/subvec]
@@ -171,8 +173,8 @@
             (repeated-subvec-catvec [i]
               (reduce insert-by-sub-catvec
                       (vec (range i))
-                      (take i (interleave (range (quot i 2) ##Inf)
-                                          (range (quot i 2) ##Inf)))))]
+                      (take i (interleave (range (quot i 2) pos-infinity)
+                                          (range (quot i 2) pos-infinity)))))]
       (let [n 2371
             v (repeated-subvec-catvec n)]
         (is (every? #(or (integer? %) (= 'x %)) v))
