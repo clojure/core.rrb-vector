@@ -1,5 +1,5 @@
 (ns clojure.core.rrb-vector.test-common
-  (:require [clojure.test :as test :refer [deftest is]]
+  (:require [clojure.test :as test :refer [deftest testing is]]
             [clojure.core.rrb-vector :as fv]))
 
 ;; The intent is to keep this file as close to
@@ -74,3 +74,13 @@
                       (fv/subvec 2)
                       (conj 2001))]
     (is (every? integer? (conj v1129-pre 2002)))))
+
+(deftest test-crrbv-22
+  (testing "pop! from a regular transient vector with 32*32+1 elements"
+    (let [v1025 (into (fv/vector) (range 1025))]
+      (is (= (persistent! (pop! (transient v1025)))
+             (range 1024)))))
+  (testing "pop from a persistent regular vector with 32*32+1 elements"
+    (let [v1025 (into (fv/vector) (range 1025))]
+      (is (= (pop v1025)
+             (range 1024))))))

@@ -881,7 +881,8 @@
   (popTail [this shift cnt node]
     (if (.regular nm node)
       (let [subidx (bit-and
-                    (bit-shift-right (unchecked-dec-int cnt) (int shift))
+                    (bit-shift-right (unchecked-subtract-int cnt (int 2))
+                                     (int shift))
                     (int 0x1f))]
         (cond
           (> (int shift) (int 5))

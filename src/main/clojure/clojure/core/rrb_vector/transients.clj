@@ -177,8 +177,9 @@
       (let [ret (.ensureEditable this nm am root-edit current-node shift)]
         (if (.regular nm ret)
           (let [subidx (bit-and
-                        (bit-shift-right (unchecked-dec-int cnt) shift)
-                        0x1f)]
+                        (bit-shift-right (unchecked-subtract-int cnt (int 2))
+                                         (int shift))
+                        (int 0x1f))]
             (cond
               (> shift 5)
               (let [child (.popTail this nm am

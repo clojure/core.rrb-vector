@@ -116,7 +116,7 @@
            shift (.-shift vec)
            root  (.-root vec)
            tail  (.-tail vec)]
-       (RRBChunkedSeq. vec (array-for cnt shift root tail i) i off nil nil)))
+       (RRBChunkedSeq. vec (array-for vec cnt shift root tail i) i off nil nil)))
   ([vec node i off]
      (RRBChunkedSeq. vec node i off nil nil))
   ([vec node i off meta]
@@ -296,7 +296,7 @@
   (-seq [this]
     (cond
       (zero? cnt) nil
-      (zero? (tail-offset cnt tail)) (array-seq tail)
+      (zero? (tail-offset this)) (array-seq tail)
       :else (rrb-chunked-seq this 0 0)))
 
   ICounted
@@ -410,8 +410,8 @@
         (Vector. (dec cnt) shift root new-tail meta nil))
 
       :else
-      (let [new-tail (array-for cnt shift root tail (- cnt 2))
-            root-cnt (tail-offset cnt tail)
+      (let [new-tail (array-for this cnt shift root tail (- cnt 2))
+            root-cnt (tail-offset this)
             new-root (pop-tail shift root-cnt (.-edit root) root)]
         (cond
           (nil? new-root)
@@ -433,7 +433,7 @@
   (-assoc-n [this i val]
     (cond
       (and (<= 0 i) (< i cnt))
-      (let [tail-off (tail-offset cnt tail)]
+      (let [tail-off (tail-offset this)]
         (if (>= i tail-off)
           (let [new-tail (make-array (alength tail))
                 idx (- i tail-off)]
@@ -481,7 +481,7 @@
     (loop [i    0
            j    0
            init init
-           arr  (array-for cnt shift root tail i)
+           arr  (array-for this cnt shift root tail i)
            lim  (dec (alength arr))
            step (inc lim)]
       (let [init (f init (+ i j) (aget arr j))]
@@ -491,7 +491,7 @@
             (recur i (inc j) init arr lim step)
             (let [i (+ i step)]
               (if (< i cnt)
-                (let [arr (array-for cnt shift root tail i)
+                (let [arr (array-for this cnt shift root tail i)
                       len (alength arr)
                       lim (dec len)]
                   (recur i 0 init arr lim len))
@@ -524,7 +524,7 @@
         (throw (js/Error. "start index greater than end index"))
 
         :else
-        (let [tail-off (tail-offset cnt tail)]
+        (let [tail-off (tail-offset this)]
           (if (>= start tail-off)
             (let [new-tail (make-array new-cnt)]
               (array-copy tail (- start tail-off)
@@ -544,7 +544,7 @@
                                     new-tail (make-array new-len)]
                                 (array-copy tail 0 new-tail 0 new-len)
                                 new-tail)
-                              (array-for new-cnt shift new-root (array)
+                              (array-for this new-cnt shift new-root (array)
                                          (dec new-cnt)))
                   new-root  (if tail-cut?
                               new-root
@@ -883,7 +883,7 @@
                      (aset arr 32 rngs)))
                  (->VectorNode nil arr))
                (fold-tail r1 s1
-                          (tail-offset (.-cnt v1) (.-tail v1))
+                          (tail-offset v1)
                           (.-tail v1)))
           s1 (if o? (+ s1 5) s1)
           r2 (.-root v2)
@@ -1023,7 +1023,7 @@
             this)
 
         :else
-        (let [new-tail-base (array-for cnt shift root tail (- cnt 2))
+        (let [new-tail-base (array-for this cnt shift root tail (- cnt 2))
               new-tail      (aclone new-tail-base)
               new-tidx      (alength new-tail-base)
               new-root      (pop-tail! shift cnt (.-edit root) root)]
