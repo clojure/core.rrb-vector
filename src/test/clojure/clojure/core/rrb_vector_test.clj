@@ -161,3 +161,48 @@
                                gen/pos-int)]
             (= (repeated-subvec-catvec cnt)
                (interleave (range cnt) (repeat 'x))))))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; This code was copied from the issue:
+;; https://clojure.atlassian.net/projects/CRRBV/issues/CRRBV-13
+
+(defn assoc-in-bytevec [my-vector-of use-transient? n indices]
+  (let [coll (into (my-vector-of :byte) (range n))
+        coll2 (reduce (fn [coll i]
+                        (if use-transient?
+                          (assoc! coll i -1)
+                          (assoc coll i -1)))
+                      (if use-transient?
+                        (transient coll)
+                        coll)
+                      indices)]
+    (if use-transient?
+      (persistent! coll2)
+      coll2)))
+
+(defn assoc-in-bytevec-core [& args]
+  (apply assoc-in-bytevec clojure.core/vector-of args))
+
+(defn assoc-in-bytevec-rrbv [& args]
+  (apply assoc-in-bytevec fv/vector-of args))
+
+(deftest test-crrbv-13
+  (println "deftest test-crrbv-13")
+  ;; Some cases work, probably the ones where the tail is being
+  ;; updated.
+  (doseq [use-transient? [false true]]
+    (doseq [args [[10 [5]]
+                  [32 [0]]
+                  [32 [32]]
+                  [64 [32]]
+                  [64 [64]]]]
+      (is (= (apply assoc-in-bytevec-core false args)
+             (apply assoc-in-bytevec-rrbv use-transient? args))
+          (str "args=" (cons use-transient? args))))
+    (doseq [args [[64 [0]]
+                  [64 [1]]
+                  [64 [31]]]]
+      (is (= (apply assoc-in-bytevec-core false args)
+             (apply assoc-in-bytevec-rrbv use-transient? args))
+          (str "args=" (cons use-transient? args))))))

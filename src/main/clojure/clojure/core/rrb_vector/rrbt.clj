@@ -1001,9 +1001,10 @@
               (.aset am arr (bit-and i (int 0x1f)) val))
             (let [arr    (.array nm node)
                   subidx (bit-and (bit-shift-right i shift) (int 0x1f))
-                  child  (.clone nm am shift (aget ^objects arr subidx))]
+                  next-shift (int (unchecked-subtract-int shift (int 5)))
+                  child  (.clone nm am next-shift (aget ^objects arr subidx))]
               (aset ^objects arr subidx child)
-              (recur (unchecked-subtract-int shift (int 5)) child))))
+              (recur next-shift child))))
         node)
       (let [arr    (aclone ^objects (.array nm node))
             rngs   (ranges nm node)

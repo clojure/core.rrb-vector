@@ -269,12 +269,13 @@
                 (.aset am arr (bit-and i 0x1f) val))
               (let [arr    (.array nm node)
                     subidx (bit-and (bit-shift-right i shift) 0x1f)
+                    next-shift (int (unchecked-subtract-int shift 5))
                     child  (.ensureEditable this nm am
                                             root-edit
                                             (aget ^objects arr subidx)
-                                            shift)]
+                                            next-shift)]
                 (aset ^objects arr subidx child)
-                (recur (unchecked-subtract-int shift 5) child))))
+                (recur next-shift child))))
           (let [arr    (.array nm ret)
                 rngs   (ranges nm ret)
                 subidx (bit-and (bit-shift-right i shift) 0x1f)
