@@ -138,13 +138,8 @@
         (let [arr (aclone (.-arr current-node))]
           (aset arr subidx nil)
           (->VectorNode root-edit arr))))
-    (let [subidx (bit-and (bit-shift-right (dec cnt) shift) 0x1f)
-          rngs   (node-ranges current-node)
-          subidx (loop [subidx subidx]
-                   (if (or (zero? (int (aget rngs (inc subidx))))
-                           (== subidx 31))
-                     subidx
-                     (recur (inc subidx))))
+    (let [rngs   (node-ranges current-node)
+          subidx (dec (aget rngs 32))
           new-rngs (aclone rngs)]
       (cond
         (> shift 5)

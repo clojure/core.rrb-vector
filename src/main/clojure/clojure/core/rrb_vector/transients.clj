@@ -51,9 +51,10 @@
 (def ^ITransientHelper transient-helper
   (reify ITransientHelper
     (editableRoot [this nm am root]
-      (.node nm
-             (AtomicReference. (Thread/currentThread))
-             (clojure.core/aclone ^objects (.array nm root))))
+      (let [new-arr (clojure.core/aclone ^objects (.array nm root))]
+        (if (== 33 (alength ^objects new-arr))
+          (aset new-arr 32 (aclone (ints (aget ^objects new-arr 32)))))
+        (.node nm (AtomicReference. (Thread/currentThread)) new-arr)))
 
     (editableTail [this am tail]
       (let [ret (.array am 32)]
@@ -184,7 +185,7 @@
               (> shift 5)
               (let [child (.popTail this nm am
                                     (unchecked-subtract-int shift 5)
-                                    cnt
+                                    cnt  ;; TBD: Should this be smaller than cnt?
                                     root-edit
                                     (aget ^objects (.array nm ret) subidx))]
                 (if (and (nil? child) (zero? subidx))
@@ -201,14 +202,7 @@
                 (aset ^objects arr subidx nil)
                 ret)))
           (let [rngs   (ranges nm ret)
-                subidx (bit-and
-                        (bit-shift-right (unchecked-dec-int cnt) shift)
-                        0x1f)
-                subidx (loop [subidx subidx]
-                         (if (or (zero? (aget rngs (unchecked-inc-int subidx)))
-                                 (== subidx 31))
-                           subidx
-                           (recur (unchecked-inc-int subidx))))]
+                subidx (unchecked-dec-int (aget rngs 32))]
             (cond
               (> shift 5)
               (let [child     (aget ^objects (.array nm ret) subidx)
@@ -218,7 +212,7 @@
                                  (aget rngs subidx)
                                  (aget rngs (unchecked-dec-int subidx))))
                     new-child (.popTail this nm am
-                                        (unchecked-subtract-int subidx 5)
+                                        (unchecked-subtract-int shift 5)
                                         child-cnt
                                         root-edit
                                         child)]

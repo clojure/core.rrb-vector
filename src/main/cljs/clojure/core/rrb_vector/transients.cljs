@@ -13,7 +13,10 @@
       (VectorNode. edit new-arr))))
 
 (defn editable-root [root]
-  (VectorNode. (js-obj) (aclone (.-arr root))))
+  (let [new-arr (aclone (.-arr root))]
+    (if (== 33 (alength new-arr))
+      (aset new-arr 32 (aclone (aget new-arr 32))))
+    (VectorNode. (js-obj) new-arr)))
 
 (defn editable-tail [tail]
   (let [ret (make-array 32)]
@@ -110,13 +113,8 @@
           (let [arr (.-arr ret)]
             (aset arr subidx nil)
             ret)))
-      (let [subidx (bit-and (bit-shift-right (dec cnt) shift) 0x1f)
-            rngs   (node-ranges ret)
-            subidx (loop [subidx subidx]
-                     (if (or (zero? (int (aget rngs (inc subidx))))
-                             (== subidx 31))
-                       subidx
-                       (recur (inc subidx))))]
+      (let [rngs   (node-ranges ret)
+            subidx (dec (aget rngs 32))]
         (cond
           (> shift 5)
           (let [child     (aget (.-arr ret) subidx)

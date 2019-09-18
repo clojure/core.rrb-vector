@@ -75,6 +75,30 @@
                       (conj 2001))]
     (is (every? integer? (conj v1129-pre 2002)))))
 
+(deftest test-crrbv-21
+  ;; The following sequence of operations gives a different exception
+  ;; than the above, and I suspect is probably a different root cause
+  ;; with a distinct fix required.  It might be the same root cause as
+  ;; npe-for-1025-then-pop! but I will add a separate test case until
+  ;; I know for sure.  Even if they are the same root cause, it does
+  ;; not take long to run.
+
+  ;; Note: Even once this bug is fixed, I want to know the answer to
+  ;; whether starting from v1128 and then pop'ing off each number of
+  ;; elements, until it is down to empty or very nearly so, causes any
+  ;; of the error checks within the current version of ranges-errors
+  ;; to give an error.  It may require some correcting.
+  (let [v1128 (:marbles (last (play-rrbv 10 1128)))
+        vpop1 (reduce (fn [v i] (pop v))
+                      v1128 (range 1026))]
+    (is (every? integer? (pop vpop1)))
+    ;; The transient version below gives a similar exception, but the
+    ;; call stack goes through the transient version of popTail,
+    ;; rather than the persistent version of popTail that the one
+    ;; above does.  It seems likely that both versions of popTail have
+    ;; a similar bug.
+    (is (every? integer? (persistent! (pop! (transient vpop1)))))))
+
 (deftest test-crrbv-22
   (testing "pop! from a regular transient vector with 32*32+1 elements"
     (let [v1025 (into (fv/vector) (range 1025))]

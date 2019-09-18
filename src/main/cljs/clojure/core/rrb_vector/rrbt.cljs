@@ -1024,7 +1024,7 @@
 
         :else
         (let [new-tail-base (array-for this cnt shift root tail (- cnt 2))
-              new-tail      (aclone new-tail-base)
+              new-tail      (editable-tail new-tail-base)
               new-tidx      (alength new-tail-base)
               new-root      (pop-tail! shift cnt (.-edit root) root)]
           (cond
@@ -1039,7 +1039,8 @@
                  (nil? (aget (.-arr new-root) 1)))
             (do (set! cnt   (dec cnt))
                 (set! shift (- shift 5))
-                (set! root  (aget (.-arr new-root) 0))
+                (set! root  (ensure-editable (.-edit root)
+                                             (aget (.-arr new-root) 0)))
                 (set! tail  new-tail)
                 (set! tidx  new-tidx)
                 this)

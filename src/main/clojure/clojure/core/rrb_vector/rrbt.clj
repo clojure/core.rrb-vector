@@ -903,15 +903,8 @@
           (let [arr (aclone ^objects (.array nm node))]
             (aset arr subidx nil)
             (.node nm (.edit nm root) arr))))
-      (let [subidx (int (bit-and
-                         (bit-shift-right (unchecked-dec-int cnt) (int shift))
-                         (int 0x1f)))
-            rngs   (ranges nm node)
-            subidx (int (loop [subidx subidx]
-                          (if (or (zero? (aget rngs (unchecked-inc-int subidx)))
-                                  (== subidx (int 31)))
-                            subidx
-                            (recur (unchecked-inc-int subidx)))))
+      (let [rngs   (ranges nm node)
+            subidx (unchecked-dec-int (aget rngs 32))
             new-rngs (aclone rngs)]
         (cond
           (> (int shift) (int 5))
@@ -1807,7 +1800,7 @@
 
       :else
       (let [new-tail-base (.arrayFor this (unchecked-subtract-int cnt (int 2)))
-            new-tail      (.aclone am new-tail-base)
+            new-tail      (.editableTail transient-helper am new-tail-base)
             new-tidx      (.alength am new-tail-base)
             new-root      (.popTail transient-helper nm am
                                     shift
@@ -1829,7 +1822,11 @@
                (nil? (aget ^objects (.array nm new-root) 1)))
           (do (set! cnt   (unchecked-dec-int cnt))
               (set! shift (unchecked-subtract-int shift (int 5)))
-              (set! root  (aget ^objects (.array nm new-root) 0))
+              (set! root  (.ensureEditable
+                           transient-helper nm am
+                           (.edit nm root)
+                           (aget ^objects (.array nm new-root) 0)
+                           (unchecked-subtract-int shift (int 5))))
               (set! tail  new-tail)
               (set! tidx  new-tidx)
               this)
