@@ -1,7 +1,7 @@
 (ns clojure.core.rrb-vector.test-common
   (:require [clojure.test :as test :refer [deftest testing is]]
             [clojure.core.rrb-vector :as fv]
-            [clojure.core.rrb-vector.rrbt :as rrbt]))
+            [clojure.core.rrb-vector.test-utils :as utils]))
 
 ;; The intent is to keep this file as close to
 ;; src/test/clojure/clojure/core/rrb_vector/test_common.clj as
@@ -178,25 +178,14 @@
 (defn puzzle-b-rrbv [n]
   (puzzle-b n fv/vec custom-catvec fv/subvec))
 
-(defn reset-optimizer-counts! []
-  (println "reset all optimizer counts to 0")
-  (reset! rrbt/peephole-optimization-count 0)
-  (reset! rrbt/fallback-to-slow-splice-count1 0)
-  (reset! rrbt/fallback-to-slow-splice-count2 0))
-
-(defn print-optimizer-counts []
-  (println "optimizer counts: peephole=" @rrbt/peephole-optimization-count
-           "fallback1=" @rrbt/fallback-to-slow-splice-count1
-           "fallback2=" @rrbt/fallback-to-slow-splice-count2))
-
 (deftest test-crrbv-14
   ;; This one passes
-  (reset-optimizer-counts!)
+  (utils/reset-optimizer-counts!)
   (is (= (puzzle-b-core 977)
          (puzzle-b-rrbv 977)))
-  (print-optimizer-counts)
+  (utils/print-optimizer-counts)
   ;; (puzzle-b-rrbv 978) throws
   ;; ArrayIndexOutOfBoundsException
-  (reset-optimizer-counts!)
+  (utils/reset-optimizer-counts!)
   (is (integer? (puzzle-b-rrbv 978)))
-  (print-optimizer-counts))
+  (utils/print-optimizer-counts))
