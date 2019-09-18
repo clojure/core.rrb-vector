@@ -108,18 +108,6 @@
   (is (= (into (fv/catvec (vec (range 123)) (vec (range 68))) (range 64))
          (concat (range 123) (range 68) (range 64)))))
 
-(deftest test-hasheq
-  (let [v1 (vec (range 1024))
-        v2 (vec (range 1024))
-        v3 (fv/catvec (vec (range 512)) (vec (range 512 1024)))
-        s1 (seq v1)
-        s2 (seq v2)
-        s3 (seq v3)]
-    (is (= (hash v1) (hash v2) (hash v3) (hash s1) (hash s2) (hash s3)))
-    (is (= (hash (nthnext s1 120))
-           (hash (nthnext s2 120))
-           (hash (nthnext s3 120))))))
-
 (deftest test-iterators
   (let [v (fv/catvec (vec (range 1000)) (vec (range 1000 2048)))]
     (is (= (iterator-seq (.iterator ^Iterable v))

@@ -21,5 +21,4 @@
                         `(cljs.core/aset ~arr ~i ~param))
                       params)
        (clojure.core.rrb_vector.rrbt.Vector.
-        ~(count params) 5 cljs.core.PersistentVector.EMPTY_NODE ~arr nil
-        ~(if params nil 0)))))
+        ~(count params) 5 cljs.core.PersistentVector.EMPTY_NODE ~arr nil nil))))
