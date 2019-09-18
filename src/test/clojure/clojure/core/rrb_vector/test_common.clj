@@ -1,6 +1,7 @@
 (ns clojure.core.rrb-vector.test-common
   (:require [clojure.test :as test :refer [deftest testing is]]
-            [clojure.core.rrb-vector :as fv]))
+            [clojure.core.rrb-vector :as fv]
+            [clojure.core.rrb-vector.rrbt :as rrbt]))
 
 ;; The intent is to keep this file as close to
 ;; src/test/cljs/clojure/core/rrb_vector/test_common.cljs as possible,
@@ -108,3 +109,94 @@
     (let [v1025 (into (fv/vector) (range 1025))]
       (is (= (pop v1025)
              (range 1024))))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; This code was copied from
+;; https://github.com/mattiasw2/adventofcode1/blob/master/src/adventofcode1/nineteen_b.clj
+
+;; mentioned in issue
+;; https://clojure.atlassian.net/projects/CRRBV/issues/CRRBV-14
+
+(defn puzzle-b [n my-vec my-catvec my-subvec]
+  (letfn [(remove-at [arr idx]
+            (my-catvec (my-subvec arr 0 idx) (my-subvec arr (inc idx))))
+          (create-arr [size]
+            (my-vec (range 1 (inc size))))
+          (fv-rest [arr]
+            (my-subvec arr 1))
+          (calculate-opposite [n]
+            (int (/ n 2)))
+          (move [elfs]
+            (let [lc (count elfs)]
+              (if (= 1 lc)
+                {:ok (first elfs)}
+                (let [current      (first elfs)
+                      opposite-pos (calculate-opposite lc)
+                      _ (assert (> opposite-pos 0))
+                      _ (assert (< opposite-pos lc))
+                      opposite-elf (nth elfs opposite-pos)
+                      other2       (fv-rest (remove-at elfs opposite-pos))]
+                  (my-catvec other2 [current])))))
+          (puzzle-b-sample [elfs round]
+            (let [elfs2 (move elfs)]
+              (if (:ok elfs2)
+                (:ok elfs2)
+                (recur elfs2 (inc round)))))]
+    (puzzle-b-sample (create-arr n) 1)))
+
+(defn puzzle-b-core [n]
+  (puzzle-b n clojure.core/vec clojure.core/into clojure.core/subvec))
+
+(defn get-shift [v]
+  (.-shift v))
+
+(defn vstats [v]
+  (str "cnt=" (count v)
+       " shift=" (get-shift v)
+       ;;" %=" (format "%5.1f" (* 100.0 (dv/fraction-full v)))
+       ))
+
+;;(def custom-catvec-data (atom []))
+
+(defn custom-catvec [& args]
+  (let [;;n (count @custom-catvec-data)
+        max-arg-shift (apply max (map get-shift args))
+        ret (apply fv/catvec args)
+        ret-shift (get-shift ret)]
+    (when (or (>= ret-shift 30)
+              (> ret-shift max-arg-shift))
+      (doall (map-indexed
+              (fn [idx v]
+                (println (str "custom-catvec ENTER v" idx "  " (vstats v))))
+              args))
+      (println (str "custom-catvec LEAVE ret " (vstats ret))))
+    ;;(swap! custom-catvec-data conj {:args args :ret ret})
+    ;;(println "custom-catvec RECRD in index" n "of @custom-catvec-data")
+    ret))
+
+(defn puzzle-b-rrbv [n]
+  (puzzle-b n fv/vec custom-catvec fv/subvec))
+
+(defn reset-optimizer-counts! []
+  (println "reset all optimizer counts to 0")
+  (reset! rrbt/peephole-optimization-count 0)
+  (reset! rrbt/fallback-to-slow-splice-count1 0)
+  (reset! rrbt/fallback-to-slow-splice-count2 0))
+
+(defn print-optimizer-counts []
+  (println "optimizer counts: peephole=" @rrbt/peephole-optimization-count
+           "fallback1=" @rrbt/fallback-to-slow-splice-count1
+           "fallback2=" @rrbt/fallback-to-slow-splice-count2))
+
+(deftest test-crrbv-14
+  ;; This one passes
+  (reset-optimizer-counts!)
+  (is (= (puzzle-b-core 977)
+         (puzzle-b-rrbv 977)))
+  (print-optimizer-counts)
+  ;; (puzzle-b-rrbv 978) throws
+  ;; ArrayIndexOutOfBoundsException
+  (reset-optimizer-counts!)
+  (is (integer? (puzzle-b-rrbv 978)))
+  (print-optimizer-counts))
