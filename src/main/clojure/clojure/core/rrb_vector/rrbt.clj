@@ -865,7 +865,7 @@
                                " object array to become a node, when that"
                                " index should only be used for storing"
                                " range arrays.")
-                      data {:shift shift, :cnd cnt, :node node,
+                      data {:shift shift, :cnt cnt, :node node,
                             :tail-node tail-node, :rngs rngs, :li li,
                             :cret cret}]
                   (throw (ex-info msg data))))

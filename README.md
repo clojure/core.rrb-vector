@@ -167,9 +167,8 @@ To run Clojure tests, but no ClojureScript tests:
 ```bash
 $ lein with-profile +1.10 test
 ```
-You can test with Clojure versions 1.6 through 1.10 by specifying that
-version number after the `+`.  You can test with Clojure 1.5.1 using
-`lein test`.
+You can test with Clojure versions 1.5 through 1.10 by specifying that
+version number after the `+`.
 
 To run ClojureScript tests with Node.js and Spidermonkey JavaScript
 runtimes, but no Clojure tests:

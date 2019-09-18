@@ -26,8 +26,13 @@
   (is (dv/check-catvec 10 40 40 40 40 40 40 40 40))
   (is (apply dv/check-catvec (repeat 30 33))))
 
+(def medium-check-catvec-params [250 30 10 60000])
+(def short-check-catvec-params [10 30 10 60000])
+;;(def check-catvec-params medium-check-catvec-params)
+(def check-catvec-params short-check-catvec-params)
+
 (deftest test-splicing-generative
-  (try (dv/generative-check-catvec 125 15 10 30000)
+  (try (apply dv/generative-check-catvec check-catvec-params)
        (catch ExceptionInfo e
          (throw (ex-info (format "%s: %s"
                                  (.getMessage e)
