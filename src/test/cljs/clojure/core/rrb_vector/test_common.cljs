@@ -15,9 +15,7 @@
   (testing "slicing"
     (is (dv/check-subvec 32000 10 29999 1234 18048 10123 10191))))
 
-;; TBD: Uncomment this test after I figure out which of my fixes gets
-;; it working again.
-#_(deftest test-splicing
+(deftest test-splicing
   (testing "splicing"
     (is (dv/check-catvec 1025 1025 3245 1025 32768 1025 1025 10123 1025 1025))
     (is (dv/check-catvec 10 40 40 40 40 40 40 40 40))
@@ -25,8 +23,11 @@
     (is (dv/check-catvec 26091 31388 1098 43443 46195 4484 48099 7905
                          13615 601 13878 250 10611 9271 53170))
 
+    ;; TBD: Uncomment the test code below after I figure out which of
+    ;; my fixes gets it working again.
+
     ;; Order that catvec will perform splicev calls:
-    (let [my-catvec fv/catvec
+    #_(let [my-catvec fv/catvec
           ;; Consider switching to the next line if we add
           ;; dv/dbg-splicev from branch into master.
           ;;my-catvec dv/dbg-splicev
@@ -225,9 +226,7 @@
     ;; This one causes a NullPointerException while traversing the seq
     (is (= (seq v4) (range bfactor-squared)))))
 
-;; TBD: Uncomment this test after I figure out which of my fixes gets
-;; it working again.
-#_(deftest test-npe-for-1025-then-pop!
+(deftest test-npe-for-1025-then-pop!
   (doseq [kind [:object-array]]
     (npe-for-1025-then-pop! kind)))
 
