@@ -92,7 +92,7 @@
 (defn pop-tail! [shift cnt root-edit current-node]
   (let [ret (ensure-editable root-edit current-node)]
     (if (regular? ret)
-      (let [subidx (bit-and (bit-shift-right (dec cnt) shift) 0x1f)]
+      (let [subidx (bit-and (bit-shift-right (- cnt 2) shift) 0x1f)]
         (cond
           (> shift 5)
           (let [child (pop-tail! (- shift 5) cnt root-edit

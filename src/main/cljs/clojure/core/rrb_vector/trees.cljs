@@ -3,12 +3,16 @@
   (:require [clojure.core.rrb-vector.nodes
              :refer [regular? clone node-ranges last-range overflow?]]))
 
-(defn tail-offset [cnt tail]
-  (- cnt (alength tail)))
+(defn tail-offset [vec]
+  (let [cnt (.-cnt vec)
+        tail-len (if (instance? clojure.core.rrb-vector.rrbt/Transient vec)
+                   (.-tidx vec)
+                   (alength (.-tail vec)))]
+    (- cnt tail-len)))
 
-(defn array-for [cnt shift root tail i]
+(defn array-for [vec cnt shift root tail i]
   (if (and (<= 0 i) (< i cnt))
-    (if (>= i (tail-offset cnt tail))
+    (if (>= i (tail-offset vec))
       tail
       (loop [i i node root shift shift]
         (if (zero? shift)
@@ -116,7 +120,7 @@
 
 (defn pop-tail [shift cnt root-edit current-node]
   (if (regular? current-node)
-    (let [subidx (bit-and (bit-shift-right (dec cnt) shift) 0x1f)]
+    (let [subidx (bit-and (bit-shift-right (- cnt 2) shift) 0x1f)]
       (cond
         (> shift 5)
         (let [new-child (pop-tail (- shift 5) cnt root-edit
