@@ -113,11 +113,7 @@
 
 (defn rrb-chunked-seq
   ([vec i off]
-     (let [cnt   (.-cnt vec)
-           shift (.-shift vec)
-           root  (.-root vec)
-           tail  (.-tail vec)]
-       (RRBChunkedSeq. vec (array-for vec cnt shift root tail i) i off nil nil)))
+     (RRBChunkedSeq. vec (array-for vec i) i off nil nil))
   ([vec node i off]
      (RRBChunkedSeq. vec node i off nil nil))
   ([vec node i off meta]
@@ -206,13 +202,15 @@
                              (* i (bit-shift-left 1 shift))
                              (aget rngs (dec i))))
                         start)
-          child-end   (min (bit-shift-left 1 shift)
-                           (if (pos? i)
-                             (- end
-                                (if reg?
-                                  (* i (bit-shift-left 1 shift))
-                                  (aget rngs (dec i))))
-                             end))
+          child-end   (if reg?
+                        (min (bit-shift-left 1 shift)
+                             (if (pos? i)
+                               (- end (* i (bit-shift-left 1 shift)))
+                               end))
+                        (let [capped-end (min (aget rngs i) end)]
+                          (if (pos? i)
+                            (- capped-end (aget rngs (dec i)))
+                            capped-end)))
           new-child   (slice-left (aget arr i)
                                   (- shift 5)
                                   child-start
@@ -411,7 +409,7 @@
         (Vector. (dec cnt) shift root new-tail meta nil))
 
       :else
-      (let [new-tail (array-for this cnt shift root tail (- cnt 2))
+      (let [new-tail (array-for this (- cnt 2))
             root-cnt (tail-offset this)
             new-root (pop-tail shift root-cnt (.-edit root) root)]
         (cond
@@ -482,7 +480,7 @@
     (loop [i    0
            j    0
            init init
-           arr  (array-for this cnt shift root tail i)
+           arr  (array-for this i)
            lim  (dec (alength arr))
            step (inc lim)]
       (let [init (f init (+ i j) (aget arr j))]
@@ -492,7 +490,7 @@
             (recur i (inc j) init arr lim step)
             (let [i (+ i step)]
               (if (< i cnt)
-                (let [arr (array-for this cnt shift root tail i)
+                (let [arr (array-for this i)
                       len (alength arr)
                       lim (dec len)]
                   (recur i 0 init arr lim len))
@@ -545,7 +543,8 @@
                                     new-tail (make-array new-len)]
                                 (array-copy tail 0 new-tail 0 new-len)
                                 new-tail)
-                              (array-for this new-cnt shift new-root (array)
+                              (array-for (Vector. new-cnt shift new-root
+                                                  (array) meta nil)
                                          (dec new-cnt)))
                   new-root  (if tail-cut?
                               new-root
@@ -1247,7 +1246,7 @@
             this)
 
         :else
-        (let [new-tail-base (array-for this cnt shift root tail (- cnt 2))
+        (let [new-tail-base (array-for this (- cnt 2))
               new-tail      (editable-tail new-tail-base)
               new-tidx      (alength new-tail-base)
               new-root      (pop-tail! shift cnt (.-edit root) root)]

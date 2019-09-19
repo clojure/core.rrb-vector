@@ -10,34 +10,38 @@
                    (alength (.-tail vec)))]
     (- cnt tail-len)))
 
-(defn array-for [vec cnt shift root tail i]
-  (if (and (<= 0 i) (< i cnt))
-    (if (>= i (tail-offset vec))
-      tail
-      (loop [i i node root shift shift]
-        (if (zero? shift)
-          (.-arr node)
-          (if (regular? node)
-            (loop [node  (aget (.-arr node)
+(defn array-for [vec i]
+  (let [cnt (.-cnt vec)
+        shift (.-shift vec)
+        root (.-root vec)
+        tail (.-tail vec)]
+    (if (and (<= 0 i) (< i cnt))
+      (if (>= i (tail-offset vec))
+        tail
+        (loop [i i node root shift shift]
+          (if (zero? shift)
+            (.-arr node)
+            (if (regular? node)
+              (loop [node  (aget (.-arr node)
+                                 (bit-and (bit-shift-right i shift) 0x1f))
+                     shift (- shift 5)]
+                (if (zero? shift)
+                  (.-arr node)
+                  (recur (aget (.-arr node)
                                (bit-and (bit-shift-right i shift) 0x1f))
-                   shift (- shift 5)]
-              (if (zero? shift)
-                (.-arr node)
-                (recur (aget (.-arr node)
-                             (bit-and (bit-shift-right i shift) 0x1f))
-                       (- shift 5))))
-            (let [rngs (node-ranges node)
-                  j    (loop [j (bit-and (bit-shift-right i shift) 0x1f)]
-                         (if (< i (aget rngs j))
-                           j
-                           (recur (inc j))))
-                  i    (if (pos? j)
-                         (- i (aget rngs (dec j)))
-                         i)]
-              (recur i
-                     (aget (.-arr node) j)
-                     (- shift 5)))))))
-    (vector-index-out-of-bounds i cnt)))
+                         (- shift 5))))
+              (let [rngs (node-ranges node)
+                    j    (loop [j (bit-and (bit-shift-right i shift) 0x1f)]
+                           (if (< i (aget rngs j))
+                             j
+                             (recur (inc j))))
+                    i    (if (pos? j)
+                           (- i (aget rngs (dec j)))
+                           i)]
+                (recur i
+                       (aget (.-arr node) j)
+                       (- shift 5)))))))
+      (vector-index-out-of-bounds i cnt))))
 
 (defn new-path [tail edit shift current-node]
   (if (== (alength tail) 32)
@@ -87,12 +91,16 @@
           cret (if (== shift 5)
                  nil
                  (let [child (aget arr li)
-                       ccnt  (if (pos? li)
-                               (- (aget rngs li) (aget rngs (dec li)))
-                               (aget rngs 0))]
+                       ccnt  (+ (if (pos? li)
+                                  (- (aget rngs li) (aget rngs (dec li)))
+                                  (aget rngs 0))
+                                ;; add 32 elems to account for the new
+                                ;; 32-elem tail we plan to add to the
+                                ;; subtree.
+                                32)]
                    ;; See Note 2 in file transients.cljs
                    (if-not (overflow? child (- shift 5) ccnt)
-                     (push-tail (- shift 5) (inc ccnt) root-edit
+                     (push-tail (- shift 5) ccnt root-edit
                                 child
                                 tail-node))))]
       (if cret
@@ -105,7 +113,7 @@
                              " object array to become a node, when that"
                              " index should only be used for storing"
                              " range arrays.")
-                    data {:shift shift, :cnd cnt, :current-node current-node,
+                    data {:shift shift, :cnt cnt, :current-node current-node,
                           :tail-node tail-node, :rngs rngs, :li li,
                           :cret cret}]
                 (throw (ex-info msg data))))

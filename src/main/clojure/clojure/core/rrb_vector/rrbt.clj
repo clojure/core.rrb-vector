@@ -396,14 +396,19 @@
                                     i (bit-shift-left (int 1) shift))
                                    (aget rngs (unchecked-dec-int i))))
                           start)
-            child-end   (int (min (bit-shift-left (int 1) shift)
-                                  (if (pos? i)
-                                    (unchecked-subtract-int
-                                     end (if regular?
-                                           (unchecked-multiply-int
-                                            i (bit-shift-left (int 1) shift))
-                                           (aget rngs (unchecked-dec-int i))))
-                                    end)))
+            child-end   (int (if regular?
+                               (min (bit-shift-left (int 1) shift)
+                                    (if (pos? i)
+                                      (unchecked-subtract-int
+                                       end (unchecked-multiply-int
+                                            i (bit-shift-left (int 1) shift)))
+                                      end))
+                               (let [capped-end (min (aget rngs i) end)]
+                                 (if (pos? i)
+                                   (unchecked-subtract-int
+                                    capped-end
+                                    (aget rngs (unchecked-dec-int i)))
+                                   capped-end))))
             new-child   (slice-left nm am
                                     (aget ^objects arr i)
                                     (unchecked-subtract-int shift (int 5))
@@ -841,18 +846,23 @@
             cret (if (== shift (int 5))
                    nil
                    (let [child (aget ^objects arr li)
-                         ccnt  (if (pos? li)
-                                 (unchecked-subtract-int
-                                  (aget rngs li)
-                                  (aget rngs (unchecked-dec-int li)))
-                                 (aget rngs 0))]
+                         ccnt  (unchecked-add-int
+                                (int (if (pos? li)
+                                       (unchecked-subtract-int
+                                        (aget rngs li)
+                                        (aget rngs (unchecked-dec-int li)))
+                                       (aget rngs 0)))
+                                ;; add 32 elems to account for the new
+                                ;; 32-elem tail we plan to add to the
+                                ;; subtree.
+                                (int 32))]
                      ;; See Note 2 in file transients.clj
                      (if-not (overflow? nm child
                                         (unchecked-subtract-int shift (int 5))
                                         ccnt)
                        (.pushTail this
                                   (unchecked-subtract-int shift (int 5))
-                                  (unchecked-inc-int ccnt)
+                                  ccnt
                                   (aget ^objects arr li)
                                   tail-node))))]
         (if cret
