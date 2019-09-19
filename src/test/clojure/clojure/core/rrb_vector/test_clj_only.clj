@@ -1,5 +1,6 @@
 (ns clojure.core.rrb-vector.test-clj-only
   (:require [clojure.test :as test :refer [deftest testing is are]]
+            [clojure.reflect :as ref]
             [clojure.core.rrb-vector.test-infra :as infra]
             [clojure.core.rrb-vector.test-utils :as utils]
             [clojure.core.rrb-vector :as fv]
@@ -9,7 +10,8 @@
             [clojure.test.check.generators :as gen])
   (:use clojure.template)
   (:import (clojure.lang ExceptionInfo)
-           (java.util NoSuchElementException)))
+           (java.util NoSuchElementException)
+           (clojure.core.rrb_vector.rrbt VecSeq Vector)))
 
 ;; medium: 50 to 60 sec
 ;; short: 2 to 3 sec
@@ -132,3 +134,20 @@
       (is (= (apply assoc-in-bytevec-core false args)
              (apply assoc-in-bytevec-rrbv use-transient? args))
           (str "args=" (cons use-transient? args))))))
+
+;; Double check that the type of the mutable fields used to store the
+;; cached hash values of collections are 32-bit int, not 64-bit long,
+;; because 64-bit long do not have the Java Memory Model thread-safety
+;; guarantees that 32-bit int values do.
+
+(defn member-data-by-name [klass field-name-as-symbol]
+  (let [klass-dat (ref/type-reflect klass)
+        members (:members klass-dat)]
+    (first (filter (fn [x] (= field-name-as-symbol (:name x)))
+                   members))))
+
+(deftest test-crrbv-26
+  (is (= 'int (:type (member-data-by-name Vector '_hash))))
+  (is (= 'int (:type (member-data-by-name Vector '_hasheq))))
+  (is (= 'int (:type (member-data-by-name VecSeq '_hash))))
+  (is (= 'int (:type (member-data-by-name VecSeq '_hasheq)))))
