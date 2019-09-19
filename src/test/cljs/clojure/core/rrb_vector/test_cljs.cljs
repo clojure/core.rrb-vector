@@ -2,7 +2,7 @@
   (:require [cljs.test :as test]
             [clojure.core.rrb-vector :as fv]
             clojure.core.rrb-vector.test-common
-            clojure.core.rrb-vector.test-cljs-basic))
+            clojure.core.rrb-vector.test-cljs-only))
 
 ;; This file was copied from namespace clojure.data.xml.test-cljs
 ;; in the data.xml library tests, then modified for use by

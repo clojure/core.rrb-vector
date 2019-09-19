@@ -1,7 +1,8 @@
 (ns clojure.core.rrb-vector.long-test
-  (:require [clojure.test :as test :refer [deftest testing is]]
+  (:require [clojure.test :as test :refer [deftest testing is are]]
+            [clojure.core.rrb-vector.test-utils :as utils]
             [clojure.core.rrb-vector :as fv]
-            [clojure.core.rrb-vector.test-utils :as utils]))
+            [clojure.core.rrb-vector.debug :as dv]))
 
 ;; The intent is to keep this file as close to
 ;; src/test/clojure/clojure/core/rrb_vector/long_test.clj as possible,

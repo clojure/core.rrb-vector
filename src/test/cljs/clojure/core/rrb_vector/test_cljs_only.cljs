@@ -1,5 +1,6 @@
-(ns clojure.core.rrb-vector.test-cljs-basic
-  (:require [cljs.test :as test :refer [deftest is are]]
+(ns clojure.core.rrb-vector.test-cljs-only
+  (:require [clojure.test :as test :refer [deftest testing is are]]
+            [clojure.core.rrb-vector.test-utils :as utils]
             [clojure.core.rrb-vector :as fv]
             [clojure.core.rrb-vector.debug :as dv]
             [goog.string :as gstring]

@@ -1,13 +1,13 @@
-(ns clojure.core.rrb-vector-test
-  (:require clojure.core.rrb-test-infra
+(ns clojure.core.rrb-vector.test-clj-only
+  (:require [clojure.test :as test :refer [deftest testing is are]]
+            [clojure.core.rrb-vector.test-infra :as infra]
+            [clojure.core.rrb-vector.test-utils :as utils]
             [clojure.core.rrb-vector :as fv]
             [clojure.core.rrb-vector.debug :as dv]
-            [clojure.core.reducers :as r]
             [clojure.test.check :as tc]
             [clojure.test.check.properties :as prop]
             [clojure.test.check.generators :as gen])
-  (:use clojure.test
-        clojure.template)
+  (:use clojure.template)
   (:import (clojure.lang ExceptionInfo)
            (java.util NoSuchElementException)))
 

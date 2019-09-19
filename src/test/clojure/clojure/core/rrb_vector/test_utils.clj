@@ -1,6 +1,5 @@
 (ns clojure.core.rrb-vector.test-utils
-  (:require [clojure.test :as test :refer [deftest testing is]]
-            [clojure.core.rrb-vector.rrbt :as rrbt]))
+  (:require [clojure.core.rrb-vector.rrbt :as rrbt]))
 
 ;; The intent is to keep this file as close to
 ;; src/test/cljs/clojure/core/rrb_vector/test_utils.cljs as possible,
