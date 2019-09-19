@@ -48,7 +48,7 @@
 
 (defmacro ^:private caching-hash [coll hash-fn hash-key]
   `(let [h# ~hash-key]
-     (if-not (== h# (int -1))
+     (if-not (== h# 0)
        h#
        (let [h# (~hash-fn ~coll)]
          (set! ~hash-key (int h#))
@@ -121,19 +121,20 @@
 
   clojure.lang.IHashEq
   (hasheq [this]
-    (if (== _hasheq (int -1))
-      (compile-if (resolve 'clojure.core/hash-ordered-coll)
-        (let [h (hash-ordered-coll this)]
-          (do (set! _hasheq (int h))
-              h))
-        (loop [h (int 1) xs (seq this)]
-          (if xs
-            (recur (unchecked-add-int (unchecked-multiply-int (int 31) h)
-                                      (Util/hasheq (first xs)))
-                   (next xs))
+    (let [h _hasheq]
+      (if (== h 0)
+        (compile-if (resolve 'clojure.core/hash-ordered-coll)
+          (let [h (hash-ordered-coll this)]
             (do (set! _hasheq (int h))
-                h))))
-      _hasheq))
+                h))
+          (loop [h (int 1) xs (seq this)]
+            (if xs
+              (recur (unchecked-add-int (unchecked-multiply-int (int 31) h)
+                                        (Util/hasheq (first xs)))
+                     (next xs))
+              (do (set! _hasheq (int h))
+                  h))))
+        h)))
 
   clojure.lang.IMeta
   (meta [this]
@@ -153,7 +154,7 @@
   (first [_] (.aget am anode offset))
   (next [this]
     (if (< (inc offset) (.alength am anode))
-      (VecSeq. am vec anode i (inc offset) nil -1 -1)
+      (VecSeq. am vec anode i (inc offset) nil 0 0)
       (.chunkedNext this)))
   (more [this]
     (let [s (.next this)]
@@ -182,7 +183,7 @@
   (chunkedNext [_]
    (let [nexti (+ i (.alength am anode))]
      (when (< nexti (count vec))
-       (VecSeq. am vec (.arrayFor vec nexti) nexti 0 nil -1 -1))))
+       (VecSeq. am vec (.arrayFor vec nexti) nexti 0 nil 0 0))))
   (chunkedMore [this]
     (let [s (.chunkedNext this)]
       (or s (clojure.lang.PersistentList/EMPTY))))
@@ -492,35 +493,37 @@
       :else false))
 
   (hashCode [this]
-    (if (== _hash (int -1))
-      (loop [h (int 1) i (int 0)]
-        (if (== i cnt)
-          (do (set! _hash (int h))
-              h)
-          (let [val (.nth this i)]
-            (recur (unchecked-add-int (unchecked-multiply-int (int 31) h)
-                                      (Util/hash val))
-                   (unchecked-inc-int i)))))
-      _hash))
+    (let [h _hash]
+      (if (== h 0)
+        (loop [h (int 1) i (int 0)]
+          (if (== i cnt)
+            (do (set! _hash (int h))
+                h)
+            (let [val (.nth this i)]
+              (recur (unchecked-add-int (unchecked-multiply-int (int 31) h)
+                                        (Util/hash val))
+                     (unchecked-inc-int i)))))
+        h)))
 
   (toString [this]
     (pr-str this))
 
   clojure.lang.IHashEq
   (hasheq [this]
-    (if (== _hasheq (int -1))
-      (compile-if (resolve 'clojure.core/hash-ordered-coll)
-        (let [h (hash-ordered-coll this)]
-          (do (set! _hasheq (int h))
-              h))
-        (loop [h (int 1) xs (seq this)]
-          (if xs
-            (recur (unchecked-add-int (unchecked-multiply-int (int 31) h)
-                                      (Util/hasheq (first xs)))
-                   (next xs))
+    (let [h _hasheq]
+      (if (== h 0)
+        (compile-if (resolve 'clojure.core/hash-ordered-coll)
+          (let [h (hash-ordered-coll this)]
             (do (set! _hasheq (int h))
-                h))))
-      _hasheq))
+                h))
+          (loop [h (int 1) xs (seq this)]
+            (if xs
+              (recur (unchecked-add-int (unchecked-multiply-int (int 31) h)
+                                        (Util/hasheq (first xs)))
+                     (next xs))
+              (do (set! _hasheq (int h))
+                  h))))
+        h)))
 
   clojure.lang.Counted
   (count [_] cnt)
@@ -582,7 +585,7 @@
             new-tail (.array am (unchecked-inc-int tail-len))]
         (System/arraycopy tail 0 new-tail 0 tail-len)
         (.aset am new-tail tail-len val)
-        (Vector. nm am (unchecked-inc-int cnt) shift root new-tail _meta -1 -1))
+        (Vector. nm am (unchecked-inc-int cnt) shift root new-tail _meta 0 0))
       (let [tail-node (.node nm (.edit nm root) tail)
             new-tail  (let [new-arr (.array am 1)]
                         (.aset am new-arr 0 val)
@@ -594,15 +597,10 @@
               (doto new-arr
                 (aset (int 0) root)
                 (aset (int 1) (.newPath this (.edit nm root) shift tail-node)))
-              (Vector. nm
-                       am
+              (Vector. nm am
                        (unchecked-inc-int cnt)
                        (unchecked-add-int shift (int 5))
-                       new-root
-                       new-tail
-                       _meta
-                       -1
-                       -1))
+                       new-root new-tail _meta 0 0))
             (let [new-arr  (object-array 33)
                   new-rngs (ints (int-array 33))
                   new-root (.node nm (.edit nm root) new-arr)
@@ -615,24 +613,16 @@
                 (aset (int 0)  root-total-range)
                 (aset (int 1)  (unchecked-add-int root-total-range (int 32)))
                 (aset (int 32) (int 2)))
-              (Vector. nm
-                       am
+              (Vector. nm am
                        (unchecked-inc-int cnt)
                        (unchecked-add-int shift (int 5))
-                       new-root
-                       new-tail
-                       _meta
-                       -1
-                       -1)))
+                       new-root new-tail _meta 0 0)))
           (Vector. nm am (unchecked-inc-int cnt) shift
                    (.pushTail this shift cnt root tail-node)
-                   new-tail
-                   _meta
-                   -1
-                   -1)))))
+                   new-tail _meta 0 0)))))
 
   (empty [_]
-    (Vector. nm am 0 5 (.empty nm) (.array am 0) _meta -1 -1))
+    (Vector. nm am 0 5 (.empty nm) (.array am 0) _meta 0 0))
 
   (equiv [this that]
     (cond
@@ -662,12 +652,12 @@
       (throw (IllegalStateException. "Can't pop empty vector"))
 
       (== 1 cnt)
-      (Vector. nm am 0 5 (.empty nm) (.array am 0) _meta -1 -1)
+      (Vector. nm am 0 5 (.empty nm) (.array am 0) _meta 0 0)
 
       (> (.alength am tail) (int 1))
       (let [new-tail (.array am (unchecked-dec-int (.alength am tail)))]
         (System/arraycopy tail 0 new-tail 0 (.alength am new-tail))
-        (Vector. nm am (unchecked-dec-int cnt) shift root new-tail _meta -1 -1))
+        (Vector. nm am (unchecked-dec-int cnt) shift root new-tail _meta 0 0))
 
       :else
       (let [new-tail (.arrayFor this (unchecked-subtract-int cnt (int 2)))
@@ -676,23 +666,19 @@
         (cond
           (nil? new-root)
           (Vector. nm am (unchecked-dec-int cnt) shift (.empty nm) new-tail
-                   _meta -1 -1)
+                   _meta 0 0)
 
           (and (> shift (int 5))
                (nil? (aget ^objects (.array nm new-root) 1)))
-          (Vector. nm
-                   am
+          (Vector. nm am
                    (unchecked-dec-int cnt)
                    (unchecked-subtract-int shift (int 5))
                    (aget ^objects (.array nm new-root) 0)
-                   new-tail
-                   _meta
-                   -1
-                   -1)
+                   new-tail _meta 0 0)
 
           :else
           (Vector. nm am (unchecked-dec-int cnt) shift new-root new-tail
-                   _meta -1 -1)))))
+                   _meta 0 0)))))
 
   clojure.lang.IPersistentVector
   (assocN [this i val]
@@ -704,9 +690,9 @@
                 idx (unchecked-subtract-int i tail-off)]
             (System/arraycopy tail 0 new-tail 0 (.alength am tail))
             (.aset am new-tail idx val)
-            (Vector. nm am cnt shift root new-tail _meta -1 -1))
+            (Vector. nm am cnt shift root new-tail _meta 0 0))
           (Vector. nm am cnt shift (.doAssoc this shift root i val) tail
-                   _meta -1 -1)))
+                   _meta 0 0)))
 
       (== i cnt) (.cons this val)
       :else (throw (IndexOutOfBoundsException.))))
@@ -770,7 +756,7 @@
   (seq [this]
     (if (zero? cnt)
       nil
-      (VecSeq. am this (.arrayFor this 0) 0 0 nil -1 -1)))
+      (VecSeq. am this (.arrayFor this 0) 0 0 nil 0 0)))
 
   clojure.lang.Sequential
 
@@ -1090,7 +1076,7 @@
               (System/arraycopy tail (unchecked-subtract-int start tail-off)
                                 new-tail 0
                                 new-cnt)
-              (Vector. nm am new-cnt (int 5) (.empty nm) new-tail _meta -1 -1))
+              (Vector. nm am new-cnt (int 5) (.empty nm) new-tail _meta 0 0))
             (let [tail-cut? (> end tail-off)
                   new-root  (if tail-cut?
                               root
@@ -1105,24 +1091,24 @@
                                 (System/arraycopy tail 0 new-tail 0 new-len)
                                 new-tail)
                               (.arrayFor (Vector. nm am new-cnt shift new-root
-                                                  (.array am 0) nil -1 -1)
+                                                  (.array am 0) nil 0 0)
                                          (unchecked-dec-int new-cnt)))
                   new-root  (if tail-cut?
                               new-root
                               (.popTail (Vector. nm am
                                                  new-cnt
                                                  shift new-root
-                                                 (.array am 0) nil -1 -1)
+                                                 (.array am 0) nil 0 0)
                                         shift new-cnt new-root))]
               (if (nil? new-root)
-                (Vector. nm am new-cnt 5 (.empty nm) new-tail _meta -1 -1)
+                (Vector. nm am new-cnt 5 (.empty nm) new-tail _meta 0 0)
                 (loop [r new-root
                        s (int shift)]
                   (if (and (> s (int 5))
                            (nil? (aget ^objects (.array nm r) 1)))
                     (recur (aget ^objects (.array nm r) 0)
                            (unchecked-subtract-int s (int 5)))
-                    (Vector. nm am new-cnt s r new-tail _meta -1 -1))))))))))
+                    (Vector. nm am new-cnt s r new-tail _meta 0 0))))))))))
 
   PSpliceableVector
   (splicev [this that]
@@ -1247,13 +1233,13 @@
   (as-rrbt [^Vec this]
     (Vector. primitive-nm (.-am this)
              (.-cnt this) (.-shift this) (.-root this) (.-tail this)
-             (.-_meta this) -1 -1))
+             (.-_meta this) 0 0))
 
   PersistentVector
   (as-rrbt [^PersistentVector this]
     (Vector. object-nm object-am
              (count this) (.-shift this) (.-root this) (.-tail this)
-             (meta this) -1 -1))
+             (meta this) 0 0))
 
   APersistentVector$SubVector
   (as-rrbt [^APersistentVector$SubVector this]
@@ -1670,7 +1656,7 @@
             (aset new-rngs 32 num-granchildren-bounded)
             (aset new-arr 32 new-rngs)
             (let [new-v (Vector. nm (.-am v) (.-cnt v) (- shift 5)
-                                 new-root (.-tail v) (.-_meta v) -1 -1)]
+                                 new-root (.-tail v) (.-_meta v) 0 0)]
               (when (:debug-fn config)
                 ((:debug-fn config) v new-v))
               new-v)))))))
@@ -1833,7 +1819,7 @@
                           (aset 1 (+ ncnt1 ncnt2))
                           (aset 32 2)))
            (Vector. nm am (+ (count v1) (count v2)) (+ s 5) new-root (.-tail v2)
-                    nil -1 -1))
+                    nil 0 0))
          (loop [r n1
                 s (int s)]
            (if (and (> s (int 5))
@@ -1841,7 +1827,7 @@
              (recur (aget ^objects (.array nm r) 0)
                     (unchecked-subtract-int s (int 5)))
              (Vector. nm am (+ (count v1) (count v2)) s r (.-tail v2)
-                      nil -1 -1))))))))
+                      nil 0 0))))))))
 
 (defn array-copy [^ArrayManager am from i to j len]
   (loop [i   (int i)
@@ -1995,7 +1981,7 @@
     (.set (.edit nm root) nil)
     (let [trimmed-tail (.array am tidx)]
       (array-copy am tail 0 trimmed-tail 0 tidx)
-      (Vector. nm am cnt shift root trimmed-tail nil -1 -1)))
+      (Vector. nm am cnt shift root trimmed-tail nil 0 0)))
 
   clojure.lang.ITransientVector
   (assocN [this i val]
