@@ -215,7 +215,7 @@ copyright notice:
 
 ## Licence
 
-Copyright © 2012-2014 Michał Marczyk, Rich Hickey and contributors
+Copyright © 2012-2019 Michał Marczyk, Andy Fingerhut, Rich Hickey and contributors
 
 Distributed under the
 [Eclipse Public License 1.0](http://opensource.org/licenses/eclipse-1.0.php),
