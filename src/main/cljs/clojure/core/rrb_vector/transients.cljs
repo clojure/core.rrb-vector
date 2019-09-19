@@ -60,12 +60,16 @@
             cret (if (== shift 5)
                    nil
                    (let [child (ensure-editable root-edit (aget arr li))
-                         ccnt  (if (pos? li)
-                                 (- (aget rngs li) (aget rngs (dec li)))
-                                 (aget rngs 0))]
+                         ccnt  (+ (if (pos? li)
+                                    (- (aget rngs li) (aget rngs (dec li)))
+                                    (aget rngs 0))
+                                  ;; add 32 elems to account for the
+                                  ;; new 32-elem tail we plan to add
+                                  ;; to the subtree.
+                                  32)]
                      ;; See Note 2
                      (if-not (overflow? child (- shift 5) ccnt)
-                       (push-tail! (- shift 5) (inc ccnt) root-edit
+                       (push-tail! (- shift 5) ccnt root-edit
                                    child
                                    tail-node))))]
         (if cret

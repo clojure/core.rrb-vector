@@ -23,11 +23,8 @@
     (is (dv/check-catvec 26091 31388 1098 43443 46195 4484 48099 7905
                          13615 601 13878 250 10611 9271 53170))
 
-    ;; TBD: Uncomment the test code below after I figure out which of
-    ;; my fixes gets it working again.
-
     ;; Order that catvec will perform splicev calls:
-    #_(let [my-catvec fv/catvec
+    (let [my-catvec fv/catvec
           ;; Consider switching to the next line if we add
           ;; dv/dbg-splicev from branch into master.
           ;;my-catvec dv/dbg-splicev
