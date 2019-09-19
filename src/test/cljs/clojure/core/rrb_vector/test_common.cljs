@@ -1,9 +1,9 @@
 (ns clojure.core.rrb-vector.test-common
   (:require [clojure.test :as test :refer [deftest testing is are]]
             [clojure.core.reducers :as r]
+            [clojure.core.rrb-vector.test-utils :as utils]
             [clojure.core.rrb-vector :as fv]
-            [clojure.core.rrb-vector.debug :as dv]
-            [clojure.core.rrb-vector.test-utils :as utils]))
+            [clojure.core.rrb-vector.debug :as dv]))
 
 ;; The intent is to keep this file as close to
 ;; src/test/clojure/clojure/core/rrb_vector/test_common.clj as

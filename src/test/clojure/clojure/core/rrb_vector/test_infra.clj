@@ -1,4 +1,4 @@
-(ns clojure.core.rrb-test-infra
+(ns clojure.core.rrb-vector.test-infra
   (:require [clojure.test :as test]))
 
 (defn now-msec []
