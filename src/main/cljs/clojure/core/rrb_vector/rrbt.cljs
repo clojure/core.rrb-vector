@@ -945,13 +945,7 @@
       v
       (let [root (.-root v)
             children (child-nodes root)
-            ;; (take 33) is just a technique to avoid generating more
-            ;; grandchildren than necessary.  If there are at least
-            ;; 33, we do not care how many there are.
-            grandchildren (into [] (comp (map child-nodes)
-                                         cat
-                                         (take 33))
-                                children)
+            grandchildren (bounded-grandchildren children)
             num-granchildren-bounded (count grandchildren)
             many-grandchildren? (> num-granchildren-bounded 32)]
         (if many-grandchildren?
