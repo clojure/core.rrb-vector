@@ -74,7 +74,7 @@ equality guide, especially the ["Equality and hash"
 section](https://clojure.org/guides/equality#equality_and_hash).
 
 
-# Details in core.rrb-vector implementation
+# Details in core.rrb-vector Clojure implementation
 
 `core.rrb-vector`'s Clojure implementation should use an initial value
 of the mutable hash fields of 0, for the same reasons described above
@@ -153,3 +153,27 @@ Files checked for occurrences of `-1`:
     * VecSeq/hasheq
 * transients.clj - none, and no mentions of `Vector` or `Vecseq` or
   hash
+
+
+# Details in core.rrb-vector ClojureScript implementation
+
+Since there are no thread-safety issues here, the only thing to double
+check is that the same value (e.g. 0, -1, or whatever constant value)
+is used consistently in all places where a new object is created that
+contains a cached hash field, and wherever the hash function is
+calculated.
+
+Classes in the ClojureScript `core.rrb-vector` implementation with a
+hash field:
+
+* `RRBChunkedSeq` - the last field of the constructor call, named `__hash`
+* `Vector` - the last field of the constructor call, named `__hash`
+
+All constructor calls for `RRBChunkedSeq` are in file rrbt.cljs, and
+all use `nil` as the initial value for the field `__hash`.  Its
+`-hash` method calls `caching-hash` provided by the ClojureScript core
+code, which uses `nil` as the "hash not calculated yet" value.
+
+All constructor calls for `Vector` are in a few files, and all use
+`nil` as the initial value for the field `__hash`.  Its `-hash` method
+also uses `caching-hash`, as described in previous paragraph.
