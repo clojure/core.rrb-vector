@@ -32,7 +32,8 @@
   {:author "Michał Marczyk"}
 
   (:refer-clojure :exclude [vector vector-of vec subvec])
-  (:require [clojure.core.rrb-vector.protocols :refer [slicev splicev]]
+  (:require [clojure.core.rrb-vector.parameters :as p]
+            [clojure.core.rrb-vector.protocols :refer [slicev splicev]]
             [clojure.core.rrb-vector.nodes
              :refer [ams object-am object-nm primitive-nm
                      empty-pv-node empty-gvec-node]]
@@ -80,7 +81,7 @@
                         `(aset ~arr ~i ~param))
                       params)
        (Vector. ^NodeManager object-nm ^ArrayManager object-am
-                ~(count params) 5 empty-pv-node ~arr nil 0 0))))
+                ~(count params) p/shift-increment empty-pv-node ~arr nil 0 0))))
 
 (defn vector
   "Creates a new vector containing the args."
@@ -122,7 +123,7 @@
        ~@(map-indexed (fn [i param]
                         `(.aset ~am ~arr ~i ~param))
                       params)
-       (Vector. ~nm ~am ~(count params) 5
+       (Vector. ~nm ~am ~(count params) p/shift-increment
                 (if (identical? ~t :object) empty-pv-node empty-gvec-node)
                 ~arr nil 0 0))))
 
