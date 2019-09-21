@@ -179,7 +179,7 @@ version number after the `+`.
 Prerequisites: Only Java and Leiningen.  Leiningen will download
 whatever versions of Clojure and other libraries are needed.
 
-To run ClojureScript tests with Node.js and Spidermonkey JavaScript
+To run ClojureScript tests with Node.js and SpiderMonkey JavaScript
 runtimes, but no Clojure tests:
 ```bash
 $ lein with-profile +cljs cljsbuild test
@@ -191,7 +191,7 @@ of the `project.clj` file if the command for running those JavaScript
 runtimes have a different name on your system than what is used there.
 
 Prerequisites: Java, Leiningen, and either or both of Node.js and
-Spidermonkey JavaScript run time environments.
+SpiderMonkey JavaScript run time environments.
 
 To run normal Clojure tests, plus the `collection-check` tests, but no
 ClojureScript tests:
@@ -255,7 +255,12 @@ install it using the commands below.
     versions available via the command `port list | grep nodejs`.
 
 
-#### Spidermonkey JavaScript run time environment
+#### SpiderMonkey JavaScript run time environment
+
+Installation instructions for many different versions of SpiderMonkey
+are available on the [SpiderMonkey web
+site](https://developer.mozilla.org/en-US/docs/Mozilla/Projects/SpiderMonkey).
+You may also install it using the commands below.
 
 * Ubuntu 18.04 Linux: `sudo apt-get install libmozjs-52-dev`
 * macOS
