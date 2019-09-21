@@ -31,7 +31,7 @@
                               :compiler {:optimizations :advanced
                                          :output-to "out/test.js"}}}
               :test-commands
-              {"nodejs" ["nodejs" "-e"
+              {"node" ["node" "-e"
                        "require(\"./out/test\"); clojure.core.rrb_vector.test_cljs.run()"]
                "spidermonkey" ["js52" "-f" "out/test.js"
                                "--execute=clojure.core.rrb_vector.test_cljs.run()"]}})
