@@ -160,6 +160,12 @@ directory:
 $ mvn -DCLOJURE_VERSION=1.10.1 -Dclojure.version=1.10.1 clean package
 ```
 
+Prerequisites: Only Java and Maven need to be installed.  Maven will
+download whatever versions of Clojure are needed for the command you
+use.  Both Clojure and ClojureScript tests are run with the commands
+given here.  They use the Nashorn JavaScript run time environment
+included with Java -- no other JavaScript run time is needed.
+
 
 ### Useful Leiningen commands
 
@@ -170,18 +176,24 @@ $ lein with-profile +1.10 test
 You can test with Clojure versions 1.5 through 1.10 by specifying that
 version number after the `+`.
 
+Prerequisites: Only Java and Leiningen.  Leiningen will download
+whatever versions of Clojure and other libraries are needed.
+
 To run ClojureScript tests with Node.js and Spidermonkey JavaScript
 runtimes, but no Clojure tests:
 ```bash
 $ lein with-profile +cljs cljsbuild test
 ```
-Add `nodejs` or `spidermonkey` as a separate argument after `test` to
+Add `node` or `spidermonkey` as a separate argument after `test` to
 restrict the JavaScript runtime used to only the one you specify.  You
 may need to adjust the command names in the `:test-commands` section
 of the `project.clj` file if the command for running those JavaScript
 runtimes have a different name on your system than what is used there.
 
-To run normal Clojure tests, plus the collection-check tests, but no
+Prerequisites: Java, Leiningen, and either or both of Node.js and
+Spidermonkey JavaScript run time environments.
+
+To run normal Clojure tests, plus the `collection-check` tests, but no
 ClojureScript tests:
 ```bash
 $ lein with-profile +coll,+1.7 test
@@ -194,6 +206,60 @@ with ClojureScript.
 
 To start a REPL from Leiningen with Clojure versions 1.6.0 and older,
 you must use Leiningen 2.8.0 (likely some other versions work, too).
+
+
+### Installing other software you will need
+
+For all of the development commands you must have Java installed.
+This includes the ClojureScript compile and test commands, since the
+ClojureScript compiler is at least partially written in the Java
+version of Clojure.
+
+#### Java
+
+Install one or more of the pre-built binaries from
+[AdoptOpenJDK](https://adoptopenjdk.net), or several other providers
+of Java binaries.
+
+Additional methods:
+* Ubuntu 18.04 Linux: `sudo apt-get install default-jre`
+
+
+#### Maven
+
+For any `mvn` command you must install
+[Maven](https://maven.apache.org).
+
+* Ubuntu 18.04 Linux: `sudo apt-get install maven`
+* macOS
+  * plus MacPorts: `sudo port install maven3`, then either use the
+    command `mvn3`, or to use `mvn` also run the command `sudo port
+    select --set maven maven3`.
+
+
+#### Leiningen
+
+An install script and instructions are available on the
+[Leiningen](https://leiningen.org) site.
+
+
+#### Node.js JavaScript run time environment
+
+Installation instructions for many different versions of Node.js are
+available on the [Node.js web site](https://nodejs.org).  You can also
+install it using the commands below.
+
+* Ubuntu 18.04 Linux: `sudo apt-get install nodejs`
+* macOS
+  * plus MacPorts: `sudo port install nodejs10`.  You can see other
+    versions available via the command `port list | grep nodejs`.
+
+
+#### Spidermonkey JavaScript run time environment
+
+* Ubuntu 18.04 Linux: `sudo apt-get install libmozjs-52-dev`
+* macOS
+  * plus MacPorts: `sudo port install mozjs52`
 
 
 ## Clojure(Script) code reuse

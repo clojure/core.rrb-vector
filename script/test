@@ -1,14 +1,10 @@
 #!/bin/bash
 
-# Quick install instructions for Ubuntu 18.04 Linux:
+# See README.md for some sample install instructions for Ubuntu 18.04
+# Linux and macOS.  If you use those instructions, then the following environment variable settings should work:
 
-# Spidermonkey:
-# sudo apt install libmozjs-52-0 libmozjs-52-dev
-# installs as /usr/bin/js52
-
-# Node.js, which uses V8 as its JavaScript engine:
-# sudo apt install nodejs
-# installs as /usr/bin/nodejs
+# export NODEJS_CMD="node"
+# export SPIDERMONKEY_CMD="js52"
 
 if [ "${NODEJS_CMD}" = "" -a "${SPIDERMONKEY_CMD}" = "" ]; then
     echo "Neither NODEJS_CMD nor SPIDERMONKEY_CMD is set, cannot run tests"
