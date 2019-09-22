@@ -1,19 +1,18 @@
 (ns clojure.core.rrb-vector.test-cljs-only
   (:require [clojure.test :as test :refer [deftest testing is are]]
-            [clojure.core.rrb-vector.test-utils :as utils]
+            [clojure.core.rrb-vector.test-utils :as u]
             [clojure.core.rrb-vector :as fv]
             [clojure.core.rrb-vector.debug :as dv]
             [goog.string :as gstring]
             goog.string.format))
 
-(def extra-checks? false)
 (dv/set-debug-opts! dv/full-debug-opts)
 
 (defn format [& args]
   (apply gstring/format args))
 
 (deftest test-slicing-generative
-  (try (dv/generative-check-subvec extra-checks? 125 100000 10)
+  (try (dv/generative-check-subvec u/extra-checks? 125 100000 10)
        (catch ExceptionInfo e
          (throw (ex-info (format "%s: %s %s"
                                  (ex-message e)
@@ -28,7 +27,7 @@
 (def check-catvec-params short-check-catvec-params)
 
 (deftest test-splicing-generative
-  (try (apply dv/generative-check-catvec extra-checks? check-catvec-params)
+  (try (apply dv/generative-check-catvec u/extra-checks? check-catvec-params)
        (catch ExceptionInfo e
          (throw (ex-info (format "%s: %s"
                                  (.getMessage e)
