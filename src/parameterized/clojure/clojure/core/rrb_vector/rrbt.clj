@@ -3,7 +3,8 @@
   (:require [clojure.core.rrb-vector.parameters :as p]
             [clojure.core.rrb-vector.protocols
              :refer [PSliceableVector slicev
-                     PSpliceableVector splicev]]
+                     PSpliceableVector splicev
+                     PTransientDebugAccess]]
             [clojure.core.rrb-vector.nodes
              :refer [ranges overflow? last-range regular-ranges
                      first-child last-child remove-leftmost-child
@@ -2100,4 +2101,10 @@
                 (recur (int i)
                        (aget ^objects (.array nm node) j)
                        (unchecked-subtract-int shift (int p/shift-increment)))))))) 
-      (throw (IndexOutOfBoundsException.)))))
+      (throw (IndexOutOfBoundsException.))))
+
+  PTransientDebugAccess
+  (debugGetRoot [_] root)
+  (debugGetShift [_] shift)
+  (debugGetTail [_] tail)
+  (debugGetCnt [_] cnt))
