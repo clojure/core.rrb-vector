@@ -22,9 +22,16 @@
 
 ;;; empty nodes
 
-(def empty-pv-node PersistentVector/EMPTY_NODE)
+;; The checking-* functions for the parameterized version expect an
+;; empty node with at most p/max-branches children.  The Clojure
+;; versions have 32, unless one also parameterizes the Clojure code,
+;; which I have not done.  I will instead try changing the definition
+;; of these empty nodes to have the branch factor of the parameterized
+;; version, so the checking-* functions will not give errors for them.
+(def NOEDIT (java.util.concurrent.atomic.AtomicReference. nil))
+(def empty-pv-node (PersistentVector$Node. NOEDIT (object-array p/max-branches)))
 
-(def empty-gvec-node clojure.core/EMPTY-NODE)
+(def empty-gvec-node (VecNode. nil (object-array p/max-branches)))
 
 ;;; node managers
 
