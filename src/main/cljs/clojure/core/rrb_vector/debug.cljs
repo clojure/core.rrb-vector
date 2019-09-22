@@ -1029,36 +1029,38 @@
   ([v start end]
    (checking-slicev v start end)))
 
-(defn check-subvec [init & starts-and-ends]
+(defn check-subvec [extra-checks? init & starts-and-ends]
   (let [v1 (loop [v   (vec (range init))
                   ses (seq starts-and-ends)]
              (if ses
                (let [[s e] ses]
-                 (recur (checking-subvec v s e) (nnext ses)))
+                 (recur (clojure.core/subvec v s e) (nnext ses)))
                v))
+        my-subvec (if extra-checks? checking-subvec fv/subvec)
         v2 (loop [v   (fv/vec (range init))
                   ses (seq starts-and-ends)]
              (if ses
                (let [[s e] ses]
-                 (recur (checking-subvec v s e) (nnext ses)))
+                 (recur (my-subvec v s e) (nnext ses)))
                v))]
     (pd/same-coll? v1 v2)))
 
-(defn check-catvec [& counts]
+(defn check-catvec [extra-checks? & counts]
   (let [prefix-sums (reductions + counts)
         ranges (map range (cons 0 prefix-sums) prefix-sums)
         v1 (apply concat ranges)
-        v2 (apply checking-catvec (map fv/vec ranges))]
+        my-catvec (if extra-checks? checking-catvec fv/catvec)
+        v2 (apply my-catvec (map fv/vec ranges))]
     (pd/same-coll? v1 v2)))
 
-(defn generative-check-subvec [iterations max-init-cnt slices]
+(defn generative-check-subvec [extra-checks? iterations max-init-cnt slices]
   (dotimes [_ iterations]
     (let [init-cnt (rand-int (inc max-init-cnt))
           s1       (rand-int init-cnt)
           e1       (+ s1 (rand-int (- init-cnt s1)))]
       (loop [s&es [s1 e1] cnt (- e1 s1) slices slices]
         (if (or (zero? cnt) (zero? slices))
-          (if-not (try (apply check-subvec init-cnt s&es)
+          (if-not (try (apply check-subvec extra-checks? init-cnt s&es)
                        (catch js/Error e
                          (throw
                           (ex-info "check-subvec failure w/ Exception"
@@ -1073,13 +1075,14 @@
             (recur (conj s&es s e) c (dec slices)))))))
   true)
 
-(defn generative-check-catvec [iterations max-vcnt min-cnt max-cnt]
+(defn generative-check-catvec [extra-checks? iterations max-vcnt
+                               min-cnt max-cnt]
   (dotimes [_ iterations]
     (let [vcnt (inc (rand-int (dec max-vcnt)))
           cnts (vec (repeatedly vcnt
                                 #(+ min-cnt
                                     (rand-int (- (inc max-cnt) min-cnt)))))]
-      (if-not (try (apply check-catvec cnts)
+      (if-not (try (apply check-catvec extra-checks? cnts)
                    (catch js/Error e
                      (throw
                       (ex-info "check-catvec failure w/ Exception"

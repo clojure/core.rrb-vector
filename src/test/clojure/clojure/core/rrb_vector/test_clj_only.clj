@@ -12,6 +12,9 @@
   (:import (clojure.lang ExceptionInfo)
            (java.util NoSuchElementException)))
 
+(def extra-checks? false)
+(dv/set-debug-opts! dv/full-debug-opts)
+
 (defn clj-version-at-least [major-minor-vector]
   (let [clj-version ((juxt :major :minor) *clojure-version*)
         cmp (compare clj-version major-minor-vector)]
@@ -26,7 +29,7 @@
 
 (deftest test-slicing
   (testing "slicing (generative)"
-    (is (try (dv/generative-check-subvec 250 200000 20)
+    (is (try (dv/generative-check-subvec extra-checks? 250 200000 20)
              (catch ExceptionInfo e
                (throw (ex-info (format "%s: %s %s"
                                        (.getMessage e)
@@ -37,7 +40,8 @@
 
 (deftest test-splicing
   (testing "splicing (generative)"
-    (is (try (apply dv/generative-check-catvec check-catvec-params)
+    (is (try (apply dv/generative-check-catvec extra-checks?
+                    check-catvec-params)
              (catch ExceptionInfo e
                (throw (ex-info (format "%s: %s"
                                        (.getMessage e)
