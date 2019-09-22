@@ -36,10 +36,6 @@
                                (.getCause e))))))))
 
 (deftest test-splicing
-  (testing "splicing"
-    (is (dv/check-catvec 1025 1025 3245 1025 32768 1025 1025 10123 1025 1025))
-    (is (dv/check-catvec 10 40 40 40 40 40 40 40 40))
-    (is (apply dv/check-catvec (repeat 30 33))))
   (testing "splicing (generative)"
     (is (try (apply dv/generative-check-catvec check-catvec-params)
              (catch ExceptionInfo e
@@ -83,10 +79,6 @@
             (fv/catvec (fv/subvec v 0 n) ['x] (fv/subvec v n)))
           (repeated-subvec-catvec [i]
             (reduce insert-by-sub-catvec (vec (range i)) (range i 0 -1)))]
-    ;; The next line has been added to namespace
-    ;; clojure.core.rrb-vector.test-common, but the quick-check call
-    ;; after it has not.
-    ;;(is (= (repeated-subvec-catvec 2371) (interleave (range 2371) (repeat 'x))))
     (is (tc/quick-check 100
           (prop/for-all [cnt (gen/fmap
                                (comp inc #(mod % 60000))
