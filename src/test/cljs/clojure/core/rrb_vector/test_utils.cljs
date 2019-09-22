@@ -7,6 +7,8 @@
 ;; library, this file and that one can be replaced with a common test
 ;; file with the suffix .cljc
 
+(def extra-checks? false)
+
 (defn reset-optimizer-counts! []
   (println "reset all optimizer counts to 0")
   (reset! rrbt/peephole-optimization-count 0)

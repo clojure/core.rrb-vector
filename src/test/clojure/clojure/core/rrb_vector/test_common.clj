@@ -2,7 +2,7 @@
   (:require [clojure.test :as test :refer [deftest testing is are]]
             [clojure.core.reducers :as r]
             [clojure.core.rrb-vector.test-infra :as infra]
-            [clojure.core.rrb-vector.test-utils :as utils]
+            [clojure.core.rrb-vector.test-utils :as u]
             [clojure.core.rrb-vector :as fv]
             [clojure.core.rrb-vector.debug :as dv]))
 
@@ -12,27 +12,26 @@
 ;; library, this file and that one can be replaced with a common test
 ;; file with the suffix .cljc
 
-(def extra-checks? false)
 (dv/set-debug-opts! dv/full-debug-opts)
 
 (deftest test-slicing
   (testing "slicing"
-    (is (dv/check-subvec extra-checks?
+    (is (dv/check-subvec u/extra-checks?
                          32000 10 29999 1234 18048 10123 10191))))
 
 (deftest test-splicing
   (testing "splicing"
-    (is (dv/check-catvec extra-checks?
+    (is (dv/check-catvec u/extra-checks?
                          1025 1025 3245 1025 32768 1025 1025 10123 1025 1025))
-    (is (dv/check-catvec extra-checks?
+    (is (dv/check-catvec u/extra-checks?
                          10 40 40 40 40 40 40 40 40))
-    (is (apply dv/check-catvec extra-checks? (repeat 30 33)))
-    (is (dv/check-catvec extra-checks?
+    (is (apply dv/check-catvec u/extra-checks? (repeat 30 33)))
+    (is (dv/check-catvec u/extra-checks?
                          26091 31388 1098 43443 46195 4484 48099 7905
                          13615 601 13878 250 10611 9271 53170))
 
     ;; Order that catvec will perform splicev calls:
-    (let [my-splice (if extra-checks? dv/checking-splicev fv/catvec)
+    (let [my-splice (if u/extra-checks? dv/checking-splicev fv/catvec)
           counts [26091 31388 1098 43443 46195 4484 48099 7905
                   13615 601 13878 250 10611 9271 53170]
 
@@ -76,7 +75,7 @@
       (is (= (reduce-kv + 0 v1) (reduce-kv + 0 v2))))))
 
 (deftest test-reduce-2
-  (let [my-subvec (if extra-checks? dv/checking-subvec fv/subvec)
+  (let [my-subvec (if u/extra-checks? dv/checking-subvec fv/subvec)
         v1 (my-subvec (vec (range 1003)) 500)
         v2 (vec (range 500 1003))]
     (is (= (reduce + 0 v1)
@@ -96,7 +95,7 @@
                       s)))))
 
 (deftest test-assoc
-  (let [my-subvec (if extra-checks? dv/checking-subvec fv/subvec)]
+  (let [my-subvec (if u/extra-checks? dv/checking-subvec fv/subvec)]
     (let [v1 (fv/vec (range 40000))
           v2 (reduce (fn [out [k v]]
                        (assoc out k v))
@@ -112,7 +111,7 @@
       1 32 1024 32768)))
 
 (deftest test-assoc!
-  (let [my-subvec (if extra-checks? dv/checking-subvec fv/subvec)]
+  (let [my-subvec (if u/extra-checks? dv/checking-subvec fv/subvec)]
     (let [v1 (fv/vec (range 40000))
           v2 (persistent!
               (reduce (fn [out [k v]]
@@ -131,7 +130,7 @@
       1 32 1024 32768)))
 
 (deftest test-relaxed
-  (let [my-catvec (if extra-checks? dv/checking-catvec fv/catvec)]
+  (let [my-catvec (if u/extra-checks? dv/checking-catvec fv/catvec)]
     (is (= (into (my-catvec (vec (range 123)) (vec (range 68))) (range 64))
            (concat (range 123) (range 68) (range 64))))
     (is (= (dv/slow-into (fv/catvec (vec (range 123)) (vec (range 68)))
@@ -139,7 +138,7 @@
            (concat (range 123) (range 68) (range 64))))))
 
 (deftest test-hasheq
-  (let [my-catvec (if extra-checks? dv/checking-catvec fv/catvec)]
+  (let [my-catvec (if u/extra-checks? dv/checking-catvec fv/catvec)]
     (is (= (hash []) (hash (fv/vector))))  ;; CRRBV-25
     (let [v1 (vec (range 1024))
           v2 (vec (range 1024))
@@ -153,8 +152,8 @@
              (hash (nthnext s3 120)))))))
 
 (deftest test-reduce-subvec-catvec
-  (let [my-catvec (if extra-checks? dv/checking-catvec fv/catvec)
-        my-subvec (if extra-checks? dv/checking-subvec fv/subvec)]
+  (let [my-catvec (if u/extra-checks? dv/checking-catvec fv/catvec)
+        my-subvec (if u/extra-checks? dv/checking-subvec fv/subvec)]
     (letfn [(insert-by-sub-catvec [v n]
               (my-catvec (my-subvec v 0 n) (fv/vec ['x])
                          (my-subvec v n)))
@@ -166,8 +165,8 @@
 (def pos-infinity Double/POSITIVE_INFINITY)
 
 (deftest test-reduce-subvec-catvec2
-  (let [my-catvec (if extra-checks? dv/checking-catvec fv/catvec)
-        my-subvec (if extra-checks? dv/checking-subvec fv/subvec)]
+  (let [my-catvec (if u/extra-checks? dv/checking-catvec fv/catvec)
+        my-subvec (if u/extra-checks? dv/checking-subvec fv/subvec)]
     (letfn [(insert-by-sub-catvec [v n]
               (my-catvec (my-subvec v 0 n) (fv/vec ['x])
                          (my-subvec v n)))
@@ -182,8 +181,8 @@
         (is (= (count v) (* 2 n)))))))
 
 (deftest test-splice-high-subtree-branch-count
-  (let [my-catvec (if extra-checks? dv/checking-catvec fv/catvec)
-        my-subvec (if extra-checks? dv/checking-subvec fv/subvec)
+  (let [my-catvec (if u/extra-checks? dv/checking-catvec fv/catvec)
+        my-subvec (if u/extra-checks? dv/checking-subvec fv/subvec)
         x        (fv/vec (repeat 1145 \a))
         y        (my-catvec (my-subvec x 0 778) (my-subvec x 778 779) [1] (my-subvec x 779))
         z        (my-catvec (my-subvec y 0 780) [2] (my-subvec y 780 781) (my-subvec y 781))
@@ -307,7 +306,7 @@
           (partition 2 1 coll)))
 
 (deftest test-crrbv-12
-  (let [my-catvec (if extra-checks? dv/checking-catvec fv/catvec)
+  (let [my-catvec (if u/extra-checks? dv/checking-catvec fv/catvec)
         v crrbv-12-data]
     (testing "Ascending order after quicksort"
       (is (ascending? (quicksort my-catvec v))))
@@ -319,7 +318,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn npe-for-1025-then-pop! [kind]
-  (let [my-pop! (if extra-checks? dv/checking-pop! pop!)
+  (let [my-pop! (if u/extra-checks? dv/checking-pop! pop!)
         bfactor-squared (* 32 32)
         mk-vector (case kind
                     :object-array fv/vector
@@ -406,8 +405,8 @@
   (apply play clojure.core/vector clojure.core/into clojure.core/subvec args))
 
 (defn play-rrbv [& args]
-  (let [my-catvec (if extra-checks? dv/checking-catvec fv/catvec)
-        my-subvec (if extra-checks? dv/checking-subvec fv/subvec)]
+  (let [my-catvec (if u/extra-checks? dv/checking-catvec fv/catvec)
+        my-subvec (if u/extra-checks? dv/checking-subvec fv/subvec)]
     (apply play fv/vector my-catvec my-subvec args)))
 
 (deftest test-crrbv-20
@@ -512,7 +511,7 @@
 ;;(def custom-catvec-data (atom []))
 
 (defn custom-catvec [& args]
-  (let [my-catvec (if extra-checks? dv/checking-catvec fv/catvec)
+  (let [my-catvec (if u/extra-checks? dv/checking-catvec fv/catvec)
         ;;n (count @custom-catvec-data)
         max-arg-shift (apply max (map get-shift args))
         ret (apply my-catvec args)
@@ -529,17 +528,17 @@
     ret))
 
 (defn puzzle-b-rrbv [n]
-  (let [my-subvec (if extra-checks? dv/checking-subvec fv/subvec)]
+  (let [my-subvec (if u/extra-checks? dv/checking-subvec fv/subvec)]
     (puzzle-b n fv/vec custom-catvec my-subvec)))
 
 (deftest test-crrbv-14
   ;; This one passes
-  (utils/reset-optimizer-counts!)
+  (u/reset-optimizer-counts!)
   (is (= (puzzle-b-core 977)
          (puzzle-b-rrbv 977)))
-  (utils/print-optimizer-counts)
+  (u/print-optimizer-counts)
   ;; (puzzle-b-rrbv 978) throws
   ;; ArrayIndexOutOfBoundsException
-  (utils/reset-optimizer-counts!)
+  (u/reset-optimizer-counts!)
   (is (integer? (puzzle-b-rrbv 978)))
-  (utils/print-optimizer-counts))
+  (u/print-optimizer-counts))
