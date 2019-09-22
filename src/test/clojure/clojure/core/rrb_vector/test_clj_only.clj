@@ -2,7 +2,7 @@
   (:require [clojure.test :as test :refer [deftest testing is are]]
             [clojure.reflect :as ref]
             [clojure.core.rrb-vector.test-infra :as infra]
-            [clojure.core.rrb-vector.test-utils :as utils]
+            [clojure.core.rrb-vector.test-utils :as u]
             [clojure.core.rrb-vector :as fv]
             [clojure.core.rrb-vector.debug :as dv]
             [clojure.test.check :as tc]
@@ -12,7 +12,6 @@
   (:import (clojure.lang ExceptionInfo)
            (java.util NoSuchElementException)))
 
-(def extra-checks? false)
 (dv/set-debug-opts! dv/full-debug-opts)
 
 (defn clj-version-at-least [major-minor-vector]
@@ -29,7 +28,7 @@
 
 (deftest test-slicing
   (testing "slicing (generative)"
-    (is (try (dv/generative-check-subvec extra-checks? 250 200000 20)
+    (is (try (dv/generative-check-subvec u/extra-checks? 250 200000 20)
              (catch ExceptionInfo e
                (throw (ex-info (format "%s: %s %s"
                                        (.getMessage e)
@@ -40,7 +39,7 @@
 
 (deftest test-splicing
   (testing "splicing (generative)"
-    (is (try (apply dv/generative-check-catvec extra-checks?
+    (is (try (apply dv/generative-check-catvec u/extra-checks?
                     check-catvec-params)
              (catch ExceptionInfo e
                (throw (ex-info (format "%s: %s"
