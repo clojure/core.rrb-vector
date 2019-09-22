@@ -12,53 +12,56 @@
 ;; library, this file and that one can be replaced with a common test
 ;; file with the suffix .cljc
 
+(def extra-checks? false)
+(dv/set-debug-opts! dv/full-debug-opts)
+
 (deftest test-slicing
   (testing "slicing"
-    (is (dv/check-subvec 32000 10 29999 1234 18048 10123 10191))))
+    (is (dv/check-subvec extra-checks?
+                         32000 10 29999 1234 18048 10123 10191))))
 
 (deftest test-splicing
   (testing "splicing"
-    (is (dv/check-catvec 1025 1025 3245 1025 32768 1025 1025 10123 1025 1025))
-    (is (dv/check-catvec 10 40 40 40 40 40 40 40 40))
-    (is (apply dv/check-catvec (repeat 30 33)))
-    (is (dv/check-catvec 26091 31388 1098 43443 46195 4484 48099 7905
+    (is (dv/check-catvec extra-checks?
+                         1025 1025 3245 1025 32768 1025 1025 10123 1025 1025))
+    (is (dv/check-catvec extra-checks?
+                         10 40 40 40 40 40 40 40 40))
+    (is (apply dv/check-catvec extra-checks? (repeat 30 33)))
+    (is (dv/check-catvec extra-checks?
+                         26091 31388 1098 43443 46195 4484 48099 7905
                          13615 601 13878 250 10611 9271 53170))
 
     ;; Order that catvec will perform splicev calls:
-    (let [my-catvec fv/catvec
-          ;; Consider switching to the next line if we add
-          ;; dv/dbg-splicev from branch into master.
-          ;;my-catvec dv/dbg-splicev
-          
+    (let [my-splice (if extra-checks? dv/checking-splicev fv/catvec)
           counts [26091 31388 1098 43443 46195 4484 48099 7905
                   13615 601 13878 250 10611 9271 53170]
-          
+
           prefix-sums (reductions + counts)
           ranges (map range (cons 0 prefix-sums) prefix-sums)
-          
+
           [v01 v02 v03 v04 v05 v06 v07 v08
            v09 v10 v11 v12 v13 v14 v15] (map fv/vec ranges)
-          
-          v01-02 (my-catvec v01 v02)  ;; top level catvec call
-          v03-04 (my-catvec v03 v04)  ;; top level catvec call
-          v01-04 (my-catvec v01-02 v03-04)  ;; top level catvec call
-          
-          v05-06 (my-catvec v05 v06)  ;; recurse level 1 catvec call
-          v07-08 (my-catvec v07 v08)  ;; recurse level 1 catvec call
-          v05-08 (my-catvec v05-06 v07-08)  ;; recurse level 1 catvec call
-          
-          v09-10 (my-catvec v09 v10)  ;; recurse level 2 catvec call
-          v11-12 (my-catvec v11 v12)  ;; recurse level 2 catvec call
-          v09-12 (my-catvec v09-10 v11-12)  ;; recurse level 2 catvec call
 
-          v13-14 (my-catvec v13 v14)  ;; recurse level 3 catvec call
-          v13-15 (my-catvec v13-14 v15)  ;; recurse level 3 catvec call
+          v01-02 (my-splice v01 v02)  ;; top level catvec call
+          v03-04 (my-splice v03 v04)  ;; top level catvec call
+          v01-04 (my-splice v01-02 v03-04)  ;; top level catvec call
 
-          v09-15 (my-catvec v09-12 v13-15)  ;; recurse level 2 catvec call
+          v05-06 (my-splice v05 v06)  ;; recurse level 1 catvec call
+          v07-08 (my-splice v07 v08)  ;; recurse level 1 catvec call
+          v05-08 (my-splice v05-06 v07-08)  ;; recurse level 1 catvec call
 
-          v05-15 (my-catvec v05-08 v09-15)  ;; recurse level 1 catvec call
+          v09-10 (my-splice v09 v10)  ;; recurse level 2 catvec call
+          v11-12 (my-splice v11 v12)  ;; recurse level 2 catvec call
+          v09-12 (my-splice v09-10 v11-12)  ;; recurse level 2 catvec call
 
-          v01-15 (my-catvec v01-04 v05-15)  ;; top level catvec call
+          v13-14 (my-splice v13 v14)  ;; recurse level 3 catvec call
+          v13-15 (my-splice v13-14 v15)  ;; recurse level 3 catvec call
+
+          v09-15 (my-splice v09-12 v13-15)  ;; recurse level 2 catvec call
+
+          v05-15 (my-splice v05-08 v09-15)  ;; recurse level 1 catvec call
+
+          v01-15 (my-splice v01-04 v05-15)  ;; top level catvec call
 
           exp-val (range (last prefix-sums))]
       (is (= -1 (dv/first-diff v01-15 exp-val)))
@@ -73,7 +76,8 @@
       (is (= (reduce-kv + 0 v1) (reduce-kv + 0 v2))))))
 
 (deftest test-reduce-2
-  (let [v1 (fv/subvec (vec (range 1003)) 500)
+  (let [my-subvec (if extra-checks? dv/checking-subvec fv/subvec)
+        v1 (my-subvec (vec (range 1003)) 500)
         v2 (vec (range 500 1003))]
     (is (= (reduce + 0 v1)
            (reduce + 0 v2)
@@ -92,67 +96,65 @@
                       s)))))
 
 (deftest test-assoc
-  (let [v1 (fv/vec (range 40000))
-        v2 (reduce (fn [out [k v]]
-                     (assoc out k v))
-                   (assoc v1 40000 :foo)
-                   (map-indexed vector (rseq v1)))]
-    (is (= (concat (rseq v1) [:foo]) v2)))
-  (are [i] (= :foo
-              (-> (range 40000)
-                  (fv/vec)
-                  (fv/subvec i)
-                  (assoc 10 :foo)
-                  (nth 10)))
-       1 32 1024 32768))
+  (let [my-subvec (if extra-checks? dv/checking-subvec fv/subvec)]
+    (let [v1 (fv/vec (range 40000))
+          v2 (reduce (fn [out [k v]]
+                       (assoc out k v))
+                     (assoc v1 40000 :foo)
+                     (map-indexed vector (rseq v1)))]
+      (is (= (concat (rseq v1) [:foo]) v2)))
+    (are [i] (= :foo
+                (-> (range 40000)
+                    (fv/vec)
+                    (my-subvec i)
+                    (assoc 10 :foo)
+                    (nth 10)))
+      1 32 1024 32768)))
 
 (deftest test-assoc!
-  (let [v1 (fv/vec (range 40000))
-        v2 (persistent!
-            (reduce (fn [out [k v]]
-                      (assoc! out k v))
-                    (assoc! (transient v1) 40000 :foo)
-                    (map-indexed vector (rseq v1))))]
-    (is (= (concat (rseq v1) [:foo]) v2)))
-  (are [i] (= :foo
-              (-> (range 40000)
-                  (fv/vec)
-                  (fv/subvec i)
-                  (transient)
-                  (assoc! 10 :foo)
-                  (persistent!)
-                  (nth 10)))
-       1 32 1024 32768))
-
-(defn slow-into [to from]
-  (reduce conj to from))
+  (let [my-subvec (if extra-checks? dv/checking-subvec fv/subvec)]
+    (let [v1 (fv/vec (range 40000))
+          v2 (persistent!
+              (reduce (fn [out [k v]]
+                        (assoc! out k v))
+                      (assoc! (transient v1) 40000 :foo)
+                      (map-indexed vector (rseq v1))))]
+      (is (= (concat (rseq v1) [:foo]) v2)))
+    (are [i] (= :foo
+                (-> (range 40000)
+                    (fv/vec)
+                    (my-subvec i)
+                    (transient)
+                    (assoc! 10 :foo)
+                    (persistent!)
+                    (nth 10)))
+      1 32 1024 32768)))
 
 (deftest test-relaxed
-  (is (= (into (fv/catvec (vec (range 123)) (vec (range 68))) (range 64))
-         (concat (range 123) (range 68) (range 64))))
-  (is (= (slow-into (fv/catvec (vec (range 123)) (vec (range 68)))
-                    (range 64))
-         (concat (range 123) (range 68) (range 64)))))
+  (let [my-catvec (if extra-checks? dv/checking-catvec fv/catvec)]
+    (is (= (into (my-catvec (vec (range 123)) (vec (range 68))) (range 64))
+           (concat (range 123) (range 68) (range 64))))
+    (is (= (dv/slow-into (fv/catvec (vec (range 123)) (vec (range 68)))
+                         (range 64))
+           (concat (range 123) (range 68) (range 64))))))
 
 (deftest test-hasheq
-  (is (= (hash []) (hash (fv/vector))))  ;; CRRBV-25
-  (let [v1 (vec (range 1024))
-        v2 (vec (range 1024))
-        v3 (fv/catvec (vec (range 512)) (vec (range 512 1024)))
-        s1 (seq v1)
-        s2 (seq v2)
-        s3 (seq v3)]
-    (is (= (hash v1) (hash v2) (hash v3) (hash s1) (hash s2) (hash s3)))
-    (is (= (hash (nthnext s1 120))
-           (hash (nthnext s2 120))
-           (hash (nthnext s3 120))))))
+  (let [my-catvec (if extra-checks? dv/checking-catvec fv/catvec)]
+    (is (= (hash []) (hash (fv/vector))))  ;; CRRBV-25
+    (let [v1 (vec (range 1024))
+          v2 (vec (range 1024))
+          v3 (my-catvec (vec (range 512)) (vec (range 512 1024)))
+          s1 (seq v1)
+          s2 (seq v2)
+          s3 (seq v3)]
+      (is (= (hash v1) (hash v2) (hash v3) (hash s1) (hash s2) (hash s3)))
+      (is (= (hash (nthnext s1 120))
+             (hash (nthnext s2 120))
+             (hash (nthnext s3 120)))))))
 
 (deftest test-reduce-subvec-catvec
-  ;; Consider replacing with extra-debug-checks versions of these
-  ;; functions later, e.g. what I call dv/dbg-catvec and dv/dbg-subvec
-  ;; on a branch.
-  (let [my-catvec fv/catvec
-        my-subvec fv/subvec]
+  (let [my-catvec (if extra-checks? dv/checking-catvec fv/catvec)
+        my-subvec (if extra-checks? dv/checking-subvec fv/subvec)]
     (letfn [(insert-by-sub-catvec [v n]
               (my-catvec (my-subvec v 0 n) (fv/vec ['x])
                          (my-subvec v n)))
@@ -164,8 +166,8 @@
 (def pos-infinity Double/POSITIVE_INFINITY)
 
 (deftest test-reduce-subvec-catvec2
-  (let [my-catvec fv/catvec
-        my-subvec fv/subvec]
+  (let [my-catvec (if extra-checks? dv/checking-catvec fv/catvec)
+        my-subvec (if extra-checks? dv/checking-subvec fv/subvec)]
     (letfn [(insert-by-sub-catvec [v n]
               (my-catvec (my-subvec v 0 n) (fv/vec ['x])
                          (my-subvec v n)))
@@ -180,8 +182,8 @@
         (is (= (count v) (* 2 n)))))))
 
 (deftest test-splice-high-subtree-branch-count
-  (let [my-catvec fv/catvec
-        my-subvec fv/subvec
+  (let [my-catvec (if extra-checks? dv/checking-catvec fv/catvec)
+        my-subvec (if extra-checks? dv/checking-subvec fv/subvec)
         x        (fv/vec (repeat 1145 \a))
         y        (my-catvec (my-subvec x 0 778) (my-subvec x 778 779) [1] (my-subvec x 779))
         z        (my-catvec (my-subvec y 0 780) [2] (my-subvec y 780 781) (my-subvec y 781))
@@ -292,31 +294,33 @@
   7942 8926 1499 6772 7561 5565 3587 7273 6172 7428 6787 7181 5754
   7579 5535 5543 5818 7264 1854 6998 7425 5394 6661 6562 375 2990])
 
-(defn quicksort [v]
+(defn quicksort [my-catvec v]
   (if (<= (count v) 1)
     v
     (let [[x & xs] v]
-      (fv/catvec (quicksort (filterv #(<= % x) xs))
+      (my-catvec (quicksort my-catvec (filterv #(<= % x) xs))
                  [x]
-                 (quicksort (filterv #(> % x) xs))))))
+                 (quicksort my-catvec (filterv #(> % x) xs))))))
 
 (defn ascending? [coll]
   (every? (fn [[a b]] (<= a b))
           (partition 2 1 coll)))
 
 (deftest test-crrbv-12
-  (let [v crrbv-12-data]
+  (let [my-catvec (if extra-checks? dv/checking-catvec fv/catvec)
+        v crrbv-12-data]
     (testing "Ascending order after quicksort"
-      (is (ascending? (quicksort v)))))
-  (testing "Repeated catvec followed by pop"
+      (is (ascending? (quicksort my-catvec v))))
+    (testing "Repeated catvec followed by pop"
       (is (= [] (nth (iterate pop
-                              (nth (iterate #(fv/catvec [0] %) [])
+                              (nth (iterate #(my-catvec [0] %) [])
                                    963))
-                     963)))))
+                     963))))))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn npe-for-1025-then-pop! [kind]
-  (let [bfactor-squared (* 32 32)
+  (let [my-pop! (if extra-checks? dv/checking-pop! pop!)
+        bfactor-squared (* 32 32)
         mk-vector (case kind
                     :object-array fv/vector
                     :long-array #(fv/vector-of :long))
@@ -327,18 +331,18 @@
         v2 (-> (mk-vector)
                (into (range bfactor-squared))
                (transient)
-               (pop!)
+               (my-pop!)
                (persistent!))
         v3 (-> (mk-vector)
                (into (range boundary))
                (into (range boundary (inc bfactor-squared)))
                (transient)
-               (pop!)
+               (my-pop!)
                (persistent!))
         v4 (-> (mk-vector)
                (into (range (inc bfactor-squared)))
                (transient)
-               (pop!)
+               (my-pop!)
                (persistent!))]
     ;; This test passes
     (is (= (seq v1) (range (inc bfactor-squared))))
@@ -402,7 +406,9 @@
   (apply play clojure.core/vector clojure.core/into clojure.core/subvec args))
 
 (defn play-rrbv [& args]
-  (apply play fv/vector fv/catvec fv/subvec args))
+  (let [my-catvec (if extra-checks? dv/checking-catvec fv/catvec)
+        my-subvec (if extra-checks? dv/checking-subvec fv/subvec)]
+    (apply play fv/vector my-catvec my-subvec args)))
 
 (deftest test-crrbv-20
   ;; This one passes
@@ -485,6 +491,7 @@
                   (my-catvec other2 [current])))))
           (puzzle-b-sample [elfs round]
             (let [elfs2 (move elfs)]
+              ;;(println "round=" round "# elfs=" (count elfs))
               (if (:ok elfs2)
                 (:ok elfs2)
                 (recur elfs2 (inc round)))))]
@@ -505,9 +512,10 @@
 ;;(def custom-catvec-data (atom []))
 
 (defn custom-catvec [& args]
-  (let [;;n (count @custom-catvec-data)
+  (let [my-catvec (if extra-checks? dv/checking-catvec fv/catvec)
+        ;;n (count @custom-catvec-data)
         max-arg-shift (apply max (map get-shift args))
-        ret (apply fv/catvec args)
+        ret (apply my-catvec args)
         ret-shift (get-shift ret)]
     (when (or (>= ret-shift 30)
               (> ret-shift max-arg-shift))
@@ -521,7 +529,8 @@
     ret))
 
 (defn puzzle-b-rrbv [n]
-  (puzzle-b n fv/vec custom-catvec fv/subvec))
+  (let [my-subvec (if extra-checks? dv/checking-subvec fv/subvec)]
+    (puzzle-b n fv/vec custom-catvec my-subvec)))
 
 (deftest test-crrbv-14
   ;; This one passes
