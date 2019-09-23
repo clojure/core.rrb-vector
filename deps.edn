@@ -1,0 +1,114 @@
+;; See shell scripts './script/sdo' and './script/jdo' for sample
+;; useful combinations of aliases to use to acommplish common tasks.
+
+;; One way to specify a local version of ClojureScript, in case you
+;; want to test with modifications to it:
+;; org.clojure/clojurescript {:local/root "/Users/jafinger/clj/clojurescript"}
+
+{:paths ["src/main/clojure" "src/main/cljs" "src/main/cljc"]
+ ;;:paths ["src/parameterized/clojure" "src/main/cljs" "src/main/cljc"]
+ :aliases
+ {;; Common alias to use for all Clojure/Java commands
+  :clj {:jvm-opts ["-XX:-OmitStackTraceInFastThrow"]}
+  ;; Common alias to use for all ClojureScript commands
+  :cljs {:extra-deps {org.clojure/clojurescript {:mvn/version "1.10.520"}}
+         :jvm-opts ["-XX:-OmitStackTraceInFastThrow"]}
+
+  ;; - start a Clojure/Java Socket REPL on port 50505
+  :clj-socket {:jvm-opts ["-Dclojure.server.repl={:port,50505,:accept,clojure.core.server/repl}"]}
+  ;; start a Node-based ClojureScript socket REPL on port 50505
+  :cljs-socket {:jvm-opts ["-Dclojure.server.repl={:port,50505,:accept,cljs.server.node/repl}"]}
+
+  ;; Common alias to use for all Clojure/Java commands that run tests
+  :clj-test {:extra-paths ["src/test/clojure" "src/test/cljc"]
+             :extra-deps {org.clojure/test.check {:mvn/version "0.7.0"}}}
+  ;; Common alias to use for all ClojureScript commands that run tests
+  :cljs-test {:extra-paths ["src/test/cljs" "src/test/cljc"]
+              :extra-deps {org.clojure/test.check {:mvn/version "0.7.0"}}}
+
+  ;; Run only very short tests
+  :clj-rt {:main-opts ["-e" "(require,'[clojure.test,:as,t],'clojure.core.rrb-vector.test-clj-only),(t/run-tests,'clojure.core.rrb-vector.test-clj-only)"]}
+  :cljs-rt {:main-opts ["-m" "cljs.main"
+                          "-re" "node"
+                          "-e" "(require,'[clojure.test,:as,t],'clojure.core.rrb-vector.test-cljs-only),(t/run-tests,'clojure.core.rrb-vector.test-cljs-only)"]}
+
+  ;; Run 'short' tests
+  :clj-runt {:main-opts ["-e" "(require,'[clojure.test,:as,t],'clojure.core.rrb-vector.test-clj-only,'clojure.core.rrb-vector.test-common),(t/run-tests,'clojure.core.rrb-vector.test-common),(t/run-tests,'clojure.core.rrb-vector.test-clj-only)"]}
+  :cljs-runt {:main-opts ["-m" "cljs.main"
+                          "-re" "node"
+                          "-e" "(require,'[clojure.test,:as,t],'clojure.core.rrb-vector.test-cljs-only,'clojure.core.rrb-vector.test-common),(t/run-tests,'clojure.core.rrb-vector.test-common),(t/run-tests,'clojure.core.rrb-vector.test-cljs-only)"]}
+
+  ;; Run generative and/or 'long' tests
+  :clj-runlongtests {:main-opts ["-e"
+                                 "(require,'[clojure.test,:as,t],'clojure.core.rrb-vector.long-test),(t/run-tests,'clojure.core.rrb-vector.long-test)"]}
+  :cljs-runlongtests {:main-opts ["-m" "cljs.main"
+                                  "-re" "node"
+                                  "-e" "(require,'[clojure.test,:as,t],'clojure.core.rrb-vector.long-test),(t/run-tests,'clojure.core.rrb-vector.long-test)"]}
+
+  ;; Using collections-check requires this minimum version of
+  ;; test.check, and at least Clojure 1.7.0
+  :clj-check {:extra-paths ["src/test_local/clojure"]
+              :extra-deps {collection-check {:mvn/version "0.1.7"}
+                           com.gfredericks/test.chuck {:mvn/version "0.2.10"}
+                           org.clojure/test.check {:mvn/version "0.9.0"}}}
+  :clj-runcheck {:main-opts ["-e" "(require,'[clojure.test,:as,t],'clojure.core.rrb-vector-check),(t/run-tests,'clojure.core.rrb-vector-check)"]}
+  :cljs-check {:extra-paths ["src/test_local/clojure"]
+               :extra-deps {collection-check {:mvn/version "0.1.7"}
+                            com.gfredericks/test.chuck {:mvn/version "0.2.10"}
+                            org.clojure/test.check {:mvn/version "0.9.0"}}}
+  :cljs-runcheck {:main-opts ["-m" "cljs.main"
+                              "-re" "node"
+                              "-e" "(require,'[clojure.test,:as,t],'clojure.core.rrb-vector-check),(t/run-tests,'clojure.core.rrb-vector-check)"]}
+
+  ;; Run performance tests
+  :clj-runperf {:main-opts ["-e" "(require,'[clojure.test,:as,t],'clojure.core.rrb-vector-performance-test),(t/run-tests,'clojure.core.rrb-vector-performance-test)"]}
+  :cljs-runperf {:main-opts ["-m" "cljs.main"
+                          "-re" "node"
+                          "-e" "(require,'[clojure.test,:as,t],'clojure.core.rrb-vector-performance-test),(t/run-tests,'clojure.core.rrb-vector-performance-test)"]}
+
+  ;; Run whatever the current 'focus' tests are
+  :clj-runfocus {:main-opts ["-e" "(require,'[clojure.test,:as,t],'[clojure.core.rrb-vector.test-common,:as,ct]),(ct/test-reduce-subvec-catvec2)"]}
+  :cljs-runfocus {:main-opts ["-m" "cljs.main"
+                              "-re" "node"
+                              "-e" "(require,'[clojure.test,:as,t],'[clojure.core.rrb-vector.test-common,:as,ct]),(ct/test-reduce-subvec-catvec2)"]}
+
+  ;; I have tried using cljs-test-runner for running clojure.test
+  ;; tests in a modified version of core.rrb-vector, but my guess is
+  ;; that since an older version of core.rrb-vector (version 0.0.11)
+  ;; is in the transitive dependencies of the cljs-test-runner project
+  ;; itself, that version conflicts with the version I am attempting
+  ;; to test.  See
+  ;; https://github.com/Olical/cljs-test-runner/issues/34
+;;  :cljs-runner {:extra-deps {olical/cljs-test-runner {:mvn/version "3.7.0"}}
+;;                :main-opts ["-m" "cljs-test-runner.main"
+;;                            "-d" "src/test/cljs"]}
+  :cljol {:extra-deps {cljol {:local/root "/Users/jafinger/clj/cljol"}
+                       org.clojure/clojure {:mvn/version "1.7.0"}}}
+;;  :cljol {:extra-deps {cljol {:git/url "https://github.com/jafingerhut/cljol"
+;;                              :sha "f957e6f5e95544342885e803ead94df91567f0ef"}}}
+  :cap {;; recommended options from README of
+        ;; https://github.com/clojure-goes-fast/clj-async-profiler
+        :jvm-opts ["-Djdk.attach.allowAttachSelf"
+                   ;; I have trouble entering password for this from
+                   ;; clj REPL.  Maybe clojure command instead of clj
+                   ;; is better for this?
+                   "-Djol.tryWithSudo=true"
+                   "-XX:+UnlockDiagnosticVMOptions"
+                   "-XX:+DebugNonSafepoints"]
+        :extra-deps {com.clojure-goes-fast/clj-async-profiler
+                     {:mvn/version "0.4.0"}}}
+  :nodis {:extra-deps {com.clojure-goes-fast/clj-java-decompiler
+                       {:mvn/version "0.2.1"}}}
+  :eastwood {:extra-deps {jonase/eastwood {:mvn/version "0.3.5"}}
+             :main-opts ["-m" "eastwood.lint"
+                         "{:source-paths,[\"src/main/clojure\"],:test-paths,[\"src/test/clojure\",\"src/test/cljs\",\"src/test_local/clojure\"],:add-linters,[:unused-fn-args,:unused-locals,:unused-namespaces,:unused-private-vars],:exclude-linters,[:implicit-dependencies],:exclude-namespaces,[]}"]}
+
+  ;; pull in specific versions of Clojure:
+  :1.5    {:override-deps {org.clojure/clojure {:mvn/version "1.5.1"}}}
+  :1.6    {:override-deps {org.clojure/clojure {:mvn/version "1.6.0"}}}
+  :1.7    {:override-deps {org.clojure/clojure {:mvn/version "1.7.0"}}}
+  :1.8    {:override-deps {org.clojure/clojure {:mvn/version "1.8.0"}}}
+  :1.9    {:override-deps {org.clojure/clojure {:mvn/version "1.9.0"}}}
+  :1.10.0 {:override-deps {org.clojure/clojure {:mvn/version "1.10.0"}}}
+  :1.10   {:override-deps {org.clojure/clojure {:mvn/version "1.10.1"}}}
+  :master {:override-deps {org.clojure/clojure {:mvn/version "1.11.0-master-SNAPSHOT"}}}}}

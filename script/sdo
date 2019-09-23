@@ -1,0 +1,45 @@
+#! /bin/bash
+
+# Run some task using ClojureScript
+
+if [ $# -eq 0 ]
+then
+    # Default if nothing else is specified is a REPL plus listening
+    # for Socket REPL
+    TASK="socket"
+elif [ $# -eq 1 ]
+then
+    TASK="$1"
+else
+    1>&2 echo "usage: `basename $0` arg1"
+    exit 1
+fi
+
+set -x
+
+case ${TASK} in
+sock*)
+    # Run REPL, with option to listen for Socket REPL connection, and
+    # test paths in classpath.
+    exec clj -A:cljs:cljs-test:cljs-socket ;;
+test*)
+    # Run 'short' tests
+    exec clojure -A:cljs:cljs-test:cljs-runt ;;
+long*)
+    # Run long/generative tests
+    exec clojure -A:cljs:cljs-test:cljs-runlongtests ;;
+coll*)
+    # Run collection-check generative tests
+    exec clojure -A:cljs:cljs-test:cljs-check:cljs-runcheck ;;
+perf*)
+    # Run performance tests
+    exec clojure -A:cljs:cljs-test:cljs-runperf ;;
+focu*)
+    # Run whatever the current 'focus' tests are
+    exec clojure -A:cljs:cljs-test:cljs-check:cljs-runfocus ;;
+east*|lint*)
+    1>&2 echo "Eastwood not supported for ClojureScript" ;;
+*)
+    1>&2 echo "unknown task name: ${TASK}"
+    exit 1 ;;
+esac
