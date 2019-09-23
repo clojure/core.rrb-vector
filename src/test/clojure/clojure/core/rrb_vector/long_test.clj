@@ -1,7 +1,5 @@
 (ns clojure.core.rrb-vector.long-test
   (:require [clojure.test :as test :refer [deftest testing is are]]
-            [clojure.core.rrb-vector.test-infra :as infra
-             :refer [ex-message-copy ex-cause-copy]]
             [clojure.core.rrb-vector.test-utils :as u]
             [clojure.core.rrb-vector :as fv]
             [clojure.core.rrb-vector.debug :as dv]
@@ -43,11 +41,11 @@
           (apply dv/generative-check-subvec u/extra-checks? check-subvec-params)
           (catch ExceptionInfo e
             (throw (ex-info (dpd/format "%s: %s %s"
-                                        (ex-message-copy e)
+                                        (u/ex-message-copy e)
                                         (:init-cnt (ex-data e))
                                         (:s&es (ex-data e)))
                             {}
-                            (ex-cause-copy e))))))))
+                            (u/ex-cause-copy e))))))))
 
 ;; short: 2 to 3 sec
 ;; medium: 50 to 60 sec
@@ -62,10 +60,10 @@
           (apply dv/generative-check-catvec u/extra-checks? check-catvec-params)
           (catch ExceptionInfo e
             (throw (ex-info (dpd/format "%s: %s"
-                                        (ex-message-copy e)
+                                        (u/ex-message-copy e)
                                         (:cnts (ex-data e)))
                             {}
-                            (ex-cause-copy e))))))))
+                            (u/ex-cause-copy e))))))))
 
 
 ;; This problem reproduction code is from CRRBV-17 ticket:

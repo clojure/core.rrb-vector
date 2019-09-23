@@ -1,7 +1,6 @@
 (ns clojure.core.rrb-vector.test-common
   (:require [clojure.test :as test :refer [deftest testing is are]]
             [clojure.core.reducers :as r]
-            [clojure.core.rrb-vector.test-infra :as infra]
             [clojure.core.rrb-vector.test-utils :as u]
             [clojure.core.rrb-vector :as fv]
             [clojure.core.rrb-vector.debug :as dv]))
