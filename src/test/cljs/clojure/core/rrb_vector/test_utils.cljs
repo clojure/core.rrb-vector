@@ -1,5 +1,6 @@
 (ns clojure.core.rrb-vector.test-utils
-  (:require [clojure.core.rrb-vector.rrbt :as rrbt]))
+  (:require [clojure.test :as test]
+            [clojure.core.rrb-vector.rrbt :as rrbt]))
 
 ;; Parts of this file are nearly identical to
 ;; src/test/clojure/clojure/core/rrb_vector/test_utils.clj, but also
@@ -19,6 +20,26 @@
   (println "optimizer counts: peephole=" @rrbt/peephole-optimization-count
            "fallback1=" @rrbt/fallback-to-slow-splice-count1
            "fallback2=" @rrbt/fallback-to-slow-splice-count2))
+
+(defn now-msec []
+  (js/Date.now))
+
+(def num-deftests-started (atom 0))
+(def last-deftest-start-time (atom nil))
+
+(defmethod test/report [:cljs.test/default :begin-test-var]
+  [m]
+  (let [n (swap! num-deftests-started inc)]
+    (when (== n 1)
+      (println "*clojurescript-version*" *clojurescript-version*)))
+  (println)
+  (println "starting cljs test" (:var m))
+  (reset! last-deftest-start-time (now-msec)))
+
+(defmethod test/report [:cljs.test/default :end-test-var]
+  [m]
+  (println "elapsed time (sec)" (/ (- (now-msec) @last-deftest-start-time)
+                                   1000.0)))
 
 ;; Enable tests to be run on versions of Clojure before 1.10, when
 ;; ex-message was added.

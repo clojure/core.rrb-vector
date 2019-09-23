@@ -1,6 +1,7 @@
 (ns clojure.core.rrb-vector.test-cljs
   (:require [cljs.test :as test]
             [clojure.core.rrb-vector :as fv]
+            [clojure.core.rrb-vector.test-utils :as u]
             clojure.core.rrb-vector.test-common
             clojure.core.rrb-vector.test-cljs-only
             clojure.core.rrb-vector.long-test))
@@ -11,26 +12,6 @@
 ;; could also be run on build.clojure.org via a mvn command.
 
 (def ^:dynamic *results*)
-
-(def num-deftests-started (atom 0))
-(def last-deftest-start-time (atom nil))
-
-(defn now-msec []
-  (js/Date.now))
-
-(defmethod test/report [:cljs.test/default :begin-test-var]
-  [m]
-  (let [n (swap! num-deftests-started inc)]
-    (when (== n 1)
-      (println "*clojurescript-version*" *clojurescript-version*)))
-  (println)
-  (println "starting cljs test" (:var m))
-  (reset! last-deftest-start-time (now-msec)))
-
-(defmethod test/report [:cljs.test/default :end-test-var]
-  [m]
-  (println "elapsed time (sec)" (/ (- (now-msec) @last-deftest-start-time)
-                                   1000.0)))
 
 (defmethod test/report [::test/default :end-run-tests]
   [m]
