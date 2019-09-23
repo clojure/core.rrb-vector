@@ -41,3 +41,22 @@
   [m]
   (println "elapsed time (sec)" (/ (- (now-msec) @last-deftest-start-time)
                                    1000.0)))
+
+;; Enable tests to be run on versions of Clojure before 1.10, when
+;; ex-message was added.
+
+(defn ex-message-copy
+  "Returns the message attached to ex if ex is a Throwable.
+  Otherwise returns nil."
+  {:added "1.10"}
+  [ex]
+  (when (instance? Throwable ex)
+    (.getMessage ^Throwable ex)))
+
+(defn ex-cause-copy
+  "Returns the cause of ex if ex is a Throwable.
+  Otherwise returns nil."
+  {:added "1.10"}
+  [ex]
+  (when (instance? Throwable ex)
+    (.getCause ^Throwable ex)))
