@@ -1013,8 +1013,8 @@
     (if (zero? tail-off)
       false
       (let [shift-amount (- (.-shift v) 5)
-            max-capacity-over-1024 (bit-shift-left 1 shift-amount)]
-        (< tail-off max-capacity-over-1024)))))
+            max-capacity-divided-by-1024 (bit-shift-left 1 shift-amount)]
+        (< tail-off max-capacity-divided-by-1024)))))
 
 ;; Note 3:
 
