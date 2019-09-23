@@ -840,7 +840,7 @@
                                         (aget rngs (unchecked-dec-int li)))
                                        (aget rngs 0)))
                                 ;; add 32 elems to account for the new
-                                ;; 32-elem tail we plan to add to the
+                                ;; full tail we plan to add to the
                                 ;; subtree.
                                 (int 32))]
                      ;; See Note 2 in file transients.clj
@@ -1691,8 +1691,8 @@
     (if (zero? tail-off)
       false
       (let [shift-amount (unchecked-subtract-int (.-shift v) (int 5))
-            max-capacity-over-1024 (bit-shift-left 1 shift-amount)]
-        (< tail-off max-capacity-over-1024)))))
+            max-capacity-divided-by-1024 (bit-shift-left 1 shift-amount)]
+        (< tail-off max-capacity-divided-by-1024)))))
 
 ;; Note 3:
 
