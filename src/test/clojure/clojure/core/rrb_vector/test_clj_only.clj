@@ -49,6 +49,11 @@
         (list-iterator v 100)       1948
         (list-iterator (seq v) 100) 1948))))
 
+;; This test can run in cljs, too, but at least in my testing only if
+;; we use test.check version 0.10.0 or later.  However, that seems to
+;; be incompatible with running cljs tests with Clojure 1.6.0, so for
+;; now at least this test is clj-only.
+
 (deftest test-reduce-subvec-catvec
   (letfn [(insert-by-sub-catvec [v n]
             (fv/catvec (fv/subvec v 0 n) ['x] (fv/subvec v n)))
