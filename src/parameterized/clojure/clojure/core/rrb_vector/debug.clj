@@ -208,6 +208,29 @@
         i
         -1))))
 
+;; When using non-default parameters for the tree data structure,
+;; e.g. shift-increment not 5, then in test code with calls to
+;; checking-* functions, they will give errors if they are ever given
+;; a vector returned by clojure.core/vec, because without changes to
+;; Clojure itself, they always have shift-increment 5 and max-branches
+;; 32.
+;;
+;; If we use (fv/vec coll) consistently in the test code, that in many
+;; cases returns a core.rrb-vector data structure, but if given a
+;; Clojure vector, it still returns that Clojure vector unmodified,
+;; which has the same issues for checking-* functions.  By
+;; calling (fv/vec (seq coll)) when not using default parameters, we
+;; force the return value of cvec to always be a core.rrb-vector data
+;; structure.
+;;
+;; The name 'cvec' is intended to mean "construct a vector", and only
+;; intended for use in test code that constructs vectors used as
+;; parameters to other functions operating on vectors.
+(defn cvec [coll]
+  (if (= p/shift-increment 5)
+    (clojure.core/vec coll)
+    (fv/vec (seq coll))))
+
 (defn slow-into [to from]
   (reduce conj to from))
 
@@ -944,13 +967,9 @@
       ret)))
 
 (defn checking-splicev [v1 v2]
-  (let [rv1 (as-rrbt v1)
-        ret (checking-splice-rrbts (.-nm rv1) (.-am rv1)
-                                   rv1 (as-rrbt v2))]
-    (println "checking-splicev (count v1)=" (count v1)
-             "(count v2)=" (count v2)
-             "(count ret)=" (count ret))
-    ret))
+  (let [rv1 (as-rrbt v1)]
+    (checking-splice-rrbts (.-nm rv1) (.-am rv1)
+                           rv1 (as-rrbt v2))))
 
 (defn checking-catvec-impl
   ([]
@@ -1035,36 +1054,38 @@
   ([v start end]
    (checking-slicev v start end)))
 
-(defn check-subvec [init & starts-and-ends]
+(defn check-subvec [extra-checks? init & starts-and-ends]
   (let [v1 (loop [v   (vec (range init))
                   ses (seq starts-and-ends)]
              (if ses
                (let [[s e] ses]
-                 (recur (checking-subvec v s e) (nnext ses)))
+                 (recur (clojure.core/subvec v s e) (nnext ses)))
                v))
+        my-subvec (if extra-checks? checking-subvec fv/subvec)
         v2 (loop [v   (fv/vec (range init))
                   ses (seq starts-and-ends)]
              (if ses
                (let [[s e] ses]
-                 (recur (checking-subvec v s e) (nnext ses)))
+                 (recur (my-subvec v s e) (nnext ses)))
                v))]
     (pd/same-coll? v1 v2)))
 
-(defn check-catvec [& counts]
+(defn check-catvec [extra-checks? & counts]
   (let [prefix-sums (reductions + counts)
         ranges (map range (cons 0 prefix-sums) prefix-sums)
         v1 (apply concat ranges)
-        v2 (apply checking-catvec (map fv/vec ranges))]
+        my-catvec (if extra-checks? checking-catvec fv/catvec)
+        v2 (apply my-catvec (map fv/vec ranges))]
     (pd/same-coll? v1 v2)))
 
-(defn generative-check-subvec [iterations max-init-cnt slices]
+(defn generative-check-subvec [extra-checks? iterations max-init-cnt slices]
   (dotimes [_ iterations]
     (let [init-cnt (rand-int (inc max-init-cnt))
           s1       (rand-int init-cnt)
           e1       (+ s1 (rand-int (- init-cnt s1)))]
       (loop [s&es [s1 e1] cnt (- e1 s1) slices slices]
         (if (or (zero? cnt) (zero? slices))
-          (if-not (try (apply check-subvec init-cnt s&es)
+          (if-not (try (apply check-subvec extra-checks? init-cnt s&es)
                        (catch Exception e
                          (throw
                           (ex-info "check-subvec failure w/ Exception"
@@ -1079,13 +1100,14 @@
             (recur (conj s&es s e) c (dec slices)))))))
   true)
 
-(defn generative-check-catvec [iterations max-vcnt min-cnt max-cnt]
+(defn generative-check-catvec [extra-checks? iterations max-vcnt
+                               min-cnt max-cnt]
   (dotimes [_ iterations]
     (let [vcnt (inc (rand-int (dec max-vcnt)))
           cnts (vec (repeatedly vcnt
                                 #(+ min-cnt
                                     (rand-int (- (inc max-cnt) min-cnt)))))]
-      (if-not (try (apply check-catvec cnts)
+      (if-not (try (apply check-catvec extra-checks? cnts)
                    (catch Exception e
                      (throw
                       (ex-info "check-catvec failure w/ Exception"
