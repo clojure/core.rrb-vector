@@ -1,10 +1,10 @@
 (ns clojure.core.rrb-vector.test-clj-only
   (:require [clojure.test :as test :refer [deftest testing is are]]
             [clojure.reflect :as ref]
-            [clojure.core.rrb-vector.test-infra :as infra]
             [clojure.core.rrb-vector.test-utils :as u]
             [clojure.core.rrb-vector :as fv]
             [clojure.core.rrb-vector.debug :as dv]
+            [clojure.core.rrb-vector.debug-platform-dependent :as dpd]
             [clojure.test.check :as tc]
             [clojure.test.check.properties :as prop]
             [clojure.test.check.generators :as gen])
@@ -18,35 +18,6 @@
   (let [clj-version ((juxt :major :minor) *clojure-version*)
         cmp (compare clj-version major-minor-vector)]
     (>= cmp 0)))
-
-;; medium: 50 to 60 sec
-;; short: 2 to 3 sec
-(def medium-check-catvec-params [250 30 10 60000])
-(def short-check-catvec-params [10 30 10 60000])
-;;(def check-catvec-params medium-check-catvec-params)
-(def check-catvec-params short-check-catvec-params)
-
-(deftest test-slicing
-  (testing "slicing (generative)"
-    (is (try (dv/generative-check-subvec u/extra-checks? 250 200000 20)
-             (catch ExceptionInfo e
-               (throw (ex-info (format "%s: %s %s"
-                                       (.getMessage e)
-                                       (:init-cnt (ex-data e))
-                                       (:s&es (ex-data e)))
-                               {}
-                               (.getCause e))))))))
-
-(deftest test-splicing
-  (testing "splicing (generative)"
-    (is (try (apply dv/generative-check-catvec u/extra-checks?
-                    check-catvec-params)
-             (catch ExceptionInfo e
-               (throw (ex-info (format "%s: %s"
-                                       (.getMessage e)
-                                       (:cnts (ex-data e)))
-                               {}
-                               (.getCause e))))))))
 
 (deftest test-iterators
   (let [v (fv/catvec (dv/cvec (range 1000)) (dv/cvec (range 1000 2048)))]
@@ -76,6 +47,11 @@
         (list-iterator (seq v))     2048
         (list-iterator v 100)       1948
         (list-iterator (seq v) 100) 1948))))
+
+;; This test can run in cljs, too, but at least in my testing only if
+;; we use test.check version 0.10.0 or later.  However, that seems to
+;; be incompatible with running cljs tests with Clojure 1.6.0, so for
+;; now at least this test is clj-only.
 
 (deftest test-reduce-subvec-catvec
   (letfn [(insert-by-sub-catvec [v n]
