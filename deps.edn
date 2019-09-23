@@ -5,8 +5,8 @@
 ;; want to test with modifications to it:
 ;; org.clojure/clojurescript {:local/root "/Users/jafinger/clj/clojurescript"}
 
-{:paths ["src/main/clojure" "src/main/cljs" "src/main/cljc"]
- ;;:paths ["src/parameterized/clojure" "src/main/cljs" "src/main/cljc"]
+{;;:paths ["src/main/clojure" "src/main/cljs" "src/main/cljc"]
+ :paths ["src/parameterized/clojure" "src/main/cljs" "src/main/cljc"]
  :aliases
  {;; Common alias to use for all Clojure/Java commands
   :clj {:jvm-opts ["-XX:-OmitStackTraceInFastThrow"]}
