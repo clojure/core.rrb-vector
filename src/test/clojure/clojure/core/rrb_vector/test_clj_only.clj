@@ -49,7 +49,7 @@
                                (.getCause e))))))))
 
 (deftest test-iterators
-  (let [v (fv/catvec (vec (range 1000)) (vec (range 1000 2048)))]
+  (let [v (fv/catvec (dv/cvec (range 1000)) (dv/cvec (range 1000 2048)))]
     (is (= (iterator-seq (.iterator ^Iterable v))
            (iterator-seq (.iterator ^Iterable (seq v)))
            (iterator-seq (.listIterator ^java.util.List v))
