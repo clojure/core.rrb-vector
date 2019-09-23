@@ -1,16 +1,14 @@
 (ns clojure.core.rrb-vector.test-clj-only
   (:require [clojure.test :as test :refer [deftest testing is are]]
+            [clojure.template :refer [do-template]]
             [clojure.reflect :as ref]
-            [clojure.core.rrb-vector.test-infra :as infra]
             [clojure.core.rrb-vector.test-utils :as u]
             [clojure.core.rrb-vector :as fv]
             [clojure.core.rrb-vector.debug :as dv]
             [clojure.test.check :as tc]
             [clojure.test.check.properties :as prop]
             [clojure.test.check.generators :as gen])
-  (:use clojure.template)
-  (:import (clojure.lang ExceptionInfo)
-           (java.util NoSuchElementException)))
+  (:import (java.util NoSuchElementException)))
 
 (dv/set-debug-opts! dv/full-debug-opts)
 
@@ -18,35 +16,6 @@
   (let [clj-version ((juxt :major :minor) *clojure-version*)
         cmp (compare clj-version major-minor-vector)]
     (>= cmp 0)))
-
-;; medium: 50 to 60 sec
-;; short: 2 to 3 sec
-(def medium-check-catvec-params [250 30 10 60000])
-(def short-check-catvec-params [10 30 10 60000])
-;;(def check-catvec-params medium-check-catvec-params)
-(def check-catvec-params short-check-catvec-params)
-
-(deftest test-slicing
-  (testing "slicing (generative)"
-    (is (try (dv/generative-check-subvec u/extra-checks? 250 200000 20)
-             (catch ExceptionInfo e
-               (throw (ex-info (format "%s: %s %s"
-                                       (.getMessage e)
-                                       (:init-cnt (ex-data e))
-                                       (:s&es (ex-data e)))
-                               {}
-                               (.getCause e))))))))
-
-(deftest test-splicing
-  (testing "splicing (generative)"
-    (is (try (apply dv/generative-check-catvec u/extra-checks?
-                    check-catvec-params)
-             (catch ExceptionInfo e
-               (throw (ex-info (format "%s: %s"
-                                       (.getMessage e)
-                                       (:cnts (ex-data e)))
-                               {}
-                               (.getCause e))))))))
 
 (deftest test-iterators
   (let [v (fv/catvec (dv/cvec (range 1000)) (dv/cvec (range 1000 2048)))]
@@ -77,11 +46,16 @@
         (list-iterator v 100)       1948
         (list-iterator (seq v) 100) 1948))))
 
-(deftest test-reduce-subvec-catvec
+;; This test can run in cljs, too, but at least in my testing only if
+;; we use test.check version 0.10.0 or later.  However, that seems to
+;; be incompatible with running cljs tests with Clojure 1.6.0, so for
+;; now at least this test is clj-only.
+
+(deftest test-reduce-subvec-catvec-generative
   (letfn [(insert-by-sub-catvec [v n]
-            (fv/catvec (fv/subvec v 0 n) ['x] (fv/subvec v n)))
+            (fv/catvec (fv/subvec v 0 n) (dv/cvec ['x]) (fv/subvec v n)))
           (repeated-subvec-catvec [i]
-            (reduce insert-by-sub-catvec (vec (range i)) (range i 0 -1)))]
+            (reduce insert-by-sub-catvec (dv/cvec (range i)) (range i 0 -1)))]
     (is (tc/quick-check 100
           (prop/for-all [cnt (gen/fmap
                                (comp inc #(mod % 60000))

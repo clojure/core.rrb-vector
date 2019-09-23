@@ -1,11 +1,12 @@
 (ns clojure.core.rrb-vector.test-utils
-  (:require [clojure.core.rrb-vector.rrbt :as rrbt]))
+  (:require [clojure.test :as test]
+            [clojure.core.rrb-vector.rrbt :as rrbt]))
 
-;; The intent is to keep this file as close to
-;; src/test/clojure/clojure/core/rrb_vector/test_utils.clj as possible,
-;; so that when we start requiring Clojure 1.7.0 and later for this
-;; library, this file and that one can be replaced with a common test
-;; file with the suffix .cljc
+;; Parts of this file are nearly identical to
+;; src/test/clojure/clojure/core/rrb_vector/test_utils.clj, but also
+;; significant parts are specific to each of the clj/cljs versions, so
+;; while they could later be combined into a .cljc file, it may not
+;; give much benefit to do so.
 
 (def extra-checks? false)
 
@@ -19,3 +20,41 @@
   (println "optimizer counts: peephole=" @rrbt/peephole-optimization-count
            "fallback1=" @rrbt/fallback-to-slow-splice-count1
            "fallback2=" @rrbt/fallback-to-slow-splice-count2))
+
+(defn now-msec []
+  (js/Date.now))
+
+(def num-deftests-started (atom 0))
+(def last-deftest-start-time (atom nil))
+
+(defmethod test/report [:cljs.test/default :begin-test-var]
+  [m]
+  (let [n (swap! num-deftests-started inc)]
+    (when (== n 1)
+      (println "*clojurescript-version*" *clojurescript-version*)))
+  (println)
+  (println "starting cljs test" (:var m))
+  (reset! last-deftest-start-time (now-msec)))
+
+(defmethod test/report [:cljs.test/default :end-test-var]
+  [m]
+  (println "elapsed time (sec)" (/ (- (now-msec) @last-deftest-start-time)
+                                   1000.0)))
+
+;; Enable tests to be run on versions of Clojure before 1.10, when
+;; ex-message was added.
+
+(defn ex-message-copy
+  "Returns the message attached to the given Error / ExceptionInfo object.
+  For non-Errors returns nil."
+  [ex]
+  (when (instance? js/Error ex)
+    (.-message ex)))
+
+(defn ex-cause-copy
+  "Returns exception cause (an Error / ExceptionInfo) if ex is an
+  ExceptionInfo.
+  Otherwise returns nil."
+  [ex]
+  (when (instance? ExceptionInfo ex)
+    (.-cause ex)))
