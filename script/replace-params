@@ -1,0 +1,95 @@
+#!/bin/bash
+#_(
+   #_DEPS is same format as deps.edn. Multiline is okay.
+   DEPS='{:deps {
+                 org.clojure/clojure {:mvn/version "1.10.1"}
+                }}'
+   
+   #_You can put other options here
+   OPTS='-J-XX:-OmitStackTraceInFastThrow'
+   
+   exec clojure $OPTS -Sdeps "$DEPS" "$0" "$@"
+)
+
+;; For every file in this directory and its subdirectories:
+;;     src/parameterized/clojure/clojure/core/rrb_vector/<path_name>
+;; create a corresponding file:
+;;     src/hardcoded/clojure/clojure/core/rrb_vector/<path_name>
+
+;; that has the same contents, except for the string substitutions
+;; specified in the var named 'substitutions' throughout the file,
+;; wherever they occur.
+
+(require '[clojure.java.io :as io]
+         '[clojure.java.shell :as sh]
+         '[clojure.edn :as edn]
+         '[clojure.string :as str]
+         '[clojure.pprint :as pp])
+
+(def substitutions [
+                    ;; some comments have special cases like this,
+                    ;; which I want to replace before the other more
+                    ;; normal cases below.
+                    ["1/(p/max-branches)" "1/32"]
+                    ;;["by max-branches-squared" "by 1024"]
+                    ["1/max-branches-squared" "1/1024"]
+                    ["1/(p/max-branches-squared)" "1/1024"]
+                    ;; special case expression that appears in a few
+                    ;; places in the code.
+                    ["(inc p/max-branches)" "33"]
+
+                    ;; Note that these must be replaced before
+                    ;; p/max-branches is, because the substitution
+                    ;; code below does not know anything about
+                    ;; symbols, just raw sequences of characters.  All
+                    ;; of these are suffixes of p/max-branches.
+                    ["p/max-branches-squared" "1024"]
+                    ["p/max-branches-minus-1" "31"]
+                    ["p/max-branches-minus-2" "30"]
+
+                    ["p/shift-increment" "5"]
+                    ["p/max-branches" "32"]
+                    ["p/branch-mask" "0x1f"]
+                    ["p/non-regular-array-len" "33"]
+                    ["max-capacity-divided-by-max-branches-squared"
+                     "max-capacity-divided-by-1024"]
+                    ])
+
+(def source-dir-prefix "src/parameterized/")
+(def target-dir-prefix "src/hardcoded/")
+(def common-intermediate-path "clojure/clojure/core")
+
+(def source-dir (str source-dir-prefix common-intermediate-path))
+(def target-dir (str target-dir-prefix common-intermediate-path))
+
+(defn source-to-target-name [source-fname]
+  (let [expected-path? (str/starts-with? source-fname source-dir)]
+    (if expected-path?
+      (str target-dir (subs source-fname (count source-dir)))
+      (throw (ex-info (format "Unexpected source path '%s' does not begin with '%s'"
+                              source-fname source-dir)
+                      {:source-fname source-fname
+                       :source-dir source-dir})))))
+
+(defn make-all-substitutions [content substitution-pairs]
+  (reduce (fn [content [to-replace-str replace-with-str]]
+            (str/replace content to-replace-str replace-with-str))
+          content
+          substitution-pairs))
+
+(let [source-dir (str source-dir-prefix common-intermediate-path)]
+  (doseq [source-f (file-seq (io/file source-dir))]
+    (let [source-fname (str source-f)
+          target-fname (source-to-target-name source-fname)
+          target-f (io/file target-fname)]
+      (println)
+      (println "source file :" source-fname)
+      (println "target file1:" target-fname)
+      (println "target file2:" (str target-f))
+      (if (. source-f (isDirectory))
+        (println "skipping directory")
+        (do
+          (io/make-parents target-f)
+          (let [contents (slurp source-f)
+                new-contents (make-all-substitutions contents substitutions)]
+            (spit target-f new-contents)))))))
