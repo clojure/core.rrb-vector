@@ -1,16 +1,14 @@
 (ns clojure.core.rrb-vector.test-clj-only
   (:require [clojure.test :as test :refer [deftest testing is are]]
+            [clojure.template :refer [do-template]]
             [clojure.reflect :as ref]
             [clojure.core.rrb-vector.test-utils :as u]
             [clojure.core.rrb-vector :as fv]
             [clojure.core.rrb-vector.debug :as dv]
-            [clojure.core.rrb-vector.debug-platform-dependent :as dpd]
             [clojure.test.check :as tc]
             [clojure.test.check.properties :as prop]
             [clojure.test.check.generators :as gen])
-  (:use clojure.template)
-  (:import (clojure.lang ExceptionInfo)
-           (java.util NoSuchElementException)))
+  (:import (java.util NoSuchElementException)))
 
 (dv/set-debug-opts! dv/full-debug-opts)
 
@@ -53,11 +51,11 @@
 ;; be incompatible with running cljs tests with Clojure 1.6.0, so for
 ;; now at least this test is clj-only.
 
-(deftest test-reduce-subvec-catvec
+(deftest test-reduce-subvec-catvec-generative
   (letfn [(insert-by-sub-catvec [v n]
-            (fv/catvec (fv/subvec v 0 n) ['x] (fv/subvec v n)))
+            (fv/catvec (fv/subvec v 0 n) (dv/cvec ['x]) (fv/subvec v n)))
           (repeated-subvec-catvec [i]
-            (reduce insert-by-sub-catvec (vec (range i)) (range i 0 -1)))]
+            (reduce insert-by-sub-catvec (dv/cvec (range i)) (range i 0 -1)))]
     (is (tc/quick-check 100
           (prop/for-all [cnt (gen/fmap
                                (comp inc #(mod % 60000))
