@@ -24,8 +24,6 @@
 (set! *warn-on-reflection* true)
 (set! *unchecked-math* true) ;; :warn-on-boxed
 
-;; TBD: What to change these constants to when parameters have
-;; non-default values?
 (def ^:const rrbt-concat-threshold (inc p/max-branches))
 (def ^:const max-extra-search-steps 2)
 
@@ -307,11 +305,10 @@
   (let [shift (int shift)
         end   (int end)]
     (if (zero? shift)
-      ;; potentially return a short node, although it would be better
-      ;; to make sure a regular leaf is always left at the right, with
-      ;; any items over the final p/max-branches items moved into
-      ;; tail (and then potentially back into the tree should the tail
-      ;; become too long...)
+      ;; potentially return a short node, although it would be better to
+      ;; make sure a regular leaf is always left at the right, with any
+      ;; items over the final p/max-branches moved into tail (and then potentially
+      ;; back into the tree should the tail become too long...)
       (let [arr     (.array nm node)
             new-arr (.array am end)]
         (System/arraycopy arr 0 new-arr 0 end)
@@ -843,9 +840,9 @@
                                         (aget rngs li)
                                         (aget rngs (unchecked-dec-int li)))
                                        (aget rngs 0)))
-                                ;; add p/max-branches elems to account
-                                ;; for the new full tail we plan to
-                                ;; add to the subtree.
+                                ;; add p/max-branches elems to account for the new
+                                ;; full tail we plan to add to the
+                                ;; subtree.
                                 (int p/max-branches))]
                      ;; See Note 2 in file transients.clj
                      (if-not (overflow? nm child
@@ -1695,8 +1692,8 @@
     (if (zero? tail-off)
       false
       (let [shift-amount (unchecked-subtract-int (.-shift v) (int p/shift-increment))
-            max-capacity-over-max-branches-squared (bit-shift-left 1 shift-amount)]
-        (< tail-off max-capacity-over-max-branches-squared)))))
+            max-capacity-divided-by-max-branches-squared (bit-shift-left 1 shift-amount)]
+        (< tail-off max-capacity-divided-by-max-branches-squared)))))
 
 ;; Note 3:
 

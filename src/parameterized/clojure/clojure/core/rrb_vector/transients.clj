@@ -140,9 +140,9 @@
                                             (aget rngs li)
                                             (aget rngs (unchecked-dec-int li)))
                                            (aget rngs 0)))
-                                    ;; add p/max-branches elems to
-                                    ;; account for the new full tail
-                                    ;; we plan to add to the subtree.
+                                    ;; add p/max-branches elems to account for the
+                                    ;; new full tail we plan to add to
+                                    ;; the subtree.
                                     (int p/max-branches))]
                          ;; See Note 2
                          (if-not (overflow? nm child
