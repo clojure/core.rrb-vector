@@ -167,6 +167,30 @@ given here.  They use the Nashorn JavaScript run time environment
 included with Java -- no other JavaScript run time is needed.
 
 
+### Useful clj CLI commands
+
+To run relatively short Clojure tests, but no ClojureScript tests:
+```bash
+$ ./script/jdo test
+```
+
+To run relatively short ClojureScript tests, but no Clojure tests:
+```bash
+$ ./script/sdo test
+```
+
+Replace `test` in the commands above with one of the following for
+other useful things:
+
+* `sock` (or no argument at all) - start a REPL, and listen for a
+  socket REPL connection on TCP port 50505
+* `long` - run a longer set of tests
+* `coll` - run generative tests from
+  [`collection-check`](https://github.com/ztellman/collection-check)
+  library
+* `east` - run Eastwood lint tool (clj version only, not cljs)
+
+
 ### Useful Leiningen commands
 
 To run Clojure tests, but no ClojureScript tests:
@@ -193,16 +217,17 @@ runtimes have a different name on your system than what is used there.
 Prerequisites: Java, Leiningen, and either or both of Node.js and
 SpiderMonkey JavaScript run time environments.
 
-To run normal Clojure tests, plus the `collection-check` tests, but no
-ClojureScript tests:
+To run normal Clojure tests, plus the
+[`collection-check`](https://github.com/ztellman/collection-check)
+tests, but no ClojureScript tests:
 ```bash
 $ lein with-profile +coll,+1.7 test
 ```
-The collection-check tests require Clojure 1.7.0 or later, I believe
+The `collection-check` tests require Clojure 1.7.0 or later, I believe
 because collection-check and/or its dependencies require that.
 
-There is no existing command configured to run collection-check tests
-with ClojureScript.
+There is no existing command configured to run `collection-check`
+tests with ClojureScript.
 
 To start a REPL from Leiningen with Clojure versions 1.6.0 and older,
 you must use Leiningen 2.8.0 (likely some other versions work, too).

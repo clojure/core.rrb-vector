@@ -1,0 +1,46 @@
+#! /bin/bash
+
+# Run some task using Clojure/Java
+
+if [ $# -eq 0 ]
+then
+    # Default if nothing else is specified is a REPL plus listening
+    # for Socket REPL
+    TASK="socket"
+elif [ $# -eq 1 ]
+then
+    TASK="$1"
+else
+    1>&2 echo "usage: `basename $0` arg1"
+    exit 1
+fi
+
+set -x
+
+case ${TASK} in
+sock*)
+    # Run REPL, with option to listen for Socket REPL connection, and
+    # test paths in classpath.
+    exec clj -A:clj:clj-test:clj-socket ;;
+test*)
+    # Run 'short' tests
+    exec clojure -A:clj:clj-test:clj-runt ;;
+long*)
+    # Run long/generative tests
+    exec clojure -A:clj:clj-test:clj-runlongtests ;;
+coll*)
+    # Run collection-check generative tests
+    exec clojure -A:clj:clj-test:clj-check:clj-runcheck ;;
+perf*)
+    # Run performance tests
+    exec clojure -A:clj:clj-test:clj-runperf ;;
+focu*)
+    # Run whatever the current 'focus' tests are
+    exec clojure -A:clj:clj-test:clj-check:clj-runfocus ;;
+east*|lint*)
+    # Run Eastwood
+    exec clojure -A:clj:clj-test:clj-check:eastwood ;;
+*)
+    1>&2 echo "unknown task name: ${TASK}"
+    exit 1 ;;
+esac
