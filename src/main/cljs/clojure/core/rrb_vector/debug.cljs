@@ -207,6 +207,27 @@
         i
         -1))))
 
+;; When using non-default parameters for the tree data structure,
+;; e.g. shift-increment not 5, then in test code with calls to
+;; checking-* functions, they will give errors if they are ever given
+;; a vector returned by clojure.core/vec, because without changes to
+;; Clojure itself, they always have shift-increment 5 and max-branches
+;; 32.
+;;
+;; If we use (fv/vec coll) consistently in the test code, that in many
+;; cases returns a core.rrb-vector data structure, but if given a
+;; Clojure vector, it still returns that Clojure vector unmodified,
+;; which has the same issues for checking-* functions.  By
+;; calling (fv/vec (seq coll)) when not using default parameters, we
+;; force the return value of cvec to always be a core.rrb-vector data
+;; structure.
+;;
+;; The name 'cvec' is intended to mean "construct a vector", and only
+;; intended for use in test code that constructs vectors used as
+;; parameters to other functions operating on vectors.
+(defn cvec [coll]
+  (clojure.core/vec coll))
+
 (defn slow-into [to from]
   (reduce conj to from))
 

@@ -76,8 +76,8 @@
 
 (deftest test-reduce-2
   (let [my-subvec (if u/extra-checks? dv/checking-subvec fv/subvec)
-        v1 (my-subvec (vec (range 1003)) 500)
-        v2 (vec (range 500 1003))]
+        v1 (my-subvec (dv/cvec (range 1003)) 500)
+        v2 (dv/cvec (range 500 1003))]
     (is (= (reduce + 0 v1)
            (reduce + 0 v2)
            (reduce + 0 (r/map identity (seq v1)))
@@ -131,18 +131,18 @@
 
 (deftest test-relaxed
   (let [my-catvec (if u/extra-checks? dv/checking-catvec fv/catvec)]
-    (is (= (into (my-catvec (vec (range 123)) (vec (range 68))) (range 64))
+    (is (= (into (my-catvec (dv/cvec (range 123)) (dv/cvec (range 68))) (range 64))
            (concat (range 123) (range 68) (range 64))))
-    (is (= (dv/slow-into (fv/catvec (vec (range 123)) (vec (range 68)))
+    (is (= (dv/slow-into (fv/catvec (dv/cvec (range 123)) (dv/cvec (range 68)))
                          (range 64))
            (concat (range 123) (range 68) (range 64))))))
 
 (deftest test-hasheq
   (let [my-catvec (if u/extra-checks? dv/checking-catvec fv/catvec)]
     (is (= (hash []) (hash (fv/vector))))  ;; CRRBV-25
-    (let [v1 (vec (range 1024))
-          v2 (vec (range 1024))
-          v3 (my-catvec (vec (range 512)) (vec (range 512 1024)))
+    (let [v1 (dv/cvec (range 1024))
+          v2 (dv/cvec (range 1024))
+          v3 (my-catvec (dv/cvec (range 512)) (dv/cvec (range 512 1024)))
           s1 (seq v1)
           s2 (seq v2)
           s3 (seq v3)]
@@ -155,10 +155,10 @@
   (let [my-catvec (if u/extra-checks? dv/checking-catvec fv/catvec)
         my-subvec (if u/extra-checks? dv/checking-subvec fv/subvec)]
     (letfn [(insert-by-sub-catvec [v n]
-              (my-catvec (my-subvec v 0 n) (fv/vec ['x])
+              (my-catvec (my-subvec v 0 n) (dv/cvec ['x])
                          (my-subvec v n)))
             (repeated-subvec-catvec [i]
-              (reduce insert-by-sub-catvec (vec (range i)) (range i 0 -1)))]
+              (reduce insert-by-sub-catvec (dv/cvec (range i)) (range i 0 -1)))]
       (is (= (repeated-subvec-catvec 2371)
              (interleave (range 2371) (repeat 'x)))))))
 
@@ -168,11 +168,11 @@
   (let [my-catvec (if u/extra-checks? dv/checking-catvec fv/catvec)
         my-subvec (if u/extra-checks? dv/checking-subvec fv/subvec)]
     (letfn [(insert-by-sub-catvec [v n]
-              (my-catvec (my-subvec v 0 n) (fv/vec ['x])
+              (my-catvec (my-subvec v 0 n) (dv/cvec ['x])
                          (my-subvec v n)))
             (repeated-subvec-catvec [i]
               (reduce insert-by-sub-catvec
-                      (vec (range i))
+                      (dv/cvec (range i))
                       (take i (interleave (range (quot i 2) pos-infinity)
                                           (range (quot i 2) pos-infinity)))))]
       (let [n 2371
@@ -184,9 +184,9 @@
   (let [my-catvec (if u/extra-checks? dv/checking-catvec fv/catvec)
         my-subvec (if u/extra-checks? dv/checking-subvec fv/subvec)
         x        (fv/vec (repeat 1145 \a))
-        y        (my-catvec (my-subvec x 0 778) (my-subvec x 778 779) [1] (my-subvec x 779))
-        z        (my-catvec (my-subvec y 0 780) [2] (my-subvec y 780 781) (my-subvec y 781))
-        res      (my-catvec (my-subvec z 0 780) [] [3] (my-subvec z 781))
+        y        (my-catvec (my-subvec x 0 778) (my-subvec x 778 779) (dv/cvec [1]) (my-subvec x 779))
+        z        (my-catvec (my-subvec y 0 780) (dv/cvec [2]) (my-subvec y 780 781) (my-subvec y 781))
+        res      (my-catvec (my-subvec z 0 780) (dv/cvec []) (dv/cvec [3]) (my-subvec z 781))
         expected (concat (repeat 779 \a) [1] [3] (repeat 366 \a))]
     (is (= res expected))))
 
@@ -297,9 +297,9 @@
   (if (<= (count v) 1)
     v
     (let [[x & xs] v]
-      (my-catvec (quicksort my-catvec (filterv #(<= % x) xs))
-                 [x]
-                 (quicksort my-catvec (filterv #(> % x) xs))))))
+      (my-catvec (quicksort my-catvec (dv/cvec (filter #(<= % x) xs)))
+                 (dv/cvec [x])
+                 (quicksort my-catvec (dv/cvec (filter #(> % x) xs)))))))
 
 (defn ascending? [coll]
   (every? (fn [[a b]] (<= a b))
@@ -307,12 +307,12 @@
 
 (deftest test-crrbv-12
   (let [my-catvec (if u/extra-checks? dv/checking-catvec fv/catvec)
-        v crrbv-12-data]
+        v (dv/cvec crrbv-12-data)]
     (testing "Ascending order after quicksort"
       (is (ascending? (quicksort my-catvec v))))
     (testing "Repeated catvec followed by pop"
       (is (= [] (nth (iterate pop
-                              (nth (iterate #(my-catvec [0] %) [])
+                              (nth (iterate #(my-catvec (dv/cvec [0]) %) [])
                                    963))
                      963))))))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -487,7 +487,7 @@
                       _ (assert (< opposite-pos lc))
                       opposite-elf (nth elfs opposite-pos)
                       other2       (fv-rest (remove-at elfs opposite-pos))]
-                  (my-catvec other2 [current])))))
+                  (my-catvec other2 (dv/cvec [current]))))))
           (puzzle-b-sample [elfs round]
             (let [elfs2 (move elfs)]
               ;;(println "round=" round "# elfs=" (count elfs))
