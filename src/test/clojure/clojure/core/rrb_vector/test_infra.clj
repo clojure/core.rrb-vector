@@ -16,6 +16,12 @@
       (println "  " cp-str))))
 
 (defn print-clj-jvm-info []
+  (try
+    (let [shift-var (resolve
+                     'clojure.core.rrb-vector.parameters/shift-increment)]
+      (println "shift-increment=" @shift-var " (from parameters namespace)"))
+    (catch Exception e
+      (println "shift-increment=5 (assumed because no parameters namespace)")))
   (let [p (System/getProperties)]
     (println "java.vm.name" (get p "java.vm.name"))
     (println "java.vm.version" (get p "java.vm.version"))
