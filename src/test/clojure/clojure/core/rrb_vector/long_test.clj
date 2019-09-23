@@ -64,4 +64,4 @@
 (deftest test-crrbv-17
   (utils/reset-optimizer-counts!)
   (is (= (reverse (range benchmark-size))
-         (vector-push-f (fv/vector) fv/catvec fv/catvec))))
+         (vector-push-f (fv/vector) fv/catvec dv/checking-catvec))))
