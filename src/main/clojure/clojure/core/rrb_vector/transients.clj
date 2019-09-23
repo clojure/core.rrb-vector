@@ -140,8 +140,8 @@
                                             (aget rngs (unchecked-dec-int li)))
                                            (aget rngs 0)))
                                     ;; add 32 elems to account for the
-                                    ;; new 32-elem tail we plan to add
-                                    ;; to the subtree.
+                                    ;; new full tail we plan to add to
+                                    ;; the subtree.
                                     (int 32))]
                          ;; See Note 2
                          (if-not (overflow? nm child
