@@ -257,6 +257,7 @@ For any `mvn` command you must install
 
 * Ubuntu 18.04 Linux: `sudo apt-get install maven`
 * macOS
+  * plus Homebrew: `brew install maven`
   * plus MacPorts: `sudo port install maven3`, then either use the
     command `mvn3`, or to use `mvn` also run the command `sudo port
     select --set maven maven3`.
@@ -276,6 +277,7 @@ install it using the commands below.
 
 * Ubuntu 18.04 Linux: `sudo apt-get install nodejs`
 * macOS
+  * plus Homebrew: `brew install node`
   * plus MacPorts: `sudo port install nodejs10`.  You can see other
     versions available via the command `port list | grep nodejs`.
 
@@ -289,6 +291,7 @@ You may also install it using the commands below.
 
 * Ubuntu 18.04 Linux: `sudo apt-get install libmozjs-52-dev`
 * macOS
+  * plus Homebrew: `brew install spidermonkey`
   * plus MacPorts: `sudo port install mozjs52`
 
 
