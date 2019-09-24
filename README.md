@@ -291,7 +291,13 @@ You may also install it using the commands below.
 
 * Ubuntu 18.04 Linux: `sudo apt-get install libmozjs-52-dev`
 * macOS
-  * plus Homebrew: `brew install spidermonkey`
+  * plus Homebrew: As of 2019-Sep-24, `brew install spidermonkey`
+    installs version 1.8.5 of SpiderMonkey, which according to the
+    Wikipedia page on SpiderMonkey was first released in 2011, with at
+    least one release per year after that.  The ClojureScript tests
+    fail to run using this version of SpiderMonkey.  It seems worth
+    avoiding this version of SpiderMonkey for the purposes of testing
+    `core.rrb-vector`.
   * plus MacPorts: `sudo port install mozjs52`
 
 
