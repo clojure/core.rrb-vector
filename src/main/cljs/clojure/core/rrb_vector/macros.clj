@@ -6,7 +6,7 @@
 
 (defmacro assert [& args]
   (if-not elide-assertions?
-    (apply #'clojure.core/assert &form &env args)))
+    `(clojure.core/assert ~@args)))
 
 (defmacro dbg [& args]
   (if-not elide-debug-printouts?
@@ -20,5 +20,5 @@
        ~@(map-indexed (fn [i param]
                         `(cljs.core/aset ~arr ~i ~param))
                       params)
-       (clojure.core.rrb_vector.rrbt.Vector.
-        ~(count params) 5 cljs.core.PersistentVector.EMPTY_NODE ~arr nil nil))))
+       (clojure.core.rrb-vector.rrbt/Vector.
+        ~(count params) 5 cljs.core/PersistentVector.EMPTY_NODE ~arr nil nil))))
