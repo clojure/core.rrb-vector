@@ -102,6 +102,8 @@
   :eastwood {:extra-deps {jonase/eastwood {:mvn/version "0.3.5"}}
              :main-opts ["-m" "eastwood.lint"
                          "{:source-paths,[\"src/main/clojure\"],:test-paths,[\"src/test/clojure\",\"src/test/cljs\",\"src/test_local/clojure\"],:add-linters,[:unused-fn-args,:unused-locals,:unused-namespaces,:unused-private-vars],:exclude-linters,[:implicit-dependencies],:exclude-namespaces,[]}"]}
+  :clj-kondo {:extra-deps {clj-kondo {:mvn/version "RELEASE"}}
+              :main-opts ["-m" "clj-kondo.main"]}
 
   ;; pull in specific versions of Clojure:
   :1.5    {:override-deps {org.clojure/clojure {:mvn/version "1.5.1"}}}
