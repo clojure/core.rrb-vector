@@ -189,7 +189,19 @@
                  "tail:")
                (vec tail))))))
 
-(defn first-diff [xs ys]
+(defn first-diff
+  "Compare two sequences to see if they have = elements in the same
+  order, and both sequences have the same number of elements.  If all
+  of those conditions are true, and no exceptions occur while calling
+  seq, first, and next on the seqs of xs and ys, then return -1.
+
+  If two elements at the same index in each sequence are found not =
+  to each other, or the sequences differ in their number of elements,
+  return the index, 0 or larger, at which the first difference occurs.
+
+  If an exception occurs while calling seq, first, or next, throw an
+  exception that contains the index at which this exception occurred."
+  [xs ys]
   (loop [i 0 xs (seq xs) ys (seq ys)]
     (if (try (and xs ys (= (first xs) (first ys)))
              (catch Exception e
@@ -210,8 +222,9 @@
 
 ;; When using non-default parameters for the tree data structure,
 ;; e.g. shift-increment not 5, then in test code with calls to
-;; checking-* functions, they will give errors if they are ever given
-;; a vector returned by clojure.core/vec, because without changes to
+;; checking-* functions, they will be expecting those same non-default
+;; parameter values, and will give errors if they are ever given a
+;; vector returned by clojure.core/vec, because without changes to
 ;; Clojure itself, they always have shift-increment 5 and max-branches
 ;; 32.
 ;;
@@ -278,10 +291,10 @@
                  (not (pd/internal-node? (:node node-info)))))
           node-infos))
 
-;; TBD: The definition of nth in deftype Vector seems to imply that
-;; every descendant of a 'regular' node must also be regular.  That
-;; would be a straightforward sanity check to make, to return an error
-;; if a non-regular node is found with a regular ancestor in the tree.
+;; The definition of nth in deftype Vector implies that every
+;; descendant of a 'regular' node must also be regular.  That would be
+;; a straightforward sanity check to make, to return an error if a
+;; non-regular node is found with a regular ancestor in the tree.
 
 (defn basic-node-errors [v]
   (let [{:keys [v get-shift]} (pd/unwrap-subvec-accessors-for v)
@@ -591,50 +604,6 @@
            all-elems))))))
 
 
-;; functions to check:
-
-;; conj - clj arities [] [coll] [coll x] [coll x & xs]
-;; conj! - clj arities [] [coll] [coll x]
-;; pop - clj arities [coll]
-;; pop! - clj arities [coll]
-;; assoc - clj arities [coll key val] [coll key val & kvs]
-;; assoc! - clj arities [coll key val] [coll key val & kvs]
-;; nth - persistent or transient
-;;     - clj arities [coll index] [coll index not-found]
-;; N/A dissoc! - clj not supported on vectors
-
-;; note that if we wrap conj! transient persistent! and conj, but not
-;; into, then into will in clj be direct-linked to unwrapped version
-;; of those other functions, and will thus _not_ be checked.
-
-;; peek - persistent only.  clj arities [coll]
-;;
-;; catvec (persistent only) - clj arities [] [v1] [v1 v2] [v1 v2 & vn]
-;; vector (persistent only) - clj arities [] [a] [a b] [a b & args] (same for fv/vector)
-;; vec (persistent only) - clj arities [coll] (same for fv/vec)
-;; vector-of -- persistent only, clj only, for primitive vectors  - same arities as vector, except first arg required and must be type
-
-;; seq - persistent only clj arities [coll]
-;; rseq - persistent only? clj arities [coll]
-;; subvec - clj arities [v start] [v start end]  (uses slicev in rrbt)
-
-;; It seems like a good idea to use the same data to describe this as
-;; used by collection-check:
-
-;; [:transient]
-;; [:persistent!]
-;; [:assoc idx val]
-;; [:assoc! idx val]
-;; [:pop]
-;; [:pop!]
-;; [:conj val]
-;; [:conj! val]
-
-;; [:seq] - vector->seq
-;; [:rest] - only after [:seq] I believe, from collection-check at least
-;; [into] - seq->vector
-
-
 (def failure-data (atom []))
 (def warning-data (atom []))
 
@@ -643,15 +612,7 @@
 
 (let [orig-conj clojure.core/conj]
   (defn record-failure-data [d]
-    (swap! failure-data orig-conj d)
-    ;; TBD: Consider adding an option that lets one continue after the
-    ;; first failure is found, but the default behavior of stopping
-    ;; immediately seems best.
-    (throw (ex-info
-            (str "Problem found in core.rrb-vector internal data structures."
-                 "  More details can be found map that is value of (ex-data e)"
-                 " of this exception e")
-            d)))
+    (swap! failure-data orig-conj d))
   (defn record-warning-data [d]
     (swap! warning-data orig-conj d)))
 
@@ -734,125 +695,243 @@
 ;;       Calls many internal implementation detail functions,
 ;;       e.g. slice-left slice-right make-array array-copy etc.
 
-(defn edit-nodes-error-checks [err-desc-str ret & args]
-  (let [i (edit-nodes-errors ret)]
-    (when (:error i)
-      (println (str "ERROR: found problem with ret value from " err-desc-str
-                    ": " (:description i)))
-      (record-failure-data {:err-desc-str err-desc-str, :ret ret,
-                            :args args, :edit-nodes-errors i}))
-    (when (:warning i)
-      (println (str "WARNING: possible issue with ret value from " err-desc-str
-                    ": " (:description i)))
-      (record-warning-data {:err-desc-str err-desc-str, :ret ret,
-                            :args args, :edit-nodes-errors i}))))
-
-(defn basic-node-error-checks [err-desc-str ret & args]
-  (let [i (basic-node-errors ret)]
-    (when (:error i)
-      (println (str "ERROR: found problem with ret value from " err-desc-str
-                    ": " (:description i)))
-      (record-failure-data {:err-desc-str err-desc-str, :ret ret,
-                            :args args, :basic-node-errors i}))))
-
-(defn ranges-error-checks [err-desc-str ret & args]
-  (let [i (ranges-errors ret)]
-    (when (:error i)
-      (println (str "ERROR: found problem with ret value from " err-desc-str
-                    ": " (:description i)))
-      (record-failure-data {:err-desc-str err-desc-str, :ret ret,
-                            :args args, :ranges-errors i}))
-    (when (:warning i)
-      ;; It is perfectly normal for fv/subvec and slicev to return a
-      ;; vector that causes this warning.
-      (when-not (and (= err-desc-str "slicev")
-                     (= :root-too-deep (:kind i)))
-        (println (str "WARNING: For ret value from " err-desc-str
-                      ": " (:description i)))
-        (record-warning-data {:err-desc-str err-desc-str, :ret ret,
-                              :args args, :ranges-errors i})))))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Supported keys of @debug-opts:
 
-;; :catvec used by checking-catvec
-;; :splicev used by checking-splicev
-;; :slicev used by checking-slicev
-
-;; The value associated with each key is a submap that may have the
-;; following keys.
-
-;; :trace - logical true to enable some debug printing when checking-*
-;; function is called.
-
-;; :validate - logical true to enable checking of a return value
-;; against the expected return value, independently calculated via
-;; operations on sequences.
-
-;; :return-value-checks - a sequence of functions to perform
-;; additional checks on the return value, e.g.
-
-;; edit-nodes-error-checks
-;; basic-node-error-checks
-;; ranges-error-checks
-
-;; See those functions for the arguments the function is called with.
+;; See the documentation of the several checking-* functions for the
+;; keys supported inside of the @debug-opts map.
 
 (def debug-opts (atom {}))
-
-;; set-debug-opts! is a helper function for modifying the debug-opts
-;; atom above.  Call:
-
-;; (set-debug-opts! full-debug-opts)
-
-;; to enable as thorough of extra verification checks as is supported
-;; by existing code, when you call any of the checking-* variants of the
-;; functions in this namespace, e.g. checking-catvec, checking-subvec.
-
-;; It will also slow down your code to do so.  checking-* functions return
-;; the same values as their non checking-* original functions they are
-;; based upon, so you can write application code that mixes calls to
-;; both, calling the checking-* versions only occasionally, if you have a
-;; long sequence of operations that you want to look for bugs within
-;; core.rrb-vector's implementation of.
-
-;; checking-catvec always calls to checking-splice-rrbts, and checking-splice-rrbts
-;; always concatenates a pair of vectors, so it is closer to the
-;; source of any problems that catvec can encounter.  I think in just
-;; about all cases it will be more effetive to enable :splice-rrbts in
-;; debug-opts, vs. :catvec, and if you do that, it will only slow you
-;; down to also enable :catvec.
 
 (def full-debug-opts {:trace false
                       :validate true
                       :return-value-checks
-                      [edit-nodes-error-checks
-                       basic-node-error-checks
-                       ranges-error-checks]})
+                      [edit-nodes-errors
+                       basic-node-errors
+                       ranges-errors]
+                      ;; false -> throw an exception when error detected
+                      :continue-on-error false
+                      ;; true -> do not throw an exception when warning found
+                      :continue-on-warning true})
 
-(defn set-debug-opts! [opts]
+(defn set-debug-opts!
+  "set-debug-opts! modified the debug-opts atom of the core.rrb-vector
+  library, which configures what kinds of extra checks are performed
+  when calling the checking-* versions of functions defined in the
+  library's debug namespace.
+
+  Example call:
+
+    (require '[clojure.core.rrb-vector.debug :as d])
+    (d/set-debug-opts! d/full-debug-opts)
+
+  This call enables as thorough of extra verification checks as is
+  supported by existing code, when you call any of the checking-*
+  variants of the functions in this namespace, e.g. checking-catvec,
+  checking-subvec.
+
+  It will also slow down your code to do so.  checking-* functions
+  return the same values as their non checking-* original functions
+  they are based upon, so you can write application code that mixes
+  calls to both, calling the checking-* versions only occasionally, if
+  you have a long sequence of operations that you want to look for
+  bugs within core.rrb-vector's implementation of."
+  [opts]
   (reset! debug-opts
-          {;;:catvec opts      ;; redundant, really.  Recommend :splice-rrbts
-           :splice-rrbts opts  ;; checking this checks checking-catvec results, too
-           :slicev opts        ;; checking this checks checking-subvec results, too
+          {:catvec opts        ;; affects checking-catvec behavior,
+                               ;; via calling checking-splicev and
+                               ;; checking-splice-rrbts and enabling
+                               ;; their extra checks.
+           :subvec opts        ;; affects checking-subvec behavior,
+                               ;; via calling checking-slicev and
+                               ;; enabling its extra checks
            :pop opts           ;; affects checking-pop
            :pop! opts          ;; affects checking-pop!
            :transient opts}))  ;; affects checking-transient
 
-(defn validating-pop [f err-desc-str coll]
+(defn validation-failure [err-msg-str failure-data opts]
+  (println "ERROR:" err-msg-str)
+  (record-failure-data failure-data)
+  (when-not (:continue-on-error opts)
+    (throw (ex-info err-msg-str failure-data))))
+
+(defn sanity-check-vector-internals
+  "This function is called by all of the checking-* variants of
+  functions in the debug namespace.  It calls all of the functions
+  in (:return-value-checks opts) in the order given, passing each of
+  those functions a return value 'ret'.  Each function performs sanity
+  checks on the 'ret' data structure used to represent the vector.
+
+  Those functions should return a map with key :error having a logical
+  true value if any errors were found, or a key :warning having a
+  logical true value if any warnings were found, otherwise both of
+  those values must be logical false in the returned map (or no such
+  key is present in the returned map at all).
+
+  Three examples of such functions are included in core.rrb-vector's
+  debug namespace.
+
+  * edit-nodes-errors
+  * basic-node-errors
+  * ranges-errors
+
+  They each look for different problems in the vector data structure
+  internals.  They were developed as separate functions in case there
+  was ever a significant performance advantage to configuring only
+  some of them to be called, not all of them, for long tests.
+
+  If any errors are found, this function calls record-failure-data, to
+  record the details in a global atom.  It prints a message to *out*,
+  and if (:continue-on-error opts) is logical false, it throws a data
+  conveying exception using ex-info containing the same message, and
+  the same error details map passed to record-failure-data.
+
+  If no exception is thrown due to an error, then repeat the same
+  checks for a warning message, recording details via calling
+  record-warning-data, and throwing an exception
+  if (:continue-on-warning opts) is logical false."
+  [err-desc-str ret args opts]
+  (doseq [check-fn (:return-value-checks opts)]
+    (let [i (check-fn ret)]
+      (when (:error i)
+        (let [msg (str "found error in ret value from " err-desc-str
+                       ": " (:description i))
+              failure-data {:err-desc-str err-desc-str, :ret ret,
+                            :args args, :error-info i}]
+          (println "ERROR:" msg)
+          (record-failure-data failure-data)
+          (when-not (:continue-on-error opts)
+            (throw (ex-info msg failure-data)))))
+      (when (:warning i)
+        ;; It is perfectly normal for fv/subvec and slicev to return a
+        ;; vector that causes this warning.
+        (when-not (and (= err-desc-str "slicev")
+                       (= :root-too-deep (:kind i)))
+          (let [msg (str "possible issue with ret value from " err-desc-str
+                         ": " (:description i))
+                failure-data {:err-desc-str err-desc-str, :ret ret,
+                              :args args, :error-info i}]
+            (println "WARNING:" msg)
+            (record-warning-data failure-data)
+            (when-not (:continue-on-warning opts)
+              (throw (ex-info msg failure-data)))))))))
+
+(defn validating-pop
+  "validating-pop is not really designed to be called from user
+  programs.  checking-pop can do everything that validating-pop can,
+  and more.  See its documentation.
+
+  A typical way of calling validating-pop is:
+
+      (require '[clojure.core.rrb-vector.debug :as d])
+      (d/validating-pop clojure.core/pop \"pop\" coll)
+
+  Most of the validating-* functions behave similarly.  This one
+  contains the most complete documentation, and the others refer to
+  this one.  They all differ in the function that they are intended to
+  validate, and a few other details, which will be collected in one
+  place here for function validating-pop so one can quickly see the
+  differences between validating-pop and the other validating-*
+  functions.
+
+      good example f: clojure.core/pop
+      opts map: (get @d/debug-opts :pop)
+
+  The first argument can be any function f.  f is expected to take
+  arguments and return a value equal to what clojure.core/pop would,
+  given the argument coll.
+
+  validating-pop will first make a copy of the seq of items in coll,
+  as a safety precaution, because some kinds of incorrect
+  implementations of pop could mutate their input argument.  That
+  would be a bug, of course, but aiding a developer in detecting bugs
+  is the reason validating-pop exists.  It uses the function
+  copying-seq to do this, which takes at least linear time in the size
+  of coll.
+
+  It will then calculate a sequence that is = to the expected return
+  value, e.g. for pop, all items in coll except the last one.
+
+  Then validating-pop will call (f coll), then call copying-seq on the
+  return value.
+
+  If the expected and returned sequences are not =, then a map
+  containing details about the arguments and actual return value is
+  created and passed to d/record-failure-data, which appends the map
+  to the end of a vector that is the value of an atom named
+  d/failure-data.  An exception is thrown if (:continue-on-error opts)
+  is logical false, with ex-data equal to this same map of error data.
+
+  If the expected and actual sequences are the same, no state is
+  modified and no exception is thrown.
+
+  If validating-pop does not throw an exception, the return value is
+  (f coll)."
+  [f err-desc-str coll]
   (let [coll-seq (copying-seq coll)
         exp-ret-seq (butlast coll-seq)
         ret (f coll)
         ret-seq (copying-seq ret)]
     (when (not= ret-seq exp-ret-seq)
-      (println "ERROR: (pop coll) returned incorrect value")
-      (record-failure-data {:err-desc-str err-desc-str, :ret ret,
-                            :args (list coll),
-                            :coll-seq coll-seq, :ret-seq ret-seq,
-                            :exp-ret-seq exp-ret-seq}))
+      (validation-failure
+       "(pop coll) returned incorrect value"
+       {:err-desc-str err-desc-str, :ret ret,
+        :args (list coll),
+        :coll-seq coll-seq, :ret-seq ret-seq,
+        :exp-ret-seq exp-ret-seq}
+       (get @debug-opts :pop)))
     ret))
 
-(defn checking-pop [coll]
+(defn checking-pop
+  "These two namespace aliases will be used later in this
+  documentation:
+
+      (require '[clojure.core.rrb-vector.debug :as d])
+      (require '[clojure.core.rrb-vector.debug-platform-dependent :as pd])
+
+  checking-pop passes its argument to clojure.core/pop, and if it
+  returns, it returns whatever clojure.core/pop does.  If checking-pop
+  detects any problems, it will record information about the problems
+  found in one or both of the global atoms 'd/failure-data' and
+  'd/warning-data', and optionally throw an exception.
+
+  If coll is not a vector type according to pd/is-vector?, then
+  checking-pop simply behaves exactly like clojure.core/pop, with no
+  additional checks performed.  All of checking-pop's extra checks are
+  specific to vectors.
+
+  If coll is a vector, then checking-pop looks up the key :pop in a
+  global atom 'd/debug-opts'.  The result of that lookup is a map we
+  will call 'opts' below.
+
+      opts map: (get @d/debug-opts :pop)
+      function called if (:validating opts) is logical true:
+          validating-pop
+
+  If (:trace opts) is true, then a debug trace message is printed to
+  *out*.
+
+  If (:validate opts) is true, then validating-pop is called, using
+  clojure.core/pop to do the real work, but validating-pop will check
+  whether the return value looks correct relative to the input
+  parameter value, i.e. it is equal to a sequence of values containing
+  all but the last element of the input coll's sequence of values.
+  See validating-pop documentation for additional details.  This step
+  records details of problems found in the atoms d/failure-data.
+
+  (:return-value-checks opts) should be a sequence of functions that
+  each take the vector returned from calling clojure.core/pop, and
+  return data about any errors or warnings they find in the internals
+  of the vector data structure.  Errors or warnings are appended to
+  atoms d/failure-data and/or d/warning-data.
+
+  If either the validate or return value checks steps find an error,
+  they throw an exception if (:continue-on-error opts) is logical
+  false.
+
+  If the return value checks step finds no error, but does find a
+  warning, it throws an exception if (:continue-on-warning opts) is
+  logical false."
+  [coll]
   (if-not (pd/is-vector? coll)
     (clojure.core/pop coll)
     (let [opts (get @debug-opts :pop)
@@ -863,24 +942,40 @@
       (let [ret (if (:validate opts)
                   (validating-pop clojure.core/pop err-desc-str coll)
                   (clojure.core/pop coll))]
-        (doseq [check-fn (:return-value-checks opts)]
-          (check-fn err-desc-str ret coll))
+        (sanity-check-vector-internals err-desc-str ret [coll] opts)
         ret))))
 
-(defn validating-pop! [f err-desc-str coll]
+(defn validating-pop!
+  "validating-pop! behaves the same as validating-pop, with the
+  differences described here.  See validating-pop for details.
+  
+      good example f: clojure.core/pop!
+      opts map: (get @d/debug-opts :pop!)
+
+  If no exception is thrown, the return value is (f coll)."
+  [f err-desc-str coll]
   (let [coll-seq (copying-seq coll)
         exp-ret-seq (butlast coll-seq)
         ret (f coll)
         ret-seq (copying-seq ret)]
     (when (not= ret-seq exp-ret-seq)
-      (println "ERROR: (pop! coll) returned incorrect value")
-      (record-failure-data {:err-desc-str err-desc-str, :ret ret,
-                            :args (list coll),
-                            :coll-seq coll-seq, :ret-seq ret-seq,
-                            :exp-ret-seq exp-ret-seq}))
+      (validation-failure
+       "(pop! coll) returned incorrect value"
+       {:err-desc-str err-desc-str, :ret ret,
+        :args (list coll),
+        :coll-seq coll-seq, :ret-seq ret-seq,
+        :exp-ret-seq exp-ret-seq}
+       (get @debug-opts :pop!)))
     ret))
 
-(defn checking-pop! [coll]
+(defn checking-pop!
+  "checking-pop! is similar to checking-pop, with the differences
+  summarized below.  See checking-pop documentation for details.
+
+      opts map: (get @d/debug-opts :pop!)
+      function called if (:validating opts) is logical true:
+          validating-pop!"
+  [coll]
   (if-not (pd/is-vector? coll)
     (clojure.core/pop! coll)
     (let [opts (get @debug-opts :pop!)
@@ -891,24 +986,40 @@
       (let [ret (if (:validate opts)
                   (validating-pop! clojure.core/pop! err-desc-str coll)
                   (clojure.core/pop! coll))]
-        (doseq [check-fn (:return-value-checks opts)]
-          (check-fn err-desc-str ret coll))
+        (sanity-check-vector-internals err-desc-str ret [coll] opts)
         ret))))
 
-(defn validating-transient [f err-desc-str coll]
+(defn validating-transient
+  "validating-transient behaves the same as validating-pop, with the
+  differences described here.  See validating-pop for details.
+  
+      good example f: clojure.core/transient
+      opts map: (get @d/debug-opts :transient)
+
+  If no exception is thrown, the return value is (f coll)."
+  [f err-desc-str coll]
   (let [coll-seq (copying-seq coll)
         exp-ret-seq coll-seq
         ret (f coll)
         ret-seq (copying-seq ret)]
     (when (not= ret-seq exp-ret-seq)
-      (println "ERROR: (transient coll) returned incorrect value")
-      (record-failure-data {:err-desc-str err-desc-str, :ret ret,
-                            :args (list coll),
-                            :coll-seq coll-seq, :ret-seq ret-seq,
-                            :exp-ret-seq exp-ret-seq}))
+      (validation-failure
+       "(transient coll) returned incorrect value"
+       {:err-desc-str err-desc-str, :ret ret,
+        :args (list coll),
+        :coll-seq coll-seq, :ret-seq ret-seq,
+        :exp-ret-seq exp-ret-seq}
+       (get @debug-opts :transient)))
     ret))
 
-(defn checking-transient [coll]
+(defn checking-transient
+  "checking-transient is similar to checking-pop, with the differences
+  summarized below.  See checking-pop documentation for details.
+
+      opts map: (get @d/debug-opts :transient)
+      function called if (:validating opts) is logical true:
+          validating-transient"
+  [coll]
   (if-not (pd/is-vector? coll)
     (clojure.core/transient coll)
     (let [opts (get @debug-opts :transient)
@@ -920,22 +1031,22 @@
                   (validating-transient clojure.core/transient err-desc-str
                                         coll)
                   (clojure.core/transient coll))]
-        (doseq [check-fn (:return-value-checks opts)]
-          (check-fn err-desc-str ret coll))
+        (sanity-check-vector-internals err-desc-str ret [coll] opts)
         ret))))
 
-;; Note: One possible advantage to having a validator for splice-rrbts
-;; is that fv/catvec can call splice-rrbts multiple times, any one of
-;; which can have an error in its return value, so wrapping validation
-;; around splice-rrbts should be able to catch any errors closer to
-;; the source of the problem.
+(defn validating-splice-rrbts
+  "validating-splice-rrbts behaves the same as validating-pop, with
+  the differences described here.  See validating-pop for details.
+  
+      good example f: clojure.core.rrb-vector.rrbt/splice-rrbts
+      opts map: (get @d/debug-opts :catvec)  ;; _not_ :splice-rrbts
 
-;; The only disadvantage I can think of is that it will be slower if
-;; there are many catvec calls on 3 or more vectors, since
-;; splice-rrbts will be called once for every pair of vectors, then in
-;; a lg(N) depth tree of calls on intermediate results.
+  Given that splice-rrbts is an internal implementation detail of the
+  core.rrb-vector library, it is expected that it is more likely you
+  would call validating-catvec instead of this function.
 
-(defn validating-splice-rrbts [err-desc-str nm am v1 v2]
+  If no exception is thrown, the return value is (f v1 v2)."
+  [err-desc-str nm am v1 v2]
   (let [orig-fn clojure.core.rrb-vector.rrbt/splice-rrbts
         v1-seq (copying-seq v1)
         v2-seq (copying-seq v2)
@@ -943,15 +1054,30 @@
         ret (orig-fn nm am v1 v2)
         ret-seq (copying-seq ret)]
     (when (not= ret-seq exp-ret-seq)
-      (println "ERROR: splice-rrbts returned incorrect value")
-      (record-failure-data {:err-desc-str err-desc-str, :ret ret,
-                            :args (list nm am v1 v2)
-                            :v1-seq v1-seq, :v2-seq v2-seq, :ret-seq ret-seq,
-                            :exp-ret-seq exp-ret-seq}))
+      (validation-failure
+       "splice-rrbts returned incorrect value"
+       {:err-desc-str err-desc-str, :ret ret,
+        :args (list nm am v1 v2)
+        :v1-seq v1-seq, :v2-seq v2-seq, :ret-seq ret-seq,
+        :exp-ret-seq exp-ret-seq}
+       (get @debug-opts :catvec)))
     ret))
 
-(defn checking-splice-rrbts [& args]
-  (let [opts (get @debug-opts :splice-rrbts)
+(defn checking-splice-rrbts
+  "checking-splice-rrbts is similar to checking-pop, with the
+  differences summarized below.  See checking-pop documentation for
+  details.
+
+  Unlike checking-pop, it seems unlikely that a user of
+  core.rrb-vector would want to call this function directly.  See
+  checking-catvec.  checking-splice-rrbts is part of the
+  implementation of checking-catvec.
+
+      opts map: (get @d/debug-opts :catvec)  ;; _not_ :splice-rrbts
+      function called if (:validating opts) is logical true:
+          validating-splice-rrbts"
+  [& args]
+  (let [opts (get @debug-opts :catvec)
         err-desc-str "splice-rrbts"]
     (when (:trace opts)
       (let [[_ _ v1 v2] args]
@@ -962,16 +1088,26 @@
     (let [ret (if (:validate opts)
                 (apply validating-splice-rrbts err-desc-str args)
                 (apply clojure.core.rrb-vector.rrbt/splice-rrbts args))]
-      (doseq [check-fn (:return-value-checks opts)]
-        (apply check-fn err-desc-str ret args))
+      (sanity-check-vector-internals err-desc-str ret args opts)
       ret)))
 
-(defn checking-splicev [v1 v2]
+(defn checking-splicev
+  "checking-splicev is identical to splicev, except that it calls
+  checking-splice-rrbts instead of splice-rrbts, for configurable
+  additional checking on each call to checking-splice-rrbts.
+
+  It is more likely that a core.rrb-vector library user will want to
+  call checking-catvec rather than this one.  checking-splicev is part
+  of the implementation of checking-catvec."
+  [v1 v2]
   (let [rv1 (as-rrbt v1)]
     (checking-splice-rrbts (.-nm rv1) (.-am rv1)
                            rv1 (as-rrbt v2))))
 
 (defn checking-catvec-impl
+  "checking-catvec-impl is identical to catvec, except that it calls
+  checking-splicev instead of splicev, for configurable additional
+  checking on each call to checking-splicev."
   ([]
      [])
   ([v1]
@@ -986,20 +1122,48 @@
      (checking-splicev (checking-splicev (checking-splicev v1 v2) (checking-splicev v3 v4))
                        (apply checking-catvec-impl vn))))
 
-(defn validating-catvec [err-desc-str & vs]
+(defn validating-catvec
+  "validating-catvec behaves similarly to validating-pop, but note
+  that it does not allow you to pass in a function f on which to
+  concatenate its arguments.  It hardcodes d/checking-catvec-impl for
+  that purpose.  See validating-pop for more details.
+  
+      opts map: (get @d/debug-opts :catvec)
+
+  If no exception is thrown, the return value is (apply
+  checking-catvec-impl vs)."
+  [err-desc-str & vs]
   (let [orig-fn checking-catvec-impl  ;; clojure.core.rrb-vector/catvec
         vs-seqs (doall (map copying-seq vs))
         exp-ret-seq (apply concat vs-seqs)
         ret (apply orig-fn vs)
         ret-seq (copying-seq ret)]
     (when (not= ret-seq exp-ret-seq)
-      (println "ERROR: catvec returned incorrect value")
-      (record-failure-data {:err-desc-str err-desc-str, :ret ret, :args vs,
-                            :vs-seqs vs-seqs, :ret-seq ret-seq,
-                            :exp-ret-seq exp-ret-seq}))
+      (validation-failure
+       "catvec returned incorrect value"
+       {:err-desc-str err-desc-str, :ret ret, :args vs,
+        :vs-seqs vs-seqs, :ret-seq ret-seq,
+        :exp-ret-seq exp-ret-seq}
+       (get @debug-opts :catvec)))
     ret))
 
-(defn checking-catvec [& args]
+(defn checking-catvec
+  "checking-catvec is similar to checking-pop, with the
+  differences summarized below.  See checking-pop documentation for
+  details.
+
+  Note that (get @d/debug-otps :catvec) is used to control tracing,
+  validating, and return value sanity checks for checking-catvec as a
+  whole.  This includes controlling those options for the function
+  checking-splice-rrbts, which is used to concatenate pairs of vectors
+  when you call checking-catvec with 3 or more vectors.  This takes a
+  bit longer to do the checking on every concatenation, but catches
+  problems closer to the time they are introduced.
+
+      opts map: (get @d/debug-opts :catvec)
+      function called if (:validating opts) is logical true:
+          validating-catvec"
+  [& args]
   (let [opts (get @debug-opts :catvec)
         err-desc-str "catvec"]
     (when (:trace opts)
@@ -1012,11 +1176,16 @@
                 (apply validating-catvec err-desc-str args)
                 (apply checking-catvec-impl ;; clojure.core.rrb-vector/catvec
                        args))]
-      (doseq [check-fn (:return-value-checks opts)]
-        (apply check-fn err-desc-str ret args))
+      (sanity-check-vector-internals err-desc-str ret args opts)
       ret)))
 
 (defn validating-slicev
+  "validating-slicev behaves similarly to validating-pop, but note
+  that it does not allow you to pass in a function f to call.  It
+  hardcodes slicev for that purpose.  See validating-pop for more
+  details.
+  
+      opts map: (get @d/debug-opts :subvec)  ;; _not_ :slicev"
   ([err-desc-str coll start]
    (validating-slicev err-desc-str coll start (count coll)))
   ([err-desc-str coll start end]
@@ -1026,15 +1195,29 @@
               coll start end)
          ret-seq (copying-seq ret)]
      (when (not= ret-seq exp-ret-seq)
-       (println "ERROR: (slicev coll start end) returned incorrect value")
-       (record-failure-data {:err-desc-str err-desc-str, :ret ret,
-                             :args (list coll start end),
-                             :coll-seq coll-seq, :ret-seq ret-seq,
-                             :exp-ret-seq exp-ret-seq}))
+       (validation-failure
+        "(slicev coll start end) returned incorrect value"
+        {:err-desc-str err-desc-str, :ret ret,
+         :args (list coll start end),
+         :coll-seq coll-seq, :ret-seq ret-seq,
+         :exp-ret-seq exp-ret-seq}
+        (get @debug-opts :subvec)))
      ret)))
 
-(defn checking-slicev [& args]
-  (let [opts (get @debug-opts :slicev)
+(defn checking-slicev
+  "checking-slicev is similar to checking-pop, with the differences
+  summarized below.  See checking-pop documentation for details.
+
+  Unlike checking-pop, it seems unlikely that a user of
+  core.rrb-vector would want to call this function directly.  See
+  checking-subvec.  checking-slicev is part of the implementation of
+  checking-subvec.
+
+      opts map: (get @d/debug-opts :subvec)  ;; _not_ :slicev
+      function called if (:validating opts) is logical true:
+          validating-slicev"
+  [& args]
+  (let [opts (get @debug-opts :subvec)
         err-desc-str "slicev"]
     (when (:trace opts)
       (let [[v start end] args]
@@ -1044,17 +1227,27 @@
                 (apply validating-slicev err-desc-str args)
                 (apply clojure.core.rrb-vector.protocols/slicev
                        args))]
-      (doseq [check-fn (:return-value-checks opts)]
-        (apply check-fn err-desc-str ret args))
+      (sanity-check-vector-internals err-desc-str ret args opts)
       ret)))
 
 (defn checking-subvec
+  "checking-subvec is similar to checking-pop, with the differences
+  summarized below.  See checking-pop documentation for details.
+
+      opts map: (get @d/debug-opts :subvec)
+      function called if (:validating opts) is logical true:
+          validating-slicev"
   ([v start]
    (checking-slicev v start (count v)))
   ([v start end]
    (checking-slicev v start end)))
 
-(defn check-subvec [extra-checks? init & starts-and-ends]
+(defn check-subvec
+  "Perform a sequence of calls to subvec an a core.rrb-vector vector,
+  as well as a normal Clojure vector, returning true if they give the
+  same results, otherwise false.  Intended for use in tests of this
+  library."
+  [extra-checks? init & starts-and-ends]
   (let [v1 (loop [v   (vec (range init))
                   ses (seq starts-and-ends)]
              (if ses
@@ -1070,7 +1263,12 @@
                v))]
     (pd/same-coll? v1 v2)))
 
-(defn check-catvec [extra-checks? & counts]
+(defn check-catvec
+  "Perform a sequence of calls to catvec or checking-catvec on one or
+  more core.rrb-vector vectors.  Return true if Clojure's built-in
+  concat function give the same results, otherwise false.  Intended
+  for use in tests of this library."
+  [extra-checks? & counts]
   (let [prefix-sums (reductions + counts)
         ranges (map range (cons 0 prefix-sums) prefix-sums)
         v1 (apply concat ranges)
@@ -1078,7 +1276,12 @@
         v2 (apply my-catvec (map fv/vec ranges))]
     (pd/same-coll? v1 v2)))
 
-(defn generative-check-subvec [extra-checks? iterations max-init-cnt slices]
+(defn generative-check-subvec
+  "Perform many calls to check-subvec with randomly generated inputs.
+  Intended for use in tests of this library.  Returns true if all
+  tests pass, otherwise throws an exception containing data about the
+  inputs that caused the failing test."
+  [extra-checks? iterations max-init-cnt slices]
   (dotimes [_ iterations]
     (let [init-cnt (rand-int (inc max-init-cnt))
           s1       (rand-int init-cnt)
@@ -1100,8 +1303,12 @@
             (recur (conj s&es s e) c (dec slices)))))))
   true)
 
-(defn generative-check-catvec [extra-checks? iterations max-vcnt
-                               min-cnt max-cnt]
+(defn generative-check-catvec
+  "Perform many calls to check-catvec with randomly generated inputs.
+  Intended for use in tests of this library.  Returns true if all
+  tests pass, otherwise throws an exception containing data about the
+  inputs that caused the failing test."
+  [extra-checks? iterations max-vcnt min-cnt max-cnt]
   (dotimes [_ iterations]
     (let [vcnt (inc (rand-int (dec max-vcnt)))
           cnts (vec (repeatedly vcnt
