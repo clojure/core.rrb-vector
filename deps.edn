@@ -26,12 +26,6 @@
   :cljs-test {:extra-paths ["src/test/cljs" "src/test/cljc"]
               :extra-deps {org.clojure/test.check {:mvn/version "0.7.0"}}}
 
-  ;; Run only very short tests
-  :clj-rt {:main-opts ["-e" "(require,'[clojure.test,:as,t],'clojure.core.rrb-vector.test-clj-only),(t/run-tests,'clojure.core.rrb-vector.test-clj-only)"]}
-  :cljs-rt {:main-opts ["-m" "cljs.main"
-                          "-re" "node"
-                          "-e" "(require,'[clojure.test,:as,t],'clojure.core.rrb-vector.test-cljs-only),(t/run-tests,'clojure.core.rrb-vector.test-cljs-only)"]}
-
   ;; Run 'short' tests
   :clj-runt {:main-opts ["-e" "(require,'[clojure.test,:as,t],'clojure.core.rrb-vector.test-clj-only,'clojure.core.rrb-vector.test-common),(t/run-tests,'clojure.core.rrb-vector.test-common),(t/run-tests,'clojure.core.rrb-vector.test-clj-only)"]}
   :cljs-runt {:main-opts ["-m" "cljs.main"

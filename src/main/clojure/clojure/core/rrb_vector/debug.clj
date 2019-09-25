@@ -1273,7 +1273,12 @@
         v2 (apply my-catvec (map fv/vec ranges))]
     (pd/same-coll? v1 v2)))
 
-(defn generative-check-subvec [extra-checks? iterations max-init-cnt slices]
+(defn generative-check-subvec
+  "Perform many calls to check-subvec with randomly generated inputs.
+  Intended for use in tests of this library.  Returns true if all
+  tests pass, otherwise throws an exception containing data about the
+  inputs that caused the failing test."
+  [extra-checks? iterations max-init-cnt slices]
   (dotimes [_ iterations]
     (let [init-cnt (rand-int (inc max-init-cnt))
           s1       (rand-int init-cnt)
@@ -1295,8 +1300,12 @@
             (recur (conj s&es s e) c (dec slices)))))))
   true)
 
-(defn generative-check-catvec [extra-checks? iterations max-vcnt
-                               min-cnt max-cnt]
+(defn generative-check-catvec
+  "Perform many calls to check-catvec with randomly generated inputs.
+  Intended for use in tests of this library.  Returns true if all
+  tests pass, otherwise throws an exception containing data about the
+  inputs that caused the failing test."
+  [extra-checks? iterations max-vcnt min-cnt max-cnt]
   (dotimes [_ iterations]
     (let [vcnt (inc (rand-int (dec max-vcnt)))
           cnts (vec (repeatedly vcnt

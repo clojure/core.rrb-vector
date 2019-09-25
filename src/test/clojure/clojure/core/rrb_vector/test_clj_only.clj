@@ -50,18 +50,35 @@
 ;; we use test.check version 0.10.0 or later.  However, that seems to
 ;; be incompatible with running cljs tests with Clojure 1.6.0, so for
 ;; now at least this test is clj-only.
+;;
+;; Note: according to several deftest forms within the test.check
+;; library's own internal set of tests, it
+;; uses (is (:result (tc/quick-check ...))) to check whether a result
+;; passes or fails.
+;;
+;; The doc string for the latest version of test.check as of
+;; 2019-Sep-25 says :result is a legacy key, and that :pass?  should
+;; have the same value.  I like the descriptiveness of :pass? better,
+;; and would prefer to use that here, but core.rrb-vector is not using
+;; that latest version of test.check yet.  Consider updating to use
+;; key :pass? instead of :result if core.rrb-vector updates to a
+;; version of test.check that returns that key.
+;;
+;; When quick-check finds a failing test case, it still returns a map
+;; that Clojure considers to be a logical true value, so the test will
+;; still pass if you do `(is (tc/quick-check ...))`.
 
 (deftest test-reduce-subvec-catvec-generative
   (letfn [(insert-by-sub-catvec [v n]
             (fv/catvec (fv/subvec v 0 n) (dv/cvec ['x]) (fv/subvec v n)))
           (repeated-subvec-catvec [i]
             (reduce insert-by-sub-catvec (dv/cvec (range i)) (range i 0 -1)))]
-    (is (tc/quick-check 100
+    (is (:result (tc/quick-check 1000
           (prop/for-all [cnt (gen/fmap
-                               (comp inc #(mod % 60000))
-                               gen/pos-int)]
-            (= (repeated-subvec-catvec cnt)
-               (interleave (range cnt) (repeat 'x))))))))
+                              (comp inc #(mod % 60000))
+                              gen/pos-int)]
+                        (= (repeated-subvec-catvec cnt)
+                           (interleave (range cnt) (repeat 'x)))))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -89,9 +106,6 @@
   (apply assoc-in-bytevec fv/vector-of args))
 
 (deftest test-crrbv-13
-  (println "deftest test-crrbv-13")
-  ;; Some cases work, probably the ones where the tail is being
-  ;; updated.
   (doseq [use-transient? [false true]]
     (doseq [args [[10 [5]]
                   [32 [0]]

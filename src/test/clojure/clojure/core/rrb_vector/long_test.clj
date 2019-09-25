@@ -36,7 +36,6 @@
 
 (deftest test-slicing-generative
   (testing "slicing (generative)"
-    ;; TBD: What does dv/generative-check-subvec return on success?
     (is (try
           (apply dv/generative-check-subvec u/extra-checks? check-subvec-params)
           (catch ExceptionInfo e
