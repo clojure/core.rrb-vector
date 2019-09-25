@@ -16,6 +16,16 @@
 ;;(def num-tests short-num-tests)
 (def num-tests medium-num-tests)
 
+;; collection-check.core/assert-vector-like calls test.chuck/checking.
+;; The README for the test.chuck library says that test.chuck/checking
+;; is intended to be called directly within a `deftest` form, with no
+;; need for any `is` or `are` calls, because test.chuck/checking makes
+;; calls to those macros inside itself.
+;;
+;; I have confirmed, by intentionally making the function fv/vector
+;; return incorrect values in some cases, that this deftest does fail
+;; as it should, given the direct call to function assert-vector-like.
+
 (deftest collection-check
   (println "Before assert-vector-like with num-tests=" num-tests)
   (assert-vector-like num-tests (fv/vector) gen/int)
