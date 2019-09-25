@@ -27,11 +27,15 @@
 (def num-deftests-started (atom 0))
 (def last-deftest-start-time (atom nil))
 
+(defn print-test-env-info []
+  (println "extra-checks?=" extra-checks?)
+  (println "*clojurescript-version*" *clojurescript-version*))
+
 (defmethod test/report [:cljs.test/default :begin-test-var]
   [m]
   (let [n (swap! num-deftests-started inc)]
     (when (== n 1)
-      (println "*clojurescript-version*" *clojurescript-version*)))
+      (print-test-env-info)))
   (println)
   (println "starting cljs test" (:var m))
   (reset! last-deftest-start-time (now-msec)))

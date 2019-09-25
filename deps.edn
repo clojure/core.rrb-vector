@@ -26,17 +26,17 @@
   :cljs-test {:extra-paths ["src/test/cljs" "src/test/cljc"]
               :extra-deps {org.clojure/test.check {:mvn/version "0.7.0"}}}
 
-  ;; Run only very short tests
-  :clj-rt {:main-opts ["-e" "(require,'[clojure.test,:as,t],'clojure.core.rrb-vector.test-clj-only),(t/run-tests,'clojure.core.rrb-vector.test-clj-only)"]}
-  :cljs-rt {:main-opts ["-m" "cljs.main"
-                          "-re" "node"
-                          "-e" "(require,'[clojure.test,:as,t],'clojure.core.rrb-vector.test-cljs-only),(t/run-tests,'clojure.core.rrb-vector.test-cljs-only)"]}
-
   ;; Run 'short' tests
   :clj-runt {:main-opts ["-e" "(require,'[clojure.test,:as,t],'clojure.core.rrb-vector.test-clj-only,'clojure.core.rrb-vector.test-common),(t/run-tests,'clojure.core.rrb-vector.test-common),(t/run-tests,'clojure.core.rrb-vector.test-clj-only)"]}
   :cljs-runt {:main-opts ["-m" "cljs.main"
                           "-re" "node"
                           "-e" "(require,'[clojure.test,:as,t],'clojure.core.rrb-vector.test-cljs-only,'clojure.core.rrb-vector.test-common),(t/run-tests,'clojure.core.rrb-vector.test-common),(t/run-tests,'clojure.core.rrb-vector.test-cljs-only)"]}
+
+  ;; Run 'short' tests with extra-checks? enabled
+  :clj-extrachecks-runt {:main-opts ["-e" "(require,'[clojure.test,:as,t],'clojure.core.rrb-vector.test-clj-only,'clojure.core.rrb-vector.test-common),(alter-var-root,#'clojure.core.rrb-vector.test-utils/extra-checks?,(constantly,true)),(t/run-tests,'clojure.core.rrb-vector.test-common),(t/run-tests,'clojure.core.rrb-vector.test-clj-only)"]}
+  :cljs-extrachecks-runt {:main-opts ["-m" "cljs.main"
+                          "-re" "node"
+                          "-e" "(require,'[clojure.test,:as,t],'clojure.core.rrb-vector.test-cljs-only,'clojure.core.rrb-vector.test-common),(set!,clojure.core.rrb-vector.test-utils/extra-checks?,true),(t/run-tests,'clojure.core.rrb-vector.test-common),(t/run-tests,'clojure.core.rrb-vector.test-cljs-only)"]}
 
   ;; Run generative and/or 'long' tests
   :clj-runlongtests {:main-opts ["-e"
@@ -102,6 +102,8 @@
   :eastwood {:extra-deps {jonase/eastwood {:mvn/version "0.3.5"}}
              :main-opts ["-m" "eastwood.lint"
                          "{:source-paths,[\"src/main/clojure\"],:test-paths,[\"src/test/clojure\",\"src/test/cljs\",\"src/test_local/clojure\"],:add-linters,[:unused-fn-args,:unused-locals,:unused-namespaces,:unused-private-vars],:exclude-linters,[:implicit-dependencies],:exclude-namespaces,[]}"]}
+  :clj-kondo {:extra-deps {clj-kondo {:mvn/version "RELEASE"}}
+              :main-opts ["-m" "clj-kondo.main"]}
 
   ;; pull in specific versions of Clojure:
   :1.5    {:override-deps {org.clojure/clojure {:mvn/version "1.5.1"}}}

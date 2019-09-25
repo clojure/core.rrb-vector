@@ -35,13 +35,14 @@
     (doseq [cp-str cp-strs]
       (println "  " cp-str))))
 
-(defn print-clj-jvm-info []
+(defn print-test-env-info []
   (try
     (let [shift-var (resolve
                      'clojure.core.rrb-vector.parameters/shift-increment)]
       (println "shift-increment=" @shift-var " (from parameters namespace)"))
     (catch Exception e
       (println "shift-increment=5 (assumed because no parameters namespace)")))
+  (println "extra-checks?=" extra-checks?)
   (let [p (System/getProperties)]
     (println "java.vm.name" (get p "java.vm.name"))
     (println "java.vm.version" (get p "java.vm.version"))
@@ -52,7 +53,7 @@
   [m]
   (let [n (swap! num-deftests-started inc)]
     (when (== n 1)
-      (print-clj-jvm-info)))
+      (print-test-env-info)))
   (println)
   (println "starting clj test" (:var m))
   (reset! last-deftest-start-time (now-msec)))

@@ -25,6 +25,9 @@ sock*)
 test*)
     # Run 'short' tests
     exec clojure -A:clj:clj-test:clj-runt ;;
+chec*)
+    # Run 'short' tests with extra checks enabled
+    exec clojure -A:clj:clj-test:clj-extrachecks-runt ;;
 long*)
     # Run long/generative tests
     exec clojure -A:clj:clj-test:clj-runlongtests ;;
