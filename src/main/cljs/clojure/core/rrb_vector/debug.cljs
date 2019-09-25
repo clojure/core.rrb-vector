@@ -188,7 +188,19 @@
                  "tail:")
                (vec tail))))))
 
-(defn first-diff [xs ys]
+(defn first-diff
+  "Compare two sequences to see if they have = elements in the same
+  order, and both sequences have the same number of elements.  If all
+  of those conditions are true, and no exceptions occur while calling
+  seq, first, and next on the seqs of xs and ys, then return -1.
+
+  If two elements at the same index in each sequence are found not =
+  to each other, or the sequences differ in their number of elements,
+  return the index, 0 or larger, at which the first difference occurs.
+
+  If an exception occurs while calling seq, first, or next, throw an
+  exception that contains the index at which this exception occurred."
+  [xs ys]
   (loop [i 0 xs (seq xs) ys (seq ys)]
     (if (try (and xs ys (= (first xs) (first ys)))
              (catch js/Error e
@@ -1248,7 +1260,7 @@
     (pd/same-coll? v1 v2)))
 
 (defn check-catvec
-  "Perform a sequence of calls to catvec or checking-catvec an one or
+  "Perform a sequence of calls to catvec or checking-catvec on one or
   more core.rrb-vector vectors.  Return true if Clojure's built-in
   concat function give the same results, otherwise false.  Intended
   for use in tests of this library."

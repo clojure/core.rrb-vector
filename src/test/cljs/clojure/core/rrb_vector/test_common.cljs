@@ -3,7 +3,8 @@
             [clojure.core.reducers :as r]
             [clojure.core.rrb-vector.test-utils :as u]
             [clojure.core.rrb-vector :as fv]
-            [clojure.core.rrb-vector.debug :as dv]))
+            [clojure.core.rrb-vector.debug :as dv]
+            [clojure.core.rrb-vector.debug-platform-dependent :as pd]))
 
 ;; The intent is to keep this file as close to
 ;; src/test/clojure/clojure/core/rrb_vector/test_common.clj as
@@ -130,9 +131,10 @@
 
 (deftest test-relaxed
   (let [my-catvec (if u/extra-checks? dv/checking-catvec fv/catvec)]
-    (is (= (into (my-catvec (dv/cvec (range 123)) (dv/cvec (range 68))) (range 64))
+    (is (= (into (my-catvec (dv/cvec (range 123)) (dv/cvec (range 68)))
+                 (range 64))
            (concat (range 123) (range 68) (range 64))))
-    (is (= (dv/slow-into (fv/catvec (dv/cvec (range 123)) (dv/cvec (range 68)))
+    (is (= (dv/slow-into (my-catvec (dv/cvec (range 123)) (dv/cvec (range 68)))
                          (range 64))
            (concat (range 123) (range 68) (range 64))))))
 
@@ -350,14 +352,14 @@
                (transient)
                (my-pop!)
                (persistent!))]
-    ;; This test passes
     (is (= (seq v1) (range (inc bfactor-squared))))
-    ;; This also passes
     (is (= (seq v2) (range (dec bfactor-squared))))
-    ;; This fails with NullPointerException while traversing the seq
-    ;; on clj.  It gets a different kind of error with cljs.
+    ;; This used to fail with core.rrb-vector version 0.0.14 with
+    ;; NullPointerException while traversing the seq on clj.  It gets
+    ;; a different kind of error with cljs.
     (is (= (seq v3) (range bfactor-squared)))
-    ;; This one causes a NullPointerException while traversing the seq
+    ;; This one caused a NullPointerException with version 0.0.14
+    ;; while traversing the seq
     (is (= (seq v4) (range bfactor-squared)))))
 
 (deftest test-npe-for-1025-then-pop!
@@ -420,13 +422,14 @@
   ;; This one passes
   (is (= (play-core 10 1128)
          (play-rrbv 10 1128)))
-  ;; This ends up with (play-rrbv 10 1129) throwing an exception
+  ;; This ends up with (play-rrbv 10 1129) throwing an exception, with
+  ;; core.rrb-vector version 0.0.14
   (is (= (play-core 10 1129)
          (play-rrbv 10 1129)))
 
   ;; The previous test demonstrates a bug in the transient RRB vector
-  ;; implementation.  The one below demonstrates a similar bug in the
-  ;; persistent RRB vector implementation.
+  ;; implementation.  The one below demonstrated a similar bug in the
+  ;; persistent RRB vector implementation in version 0.0.14.
   (let [v1128 (:marbles (last (play-rrbv 10 1128)))
         v1129-pre (-> v1128
                       (fv/subvec 2)
@@ -434,27 +437,20 @@
     (is (every? integer? (conj v1129-pre 2002)))))
 
 (deftest test-crrbv-21
-  ;; The following sequence of operations gives a different exception
-  ;; than the above, and I suspect is probably a different root cause
-  ;; with a distinct fix required.  It might be the same root cause as
-  ;; npe-for-1025-then-pop! but I will add a separate test case until
-  ;; I know for sure.  Even if they are the same root cause, it does
-  ;; not take long to run.
-
-  ;; Note: Even once this bug is fixed, I want to know the answer to
-  ;; whether starting from v1128 and then pop'ing off each number of
-  ;; elements, until it is down to empty or very nearly so, causes any
-  ;; of the error checks within the current version of ranges-errors
-  ;; to give an error.  It may require some correcting.
+  ;; The following sequence of operations gave a different exception
+  ;; than the above with core.rrb-vector version 0.0.14, and was a
+  ;; different root cause with a distinct fix required.  I do not
+  ;; recall whether it was the same root cause as
+  ;; npe-for-1025-then-pop! but both test cases are included for extra
+  ;; testing goodness.
   (let [v1128 (:marbles (last (play-rrbv 10 1128)))
         vpop1 (reduce (fn [v i] (pop v))
                       v1128 (range 1026))]
     (is (every? integer? (pop vpop1)))
-    ;; The transient version below gives a similar exception, but the
-    ;; call stack goes through the transient version of popTail,
-    ;; rather than the persistent version of popTail that the one
-    ;; above does.  It seems likely that both versions of popTail have
-    ;; a similar bug.
+    ;; The transient version below gave a similar exception with
+    ;; version 0.0.14, but the call stack went through the transient
+    ;; version of popTail, rather than the persistent version of
+    ;; popTail that the one above does.
     (is (every? integer? (persistent! (pop! (transient vpop1)))))))
 
 (deftest test-crrbv-22
@@ -512,8 +508,7 @@
 (defn vstats [v]
   (str "cnt=" (count v)
        " shift=" (get-shift v)
-       ;;" %=" (format "%5.1f" (* 100.0 (dv/fraction-full v)))
-       ))
+       " %=" (pd/format "%5.1f" (* 100.0 (dv/fraction-full v)))))
 
 ;;(def custom-catvec-data (atom []))
 
