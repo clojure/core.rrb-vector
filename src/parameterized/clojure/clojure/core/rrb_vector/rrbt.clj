@@ -1750,12 +1750,7 @@
       ;; else the fast result is good
       splice-result)))
 
-(defn post-splice-fixup [^Vector v1 ^Vector v2 ^Vector splice-result]
-  (->> splice-result
-       peephole-optimize-root
-       (fallback-to-slow-splice-if-needed v1 v2)))
-
-(defn splice-rrbts [^NodeManager nm ^ArrayManager am ^Vector v1 ^Vector v2]
+(defn splice-rrbts-main [^NodeManager nm ^ArrayManager am ^Vector v1 ^Vector v2]
   (cond
     (zero? (count v1)) v2
     (> (+ (long (count v1)) (long (count v2))) max-vector-elements)
@@ -1809,27 +1804,30 @@
           ncnt2   (if n2
                     (int ncnt2)
                     (int 0))]
-      (post-splice-fixup
-       v1 v2
-       (if n2
-         (let [arr      (object-array p/non-regular-array-len)
-               new-root (.node nm nil arr)]
-           (aset arr 0 n1)
-           (aset arr 1 n2)
-           (aset arr p/max-branches (doto (int-array p/non-regular-array-len)
-                          (aset 0 ncnt1)
-                          (aset 1 (+ ncnt1 ncnt2))
-                          (aset p/max-branches 2)))
-           (Vector. nm am (+ (count v1) (count v2)) (+ s p/shift-increment) new-root (.-tail v2)
-                    nil 0 0))
-         (loop [r n1
-                s (int s)]
-           (if (and (> s (int p/shift-increment))
-                    (nil? (aget ^objects (.array nm r) 1)))
-             (recur (aget ^objects (.array nm r) 0)
-                    (unchecked-subtract-int s (int p/shift-increment)))
-             (Vector. nm am (+ (count v1) (count v2)) s r (.-tail v2)
-                      nil 0 0))))))))
+      (if n2
+        (let [arr      (object-array p/non-regular-array-len)
+              new-root (.node nm nil arr)]
+          (aset arr 0 n1)
+          (aset arr 1 n2)
+          (aset arr p/max-branches (doto (int-array p/non-regular-array-len)
+                         (aset 0 ncnt1)
+                         (aset 1 (+ ncnt1 ncnt2))
+                         (aset p/max-branches 2)))
+          (Vector. nm am (+ (count v1) (count v2)) (+ s p/shift-increment) new-root (.-tail v2)
+                   nil 0 0))
+        (loop [r n1
+               s (int s)]
+          (if (and (> s (int p/shift-increment))
+                   (nil? (aget ^objects (.array nm r) 1)))
+            (recur (aget ^objects (.array nm r) 0)
+                   (unchecked-subtract-int s (int p/shift-increment)))
+            (Vector. nm am (+ (count v1) (count v2)) s r (.-tail v2)
+                     nil 0 0)))))))
+
+(defn splice-rrbts [^NodeManager nm ^ArrayManager am ^Vector v1 ^Vector v2]
+  (let [r1 (splice-rrbts-main nm am v1 v2)
+        r2 (peephole-optimize-root r1)]
+    (fallback-to-slow-splice-if-needed v1 v2 r2)))
 
 (defn array-copy [^ArrayManager am from i to j len]
   (loop [i   (int i)
