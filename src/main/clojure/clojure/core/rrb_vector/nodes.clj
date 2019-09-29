@@ -1,4 +1,5 @@
 (ns clojure.core.rrb-vector.nodes
+  (:require [clojure.core.rrb-vector.parameters :as p])
   (:import (clojure.core VecNode ArrayManager)
            (clojure.lang PersistentVector PersistentVector$Node)
            (java.util.concurrent.atomic AtomicReference)))

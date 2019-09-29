@@ -1,6 +1,7 @@
 (ns clojure.core.rrb-vector.debug-platform-dependent
   (:refer-clojure :exclude [format printf])
-  (:require clojure.core.rrb-vector.rrbt
+  (:require [clojure.core.rrb-vector.parameters :as p]
+            clojure.core.rrb-vector.rrbt
             [clojure.core.rrb-vector.nodes
              :refer [ranges object-nm primitive-nm object-am]]
             [clojure.core.rrb-vector :as fv])
