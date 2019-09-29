@@ -1,5 +1,6 @@
 (ns clojure.core.rrb-vector.debug
-  (:require [clojure.core.rrb-vector.rrbt
+  (:require [clojure.core.rrb-vector.parameters :as p]
+            [clojure.core.rrb-vector.rrbt
              :refer [as-rrbt]]
             [clojure.core.rrb-vector :as fv]
             [clojure.core.rrb-vector.rrbt :as rrbt]
@@ -240,7 +241,9 @@
 ;; intended for use in test code that constructs vectors used as
 ;; parameters to other functions operating on vectors.
 (defn cvec [coll]
-  (clojure.core/vec coll))
+  (if (= p/shift-increment 5)
+    (clojure.core/vec coll)
+    (fv/vec (seq coll))))
 
 (defn slow-into [to from]
   (reduce conj to from))
@@ -434,7 +437,7 @@
       {:error true, :kind :internal
        :description
        (str "Found internal regular node with # full + # partial=" num-non-nil
-            " children outside of range [1, 32]."
+            " children outside of range [1, " 32 "]."
             " root-node?=" root-node? " root-node-cnt=" root-node-cnt)
        :data children}
       :else

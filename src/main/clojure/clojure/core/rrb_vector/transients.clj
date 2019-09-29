@@ -1,5 +1,6 @@
 (ns clojure.core.rrb-vector.transients
-  (:require [clojure.core.rrb-vector.nodes :refer [ranges last-range
+  (:require [clojure.core.rrb-vector.parameters :as p]
+            [clojure.core.rrb-vector.nodes :refer [ranges last-range
                                                    overflow?]])
   (:import (clojure.core.rrb_vector.nodes NodeManager)
            (clojure.core ArrayManager)
@@ -121,7 +122,7 @@
                                                (unchecked-subtract-int
                                                 shift 5))]
                           (aset ^objects arr subidx editable-child)
-                          (recur editable-child (- shift 5))))))))
+                          (recur editable-child (- shift (int 5)))))))))
               ret)
           (let [arr  (.array nm ret)
                 rngs (ranges nm ret)
@@ -303,7 +304,7 @@
             (let [arr (object-array 32)
                   ret (.node nm edit arr)]
               (aset ^objects arr 0 n)
-              (recur (unchecked-add s 5) ret))))
+              (recur (unchecked-add s (int 5)) ret))))
         (loop [s 0 n current-node]
           (if (== s shift)
             n
@@ -314,4 +315,4 @@
               (aset ^objects arr 32 rngs)
               (aset rngs 32 1)
               (aset rngs 0 (.alength am tail))
-              (recur (unchecked-add s 5) ret))))))))
+              (recur (unchecked-add s (int 5)) ret))))))))

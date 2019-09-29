@@ -1,6 +1,7 @@
 (ns clojure.core.rrb-vector.rrbt
   (:refer-clojure :exclude [assert ->VecSeq])
-  (:require [clojure.core.rrb-vector.protocols
+  (:require [clojure.core.rrb-vector.parameters :as p]
+            [clojure.core.rrb-vector.protocols
              :refer [PSliceableVector slicev
                      PSpliceableVector splicev
                      PTransientDebugAccess]]
