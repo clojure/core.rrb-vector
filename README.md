@@ -108,6 +108,8 @@ snapshots are available from the Sonatype OSS repository.
 
  * [Development snapshots](https://oss.sonatype.org/index.html#nexus-search;gav~org.clojure~core.rrb-vector~~~)
 
+ * [Change log](CHANGES.md) of changes made in this library.
+
 Follow the first link above to discover the current release number.
 
 [Leiningen](http://leiningen.org/) dependency information:
