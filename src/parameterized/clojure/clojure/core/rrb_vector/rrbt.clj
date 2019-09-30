@@ -1617,9 +1617,9 @@
 
 (defn peephole-optimize-root [^Vector v]
   (let [config @peephole-optimization-config]
-    (if (<= (.-shift v) (* 2 p/shift-increment))
+    (if (<= (.-shift v) p/shift-increment-times-2)
       ;; Tree depth cannot be reduced if shift <= p/shift-increment.
-      ;; TBD: If shift=(* 2 p/shift-increment), the grandchildren nodes need to be handled
+      ;; TBD: If shift=p/shift-increment-times-2, the grandchildren nodes need to be handled
       ;; by an am array manager for primitive vectors, which I haven't
       ;; written code for yet below, but so far this peephole
       ;; optimizer seems to be working sufficiently well without

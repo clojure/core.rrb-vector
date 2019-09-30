@@ -47,6 +47,10 @@
                     ["p/max-branches-minus-1" "31"]
                     ["p/max-branches-minus-2" "30"]
 
+                    ;; Similarly, shift-increment-times-2 must be
+                    ;; replaced before shift-increment.
+                    ["p/shift-increment-times-2" "10"]
+
                     ["p/shift-increment" "5"]
                     ["p/max-branches" "32"]
                     ["p/branch-mask" "0x1f"]

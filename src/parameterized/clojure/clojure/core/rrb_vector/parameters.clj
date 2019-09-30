@@ -10,6 +10,9 @@
 ;; 5 3 2
 (def shift-increment 5)
 
+;; 10 6 4
+(def shift-increment-times-2 (* 2 shift-increment))
+
 ;; 32 8 4
 (def max-branches (bit-shift-left 1 shift-increment))
 
