@@ -32,7 +32,8 @@
   {:author "Michał Marczyk"}
 
   (:refer-clojure :exclude [vector vector-of vec subvec])
-  (:require [clojure.core.rrb-vector.protocols :refer [slicev splicev]]
+  (:require [clojure.core.rrb-vector.parameters :as p]
+            [clojure.core.rrb-vector.protocols :refer [slicev splicev]]
             [clojure.core.rrb-vector.nodes
              :refer [ams object-am object-nm primitive-nm
                      empty-pv-node empty-gvec-node]]
