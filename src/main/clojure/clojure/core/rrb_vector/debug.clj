@@ -1,7 +1,5 @@
 (ns clojure.core.rrb-vector.debug
   (:require [clojure.core.rrb-vector.parameters :as p]
-            [clojure.core.rrb-vector.rrbt
-             :refer [as-rrbt]]
             [clojure.core.rrb-vector :as fv]
             [clojure.core.rrb-vector.rrbt :as rrbt]
             ;; This page:
@@ -1051,7 +1049,7 @@
 
   If no exception is thrown, the return value is (f v1 v2)."
   [err-desc-str nm am v1 v2]
-  (let [orig-fn clojure.core.rrb-vector.rrbt/splice-rrbts-main
+  (let [orig-fn rrbt/splice-rrbts-main
         v1-seq (copying-seq v1)
         v2-seq (copying-seq v2)
         exp-ret-seq (concat v1-seq v2-seq)
@@ -1091,7 +1089,7 @@
                  "(type v2)=" (type v2))))
     (let [ret (if (:validate opts)
                 (apply validating-splice-rrbts-main err-desc-str args)
-                (apply clojure.core.rrb-vector.rrbt/splice-rrbts-main args))]
+                (apply rrbt/splice-rrbts-main args))]
       (sanity-check-vector-internals err-desc-str ret args opts)
       ret)))
 
@@ -1139,9 +1137,9 @@
   call checking-catvec rather than this one.  checking-splicev is part
   of the implementation of checking-catvec."
   [v1 v2]
-  (let [rv1 (as-rrbt v1)]
+  (let [rv1 (rrbt/as-rrbt v1)]
     (checking-splice-rrbts (.-nm rv1) (.-am rv1)
-                           rv1 (as-rrbt v2))))
+                           rv1 (rrbt/as-rrbt v2))))
 
 (defn checking-catvec-impl
   "checking-catvec-impl is identical to catvec, except that it calls
