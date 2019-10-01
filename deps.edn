@@ -82,10 +82,10 @@
 ;;  :cljs-runner {:extra-deps {olical/cljs-test-runner {:mvn/version "3.7.0"}}
 ;;                :main-opts ["-m" "cljs-test-runner.main"
 ;;                            "-d" "src/test/cljs"]}
-  :cljol {:extra-deps {cljol {:local/root "/Users/jafinger/clj/cljol"}
-                       org.clojure/clojure {:mvn/version "1.7.0"}}}
-;;  :cljol {:extra-deps {cljol {:git/url "https://github.com/jafingerhut/cljol"
-;;                              :sha "f957e6f5e95544342885e803ead94df91567f0ef"}}}
+;;  :cljol {:extra-deps {cljol {:local/root "/Users/andy/clj/cljol"}
+;;                       org.clojure/clojure {:mvn/version "1.7.0"}}}
+  :cljol {:extra-deps {cljol {:git/url "https://github.com/jafingerhut/cljol"
+                              :sha "bb5549e9832e73e4a9fc5dfdf695c48e797729fa"}}}
   :cap {;; recommended options from README of
         ;; https://github.com/clojure-goes-fast/clj-async-profiler
         :jvm-opts ["-Djdk.attach.allowAttachSelf"
