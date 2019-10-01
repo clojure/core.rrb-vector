@@ -6,8 +6,8 @@
   :min-lein-version "2.2.0"
   :parent [org.clojure/pom.contrib "0.2.2"]
   :dependencies [[org.clojure/clojure "1.5.1"]]
-  :source-paths ["src/parameterized/clojure"
-                 "src/main/cljs"]
+  :source-paths ["src/main/clojure" "src/main/cljs"]
+  ;;:source-paths ["src/parameterized/clojure" "src/main/cljs"]
   :test-paths ["src/test/clojure"]
   :test-selectors {:default (complement :cljs-nashorn)}
   :jvm-opts ^:replace ["-XX:+UseG1GC"]

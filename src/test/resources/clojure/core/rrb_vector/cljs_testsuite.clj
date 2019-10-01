@@ -3,7 +3,8 @@
    [clojure.test :refer [is]]
    [cljs.repl.nashorn :as repl-nh]
    [cljs.build.api :as bapi]
-   [clojure.java.io :as io])
+   [clojure.java.io :as io]
+   [clojure.core.rrb-vector.test-utils :as u])
   (:import
    java.nio.file.Files
    java.nio.file.attribute.FileAttribute))
@@ -31,8 +32,11 @@
 
 (defn run-testsuite! [dir]
   (System/setProperty "nashorn.persistent.code.cache" "target/nashorn_code_cache")
-  (let [engine (repl-nh/create-engine)]
+  (let [t1 (u/now-msec)
+        engine (repl-nh/create-engine)]
     (compile-testsuite! dir)
+    (println "INFO" "Elapsed time (sec)" (/ (- (u/now-msec) t1) 1000.0)
+             "to compile ClojureScript code")
     (println "INFO" "Running cljs tests in nashorn with persistent code cache in" (System/getProperty "nashorn.persistent.code.cache"))
     (.eval engine (io/reader (io/file dir "tests.js")))
     (let [{:as res :keys [fail error]} (read-string (.eval engine "clojure.core.rrb_vector.test_cljs._main_nashorn()"))]
