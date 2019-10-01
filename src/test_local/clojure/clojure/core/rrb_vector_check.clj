@@ -1,5 +1,7 @@
 (ns clojure.core.rrb-vector-check
-  (:require [clojure.core.rrb-vector :as fv]
+  (:require [clojure.test :as test :refer [deftest testing is are]]
+            [clojure.core.rrb-vector.test-utils :as u]
+            [clojure.core.rrb-vector :as fv]
             [clojure.test.check.generators :as gen]
             [collection-check.core :refer [assert-vector-like]])
   (:use clojure.test))
@@ -11,10 +13,12 @@
 ;;  1,000:  16 sec
 ;; 10,000: 120 sec
 
-(def medium-num-tests 10000)
 (def short-num-tests 1000)
+(def medium-num-tests 10000)
+(def long-num-tests 100000)
 ;;(def num-tests short-num-tests)
 (def num-tests medium-num-tests)
+;;(def num-tests long-num-tests)
 
 ;; collection-check.core/assert-vector-like calls test.chuck/checking.
 ;; The README for the test.chuck library says that test.chuck/checking
