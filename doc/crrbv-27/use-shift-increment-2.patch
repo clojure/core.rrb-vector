@@ -1,0 +1,28 @@
+diff --git a/deps.edn b/deps.edn
+index 775cc3e..f03df7a 100644
+--- a/deps.edn
++++ b/deps.edn
+@@ -5,8 +5,8 @@
+ ;; want to test with modifications to it:
+ ;; org.clojure/clojurescript {:local/root "/Users/jafinger/clj/clojurescript"}
+ 
+-{:paths ["src/main/clojure" "src/main/cljs" "src/main/cljc"]
+- ;;:paths ["src/parameterized/clojure" "src/main/cljs" "src/main/cljc"]
++{;;:paths ["src/main/clojure" "src/main/cljs" "src/main/cljc"]
++ :paths ["src/parameterized/clojure" "src/main/cljs" "src/main/cljc"]
+  :aliases
+  {;; Common alias to use for all Clojure/Java commands
+   :clj {:jvm-opts ["-XX:-OmitStackTraceInFastThrow"]}
+diff --git a/src/parameterized/clojure/clojure/core/rrb_vector/parameters.clj b/src/parameterized/clojure/clojure/core/rrb_vector/parameters.clj
+index 2cd5004..c8a58ea 100644
+--- a/src/parameterized/clojure/clojure/core/rrb_vector/parameters.clj
++++ b/src/parameterized/clojure/clojure/core/rrb_vector/parameters.clj
+@@ -8,7 +8,7 @@
+ ;; * when the shift-increment is 2
+ 
+ ;; 5 3 2
+-(def shift-increment 5)
++(def shift-increment 2)
+ 
+ ;; 10 6 4
+ (def shift-increment-times-2 (* 2 shift-increment))

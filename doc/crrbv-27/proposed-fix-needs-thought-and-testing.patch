@@ -1,0 +1,35 @@
+diff --git a/src/main/clojure/clojure/core/rrb_vector/rrbt.clj b/src/main/clojure/clojure/core/rrb_vector/rrbt.clj
+index 1d231a6..45bfb6b 100644
+--- a/src/main/clojure/clojure/core/rrb_vector/rrbt.clj
++++ b/src/main/clojure/clojure/core/rrb_vector/rrbt.clj
+@@ -1426,7 +1426,16 @@
+                 (aset new-rngs 32 (inc i))
+                 (recur (inc i) (next bs)))))
+           (aset new-arr 32 new-rngs)
+-          (set! (.-val transferred-leaves) cnt2)
++;;          (set! (.-val transferred-leaves) cnt2)
++          (when-not (zero? (.-val transferred-leaves))
++            (println "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
++            (println "dbg CHANGED rebalance #3"
++                     "shift=" shift
++                     "cnt1=" cnt1
++                     "cnt2=" cnt2
++                     "cnt2 added to transferred-leaves=" (.-val transferred-leaves)))
++          (set! (.-val transferred-leaves)
++                (+ (.-val transferred-leaves) cnt2))
+           (pair new-n1 nil))
+ 
+         :else
+diff --git a/src/test/clojure/clojure/core/rrb_vector/long_test.clj b/src/test/clojure/clojure/core/rrb_vector/long_test.clj
+index b68cf5a..ea2540f 100644
+--- a/src/test/clojure/clojure/core/rrb_vector/long_test.clj
++++ b/src/test/clojure/clojure/core/rrb_vector/long_test.clj
+@@ -84,7 +84,7 @@
+ (defn vector-push-f [v my-catvec extra-checks-catvec]
+   (loop [v v
+          i 0]
+-    (let [check? (or (zero? (mod i 10000))
++    (let [check? (or (zero? (mod i 100))
+                      (and (> i 99000) (zero? (mod i 100)))
+                      (and (> i 99900) (zero? (mod i 10))))]
+       (when check?

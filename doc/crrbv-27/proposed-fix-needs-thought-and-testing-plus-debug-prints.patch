@@ -1,0 +1,440 @@
+diff --git a/src/parameterized/clojure/clojure/core/rrb_vector/debug.clj b/src/parameterized/clojure/clojure/core/rrb_vector/debug.clj
+index 27156d2..8208cae 100644
+--- a/src/parameterized/clojure/clojure/core/rrb_vector/debug.clj
++++ b/src/parameterized/clojure/clojure/core/rrb_vector/debug.clj
+@@ -248,28 +248,31 @@
+ (defn slow-into [to from]
+   (reduce conj to from))
+ 
++(defn all-nodes-in-subtree [node node-shift get-array regular?]
++  (letfn [(go [depth shift node]
++            (if node
++              (if (not= shift 0)
++                (cons
++                 {:depth depth :shift shift :kind :internal :node node}
++                 (apply concat
++                        (map (partial go (inc depth) (- shift p/shift-increment))
++                             (let [arr (get-array node)]
++                               (if (regular? node)
++                                 arr
++                                 (butlast arr))))))
++                (cons {:depth depth :shift shift :kind :internal :node node}
++                      (map (fn [x]
++                             {:depth (inc depth) :kind :leaf :value x})
++                           (get-array node))))))]
++    (go 1 node-shift node)))
++
+ (defn all-vector-tree-nodes [v]
+   (let [{:keys [v get-root get-shift get-array regular?]}
+         (pd/unwrap-subvec-accessors-for v)
+         root  (get-root v)
+         shift (get-shift v)]
+-    (letfn [(go [depth shift node]
+-              (if node
+-                (if (not= shift 0)
+-                  (cons
+-                   {:depth depth :shift shift :kind :internal :node node}
+-                   (apply concat
+-                          (map (partial go (inc depth) (- shift p/shift-increment))
+-                               (let [arr (get-array node)]
+-                                 (if (regular? node)
+-                                   arr
+-                                   (butlast arr))))))
+-                  (cons {:depth depth :shift shift :kind :internal :node node}
+-                        (map (fn [x]
+-                               {:depth (inc depth) :kind :leaf :value x})
+-                             (get-array node))))))]
+-      (cons {:depth 0 :kind :base :shift shift :value v}
+-            (go 1 shift root)))))
++    (cons {:depth 0 :kind :base :shift shift :value v}
++          (all-nodes-in-subtree root shift get-array regular?))))
+ 
+ ;; All nodes that should be internal nodes are one of the internal
+ ;; node types satisfying internal-node?  All nodes that are less
+@@ -297,6 +300,11 @@
+ ;; a straightforward sanity check to make, to return an error if a
+ ;; non-regular node is found with a regular ancestor in the tree.
+ 
++(defn basic-node-errors-subtree [node node-shift]
++
++  )
++
++
+ (defn basic-node-errors [v]
+   (let [{:keys [v get-shift]} (pd/unwrap-subvec-accessors-for v)
+         shift (get-shift v)
+@@ -500,6 +508,48 @@
+     (/ (* 1.0 tail-off) max-tree-cap)))
+ 
+ 
++(defn ranges-errors-subtree
++  "Whereas ranges-errors performs checks on the contents of the entire
++  tree that represents a vector, ranges-errors-subtree performs these
++  checks on any subtree of such a tree, rooted at the given node.  You
++  must also supply a shift value, since this is not stored in the data
++  itself."
++  ([node node-shift get-array regular? get-ranges]
++   (ranges-errors-subtree node node-shift get-array regular? get-ranges
++                          false nil))
++  ([node node-shift get-array regular? get-ranges do-root-checks? root-node-cnt]
++   (letfn [
++     (go [shift node]
++       (cond
++         (nil? node) {:error false :kind :nil}
++         (zero? shift) (let [n (count (get-array node))]
++                         (merge {:error (zero? n), :kind :leaves,
++                                 :full? (= n p/max-branches), :count n}
++                                (if (zero? n)
++                                  {:description
++                                   (str "Leaf array has 0 elements."
++                                        "  Expected > 0.")})))
++         :else ;; non-0 shift
++         (let [children (map (partial go (- shift p/shift-increment))
++                             (let [arr (get-array node)]
++                               (if (regular? node)
++                                 arr
++                                 (butlast arr))))
++               errs (filter :error children)]
++           (cond
++             (seq errs) {:error true, :description "One or more errors found",
++                         :data errs}
++             (not= p/max-branches (count children))
++             {:error true, :kind :internal,
++              :description (str "Found internal node that has "
++                                (count children) " children - expected p/max-branches.")}
++             (regular? node) (regular-node-errors (and do-root-checks?
++                                                       (= shift node-shift))
++                                                  root-node-cnt children)
++             :else (non-regular-node-errors node get-ranges children)))))]
++     (go node-shift node))))
++
++
+ (defn ranges-errors [v]
+   (let [{:keys [v get-root get-shift get-tail get-cnt get-array get-ranges
+                 regular? tail-len]}
+@@ -508,70 +558,48 @@
+         root-node-cnt (count v)
+         root-shift (get-shift v)
+         tail-off (pd/dbg-tailoff v)
+-        tail (get-tail v)]
+-    (letfn [
+-      (go [shift node]
+-        (cond
+-          (nil? node) {:error false :kind :nil}
+-          (zero? shift) (let [n (count (get-array node))]
+-                          (merge {:error (zero? n), :kind :leaves,
+-                                  :full? (= n p/max-branches), :count n}
+-                                 (if (zero? n)
+-                                   {:description
+-                                    (str "Leaf array has 0 elements."
+-                                         "  Expected > 0.")})))
+-          :else ;; non-0 shift
+-          (let [children (map (partial go (- shift p/shift-increment))
+-                              (let [arr (get-array node)]
+-                                (if (regular? node)
+-                                  arr
+-                                  (butlast arr))))
+-                errs (filter :error children)]
+-            (cond
+-              (seq errs) {:error true, :description "One or more errors found",
+-                          :data errs}
+-              (not= p/max-branches (count children))
+-              {:error true, :kind :internal,
+-               :description (str "Found internal node that has "
+-                                 (count children) " children - expected p/max-branches.")}
+-              (regular? node) (regular-node-errors (= shift root-shift)
+-                                                   root-node-cnt children)
+-              :else (non-regular-node-errors node get-ranges children)))))]
+-      (let [x (go root-shift root)]
+-        (cond
+-          (:error x) x
+-          (not= tail-off (:count x))
+-          {:error true, :kind :root,
+-           :description (str "Found tail-off=" tail-off " != " (:count x)
+-                             "=count of values beneath internal nodes")
+-           :internal-node-leaf-count (:count x) :tail-off tail-off
+-           :cnt (get-cnt v)}
+-          (and (pd/transient-vector? v)
+-               (not= (tail-len tail) p/max-branches))
+-          {:error true, :kind :root,
+-           :description (str "Found transient vector with tail length "
+-                             (tail-len tail) " - expecting p/max-branches")}
+-          ;; It is always a bad thing if shift becomes more than 32,
+-          ;; because the bit-shift-left and bit-shift-right operations
+-          ;; on 32-bit ints actually behave like (bit-shift-left
+-          ;; x (mod shift-amount 32)) for shift-amount over 32.  It is
+-          ;; also likely a bug in the implementation if that happens.
+-          (>= root-shift 32)
+-          {:error true, :kind :root,
+-           :description (str "shift of root is " root-shift " >= 32,"
+-                             " which is not supported.")}
+-          ;; This is not necessarily a bug, but it seems likely to be
+-          ;; a bug if a tree is less than 1/max-branches-squared full compared to its
+-          ;; max capacity.  1/(p/max-branches) full is normal when a tree becomes 1
+-          ;; deeper than it was before.
+-          (< 0 (:count x) (max-capacity-divided-by-max-branches-squared root-shift))
+-          {:error false, :warning true, :kind :root-too-deep,
+-           :description (str "For root shift=" root-shift " the maximum "
+-                             "capacity divided by p/max-branches-squared is "
+-                             (max-capacity-divided-by-max-branches-squared root-shift)
+-                             " but the tree contains only "
+-                             (:count x) " vector elements outside of the tail")}
+-          :else x)))))
++        tail (get-tail v)
++        x (ranges-errors-subtree root root-shift get-array regular? get-ranges
++                                 true root-node-cnt)]
++    (cond
++      (:error x) x
++
++      (not= tail-off (:count x))
++      {:error true, :kind :root,
++       :description (str "Found tail-off=" tail-off " != " (:count x)
++                         "=count of values beneath internal nodes")
++       :internal-node-leaf-count (:count x) :tail-off tail-off
++       :cnt (get-cnt v)}
++
++      (and (pd/transient-vector? v)
++           (not= (tail-len tail) p/max-branches))
++      {:error true, :kind :root,
++       :description (str "Found transient vector with tail length "
++                         (tail-len tail) " - expecting p/max-branches")}
++
++      ;; It is always a bad thing if shift becomes more than 32,
++      ;; because the bit-shift-left and bit-shift-right operations
++      ;; on 32-bit ints actually behave like (bit-shift-left
++      ;; x (mod shift-amount 32)) for shift-amount over 32.  It is
++      ;; also likely a bug in the implementation if that happens.
++      (>= root-shift 32)
++      {:error true, :kind :root,
++       :description (str "shift of root is " root-shift " >= 32,"
++                         " which is not supported.")}
++
++      ;; This is not necessarily a bug, but it seems likely to be
++      ;; a bug if a tree is less than 1/max-branches-squared full compared to its
++      ;; max capacity.  1/(p/max-branches) full is normal when a tree becomes 1
++      ;; deeper than it was before.
++      (< 0 (:count x) (max-capacity-divided-by-max-branches-squared root-shift))
++      {:error false, :warning true, :kind :root-too-deep,
++       :description (str "For root shift=" root-shift " the maximum "
++                         "capacity divided by p/max-branches-squared is "
++                         (max-capacity-divided-by-max-branches-squared root-shift)
++                         " but the tree contains only "
++                         (:count x) " vector elements outside of the tail")}
++
++      :else x)))
+ 
+ #_(defn add-return-value-checks [f err-desc-str return-value-check-fn]
+   (fn [& args]
+@@ -1119,7 +1147,7 @@
+                "(type v1)=" (type v1)
+                "(type v2)=" (type v2)))
+     (let [r1 (checking-splice-rrbts-main nm am v1 v2)
+-          r2 (rrbt/peephole-optimize-root r1)]
++          r2 (rrbt/peephole-optimize-root v1 v2 r1)]
+       ;; Optimize a bit by only doing all of the sanity checks on r2
+       ;; if it is not the same identical data structure r1 that
+       ;; checking-splice-rrbts-main already checked.
+diff --git a/src/parameterized/clojure/clojure/core/rrb_vector/rrbt.clj b/src/parameterized/clojure/clojure/core/rrb_vector/rrbt.clj
+index 9548b40..ee61ef4 100644
+--- a/src/parameterized/clojure/clojure/core/rrb_vector/rrbt.clj
++++ b/src/parameterized/clojure/clojure/core/rrb_vector/rrbt.clj
+@@ -1387,6 +1387,8 @@
+                  (map list (take gcs arr) (take gcs (map - rngs (cons 0 rngs))))))]
+     (mapcat cseq (take cs arr) (take cs (map - rngs (cons 0 rngs))))))
+ 
++(def extra-trace (atom false))
++
+ (defn rebalance
+   [^NodeManager nm ^ArrayManager am shift n1 cnt1 n2 cnt2 ^Box transferred-leaves]
+   (if (nil? n2)
+@@ -1398,14 +1400,24 @@
+           sbc2 (subtree-branch-count nm am n2 shift)
+           p    (+ sbc1 sbc2)
+           e    (- a (inc (quot (dec p) p/max-branches)))]
++      (when @extra-trace
++        (println "dbg rebalance #1 shift=" shift
++                 "cnt1=" cnt1 "cnt2=" cnt2)
++        (println "dbg rebalance #2 slc1=" slc1 " slc2=" slc2
++                 "a=" a "sbc1=" sbc1 "sbc2=" sbc2 "p=" p "e=" e))
+       (cond
+         (<= e max-extra-search-steps)
+-        (pair n1 n2)
++        (do
++          (when @extra-trace
++            (println "dbg rebalance #3a"))
++          (pair n1 n2))
+ 
+         (<= (+ sbc1 sbc2) p/max-branches-squared)
+         (let [new-arr  (object-array p/non-regular-array-len)
+               new-rngs (int-array p/non-regular-array-len)
+               new-n1   (.node nm nil new-arr)]
++          (when @extra-trace
++            (println "dbg rebalance #3b"))
+           (loop [i  0
+                  bs (partition-all p/max-branches
+                                    (concat (child-seq nm n1 shift cnt1)
+@@ -1427,7 +1439,21 @@
+                 (aset new-rngs p/max-branches (inc i))
+                 (recur (inc i) (next bs)))))
+           (aset new-arr p/max-branches new-rngs)
+-          (set! (.-val transferred-leaves) cnt2)
++
++;;          (when @extra-trace
++;;            (println "dbg rebalance #3 cnt2=" cnt2 "-> transferred-leaves"))
++;;          (set! (.-val transferred-leaves) cnt2)
++
++          (when-not (zero? (.-val transferred-leaves))
++            (println "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
++            (println "dbg CHANGED rebalance #3"
++                     "shift=" shift
++                     "cnt1=" cnt1
++                     "cnt2=" cnt2
++                     "cnt2 added to transferred-leaves=" (.-val transferred-leaves)))
++          (set! (.-val transferred-leaves)
++                (+ (.-val transferred-leaves) cnt2))
++
+           (pair new-n1 nil))
+ 
+         :else
+@@ -1437,6 +1463,8 @@
+               new-rngs2 (int-array p/non-regular-array-len)
+               new-n1    (.node nm nil new-arr1)
+               new-n2    (.node nm nil new-arr2)]
++          (when @extra-trace
++            (println "dbg rebalance #3c"))
+           (loop [i  0
+                  bs (partition-all p/max-branches
+                                    (concat (child-seq nm n1 shift cnt1)
+@@ -1457,6 +1485,10 @@
+                         d   (if (>= tbs p/max-branches)
+                               (aget r li)
+                               (- (aget r li) (aget r (- li tbs))))]
++                    (when @extra-trace
++                      (println "dbg rebalance #4 transferred-leaves was"
++                               (.-val transferred-leaves)
++                               "adding d=" d "to it"))
+                     (set! (.-val transferred-leaves)
+                           (+ (.-val transferred-leaves) d))))
+                 (let [new-arr  (if (< i p/max-branches) new-arr1 new-arr2)
+@@ -1472,7 +1504,21 @@
+           (aset new-arr2 p/max-branches new-rngs2)
+           (pair new-n1 new-n2))))))
+ 
+-(defn zippath
++(declare zippath)
++
++(defn show-ranges [msg node nm desc]
++  (cond
++    (nil? node)
++    (println (format "%s %s=nil" msg desc))
++
++    (= p/non-regular-array-len (alength (.array node)))
++    (println (format "%s (ranges %s)=" msg desc)
++             (seq (ranges nm node)))
++
++    :else
++    (println (format "%s %s has no ranges" msg desc))))
++
++(defn zippath-main
+   [^NodeManager nm ^ArrayManager am shift n1 cnt1 n2 cnt2 ^Box transferred-leaves]
+   (if (== shift p/shift-increment)
+     (rebalance-leaves nm am n1 cnt1 n2 cnt2 transferred-leaves)
+@@ -1494,6 +1540,22 @@
+           [new-c1 new-c2] (zippath nm am (- shift p/shift-increment) c1 ccnt1 c2 ccnt2
+                                    next-transferred-leaves)
+           d (.-val next-transferred-leaves)]
++      (when @extra-trace
++        (println "dbg zippath #1 shift=" shift
++                 "cnt1=" cnt1 "(reg? n1)=" (.regular nm n1)
++                 "ccnt1=" ccnt1
++                 "cnt2=" cnt2 "(reg? n2)=" (.regular nm n2)
++                 "ccnt2=" ccnt2)
++        (println "dbg zippath #2 d=" d
++                 "(.-val transferred-leaves)=" (.-val transferred-leaves))
++        (show-ranges "dbg zippath #3" c1 nm "c1")
++        (show-ranges "dbg zippath #3" c2 nm "c2")
++        (show-ranges "dbg zippath #3" new-c1 nm "new-c1")
++        (show-ranges "dbg zippath #3" new-c2 nm "new-c2")
++        (println "dbg zippath #4 (identical? c1 new-c1)="
++                 (identical? c1 new-c1))
++        (println "dbg zippath #4 (identical? c2 new-c2)="
++                 (identical? c2 new-c2)))
+       (set! (.-val transferred-leaves) (+ (.-val transferred-leaves) d))
+       (rebalance nm am shift
+                  (if (identical? c1 new-c1)
+@@ -1508,6 +1570,18 @@
+                  (- cnt2 d)
+                  transferred-leaves))))
+ 
++(def zippath-extra-check-fn (atom nil))
++
++(defn zippath
++  [^NodeManager nm ^ArrayManager am shift n1 cnt1 n2 cnt2 ^Box transferred-leaves]
++  (let [ret (zippath-main nm am shift n1 cnt1 n2 cnt2 transferred-leaves)
++        [n1 n2] ret]
++    (let [f @zippath-extra-check-fn]
++      (when f
++        (f n1 shift nm)
++        (f n2 shift nm)))
++    ret))
++
+ (defn squash-nodes [^NodeManager nm shift n1 cnt1 n2 cnt2]
+   (let [arr1  (.array nm n1)
+         arr2  (.array nm n2)
+@@ -1615,7 +1689,12 @@
+     (let [rngs (ranges nm node)]
+       (aget rngs (dec (aget rngs p/max-branches))))))
+ 
+-(defn peephole-optimize-root [^Vector v]
++(def peephole-extra-check (atom nil))
++
++(defn peephole-optimize-root [arg1 arg2 ^Vector v]
++  (let [f @peephole-extra-check]
++    (if f
++      (f v arg1 arg2)))
+   (let [config @peephole-optimization-config]
+     (if (<= (.-shift v) (* 2 p/shift-increment))
+       ;; Tree depth cannot be reduced if shift <= p/shift-increment.
+@@ -1766,6 +1845,8 @@
+           s2 (.-shift v2)
+           r1 (.-root v1)
+           o? (overflow? nm r1 s1 (+ (count v1) (- p/max-branches (.alength am (.-tail v1)))))
++          _ (when @extra-trace
++              (println "dbg #1 s1=" s1 "s2=" s2 "o?=" o?))
+           r1 (if o?
+                (let [tail      (.-tail v1)
+                      tail-node (.node nm nil tail)
+@@ -1795,9 +1876,24 @@
+           d (.-val transferred-leaves)
+           ncnt1   (+ (count v1) d)
+           ncnt2   (- (count v2) (.alength am (.-tail v2)) d)
++          _ (when @extra-trace
++              (show-ranges "dbg #1b" n1 nm "n1")
++              (show-ranges "dbg #1b" n2 nm "n2")
++              (println "dbg #2 s=" s "(class d)=" (class d) "d=" d)
++              (println "dbg #3 (count v1)=" (count v1)
++                       "(count v2)=" (count v2)
++                       "ncnt1=" ncnt1 "ncnt2=" ncnt2)
++              (println "dbg #4 (identical? n2 r2)="
++                       (identical? n2 r2)))
+           [n1 n2] (if (identical? n2 r2)
+                     (squash-nodes nm s n1 ncnt1 n2 ncnt2)
+                     (object-array (list n1 n2)))
++          _ (when @extra-trace
++              (println "dbg #5 (boolean n2)=" (boolean n2))
++              (let [al1 (alength (.array n1))]
++                (if (== al1 p/non-regular-array-len)
++                  (println "dbg #6 n1 ranges=" (seq (aget (.array n1)
++                                                          p/max-branches))))))
+           ncnt1   (if n2
+                     (int ncnt1)
+                     (unchecked-add-int (int ncnt1) (int ncnt2)))
+@@ -1826,7 +1922,7 @@
+ 
+ (defn splice-rrbts [^NodeManager nm ^ArrayManager am ^Vector v1 ^Vector v2]
+   (let [r1 (splice-rrbts-main nm am v1 v2)
+-        r2 (peephole-optimize-root r1)]
++        r2 (peephole-optimize-root v1 v2 r1)]
+     (fallback-to-slow-splice-if-needed v1 v2 r2)))
+ 
+ (defn array-copy [^ArrayManager am from i to j len]
