@@ -10,7 +10,8 @@
   ;;:source-paths ["src/parameterized/clojure" "src/main/cljs"]
   :test-paths ["src/test/clojure"]
   :test-selectors {:default (complement :cljs-nashorn)}
-  :jvm-opts ^:replace ["-XX:+UseG1GC"]
+  :jvm-opts ^:replace ["-XX:+UseG1GC"
+                       "-XX:-OmitStackTraceInFastThrow"]
   :profiles {:dev {:dependencies [[org.clojure/test.check "0.7.0"]]
                    :plugins [[lein-cljsbuild "1.1.7"]]}
              :coll {:test-paths ["src/test_local/clojure"]
