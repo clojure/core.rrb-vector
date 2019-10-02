@@ -24,17 +24,17 @@ The time measurements here were made on a different machine than the
 time measurements here vs. there.  Only the relative time measurements
 between the libraries in one set of benchmark results.
 
-![](images/images/list_construct.png)
-![](images/images/list_construct_all_but_vavr.png)
+![](images/list_construct.png)
+![](images/list_construct_all_but_vavr.png)
 
-![](images/images/list_iterate.png)
-![](images/images/list_iterate_all_but_core_rrb_vector.png)
+![](images/list_iterate.png)
+![](images/list_iterate_all_but_core_rrb_vector.png)
 
-![](images/images/list_lookup.png)
+![](images/list_lookup.png)
 
-![](images/images/concat.png)
-![](images/images/concat_time_all_rrb.png)
-![](images/images/concat_time_all_rrb_but_core_rrb_vector.png)
+![](images/concat.png)
+![](images/concat_time_all_rrb.png)
+![](images/concat_time_all_rrb_but_core_rrb_vector.png)
 
 
 ## How the benchmarks were run
