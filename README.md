@@ -31,6 +31,7 @@ underlying vector).
 accepts `:object` as one of the possible type arguments, in addition
 to keywords naming primitive types.
 
+
 ## Usage
 
 core.rrb-vector exports one public namespace:
@@ -85,14 +86,6 @@ Clojure(Script) vectors and RRB vectors.
     (require '[clojure.core.rrb-vector.debug :as dv])
     (dv/dbg-vec (fv/catvec (vec (range 1234)) (vec (range 8765))))
 
-## TODO
-
- 1. more tests;
-
- 2. benchmarks;
-
- 3. performance: general perf tuning, more efficient `catvec`
-    implementation (to replace current seq-ops-based impl).
 
 ## Releases and dependency information
 
@@ -109,6 +102,10 @@ snapshots are available from the Sonatype OSS repository.
  * [Development snapshots](https://oss.sonatype.org/index.html#nexus-search;gav~org.clojure~core.rrb-vector~~~)
 
  * [Change log](CHANGES.md) of changes made in this library.
+
+ * Some [benchmark results](doc/benchmarks/benchmarks.md) comparing
+   the run time of core.rrb-vector's JVM implementation against other
+   vector/list implementations on the JVM.
 
 Follow the first link above to discover the current release number.
 
@@ -127,6 +124,15 @@ Follow the first link above to discover the current release number.
 [Gradle](http://www.gradle.org/) dependency information:
 
     compile "org.clojure:core.rrb-vector:${version}"
+
+
+## TODO
+
+ 1. more tests;
+
+ 2. performance: general perf tuning, more efficient `catvec`
+    implementation (to replace current seq-ops-based impl).
+
 
 ## Developer information
 
@@ -242,6 +248,7 @@ This includes the ClojureScript compile and test commands, since the
 ClojureScript compiler is at least partially written in the Java
 version of Clojure.
 
+
 #### Java
 
 Install one or more of the pre-built binaries from
@@ -319,6 +326,7 @@ copyright notice:
     By using this software in any fashion, you are agreeing to be bound by
       the terms of this license.
     You must not remove this notice, or any other, from this software.
+
 
 ## Licence
 
