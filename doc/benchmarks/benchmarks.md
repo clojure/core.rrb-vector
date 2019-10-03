@@ -46,10 +46,21 @@ these results was "The mutable collections, which are stored
 contiguously, are only moderately faster than their immutable
 counterparts".
 
-core.rrb-vector is significantly slower, for reasons I have yet to
-investigate.  The reason for the increases near 1K elements and 32K
-elements are most likely because those are the sizes where the 32-way
-tree data structure gets one level deeper.
+Note that the benchmark here creates a Java
+[`Iterator`](https://docs.oracle.com/javase/8/docs/api/java/util/Iterator.html)
+object from the collection, and then in a loop uses that interface's
+`hasNext` and `next` methods to traverse the entire collection until
+`hasNext` returns false.  The more typical way to traverse collections
+in Clojure is to call `seq` on them (or use one of many functions that
+call `seq` for you under the covers), and then use `rest` or `next` to
+advance one step.
+
+core.rrb-vector version 0.1.0 is significantly slower, primarily
+because it has less optimized code for its Java `Iterator`
+implementation than it has for its `seq`/`rest`/`next` implementation.
+The reason for the increases near 1K elements and 32K elements are
+most likely because those are the sizes where the 32-way tree data
+structure gets one level deeper.
 
 The graph below shows the results for all except the core.rrb-vector
 library, so any differences between those libraries can be seen.
