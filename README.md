@@ -1,35 +1,91 @@
 # core.rrb-vector
 
-An implementation of the confluently persistent vector data structure
-introduced in Bagwell, Rompf, "RRB-Trees: Efficient Immutable
-Vectors", EPFL-REPORT-169879, September, 2011.
+Why would anyone want to use this library?  The two primary answers
+are:
 
-RRB-Trees build upon Clojure's PersistentVectors, adding logarithmic
-time concatenation and slicing. ClojureScript is supported with the
-same API except for the absence of the `vector-of` function.
++ You want faster concatenation of vectors, which core.rrb-vector's
+  `catvec` function provides for both Clojure and ClojureScript.
++ You use vectors of Java primitive types like long, double, etc.,
+  returned by Clojure's `vector-of` function, e.g. to reduce memory
+  usage to about 1/3 of the memory required by vectors of arbitrary
+  objects, and
+  + You want the speed enabled by using the transient versions of such
+    vectors.  Clojure does not implement transients for primitive
+    vectors created via `vector-of` -- core.rrb-vector does.
 
-The main API entry points are `clojure.core.rrb-vector/catvec`,
+Vectors are one of the most commonly used data structures within
+Clojure.  Likely you already know that creating a vector equal to `v`
+plus a new element `e` appended to the end using the expression `(conj
+v e)` has a run time that is "effectively constant", i.e. it takes
+O(log N) time in the size N of `v`, where the base of the logarithm is
+32, so it is a constant at most 4 for all vector sizes up to a
+million, and at most 7 for all vector sizes that Clojure supports.
+
+The fastest way to concatenate two vectors `v1` and `v2` into a single
+new vector is using an expression like `(into v1 v2)`.  This is
+implemented by repeatedly appending a single element from the second
+vector to the first, so it takes linear time in the size of `v2`
+(multiplied by the effectively constant time mentioned above).
+
+Aside: There might be another expression that has a better _constant
+factor_ for its run time than `(into v1 v2)` does, and is thus faster.
+However, any other such expression will still take at least linear
+time in the size of the second vector.
+
+The core.rrb-vector library uses a tree structure similar to the one
+that Clojure uses internally for vectors, but generalizes it in such a
+way that producing a new tree that represents the concatenation of two
+input vectors using the `catvec` function can be done in O(log N)
+time, where N is the size of the result.
+
+You can give `catvec` vectors created in all of the ways you already
+normally do, and while it will return a new type of object, this new
+type behaves in all of the ways you expect a Clojure vector to behave.
+This new type of vector is indistinguishable from a normal Clojure
+vector unless you examine the value of `(type v)` or `(class v)`.  In
+particular, `(vector? v)` is true for this new type, you can call all
+of the usual sequence-based functions on it to examine or process its
+elements, you can call `conj` on it, `nth`, etc.
+
+Thus if you have a program where frequently concatenating large
+vectors to produce new vectors is useful, core.rrb-vector may help you
+write a much faster program in a more natural way.
+
+This library is an implementation of the confluently persistent vector
+data structure introduced in the paper "RRB-Trees: Efficient Immutable
+Vectors", EPFL-REPORT-169879, September, 2011, by Phil Bagwell and
+Tiark Rompf.
+
+RRB-Trees build upon Clojure's internal `PersistentVector` class used
+to implement its built in vectors, adding logarithmic time
+concatenation and slicing (i.e. create sub-vectors from input
+vectors).  ClojureScript is supported with the same API, except for
+the absence of the `vector-of` function.
+
+The main functions provided are `clojure.core.rrb-vector/catvec`,
 performing vector concatenation, and `clojure.core.rrb-vector/subvec`,
 which produces a new vector containing the appropriate subrange of the
 input vector (in contrast to `clojure.core/subvec`, which returns a
 view on the input vector).
 
-core.rrb-vector's vectors can store objects or unboxed primitives. The
-implementation allows for seamless interoperability with
-`clojure.lang.PersistentVector`, `clojure.core.Vec` (more commonly
-known as gvec) and `clojure.lang.APersistentVector$SubVector`
-instances: `clojure.core.rrb-vector/catvec` and
-`clojure.core.rrb-vector/subvec` convert their inputs to
-`clojure.core.rrb_vector.rrbt.Vector` instances whenever necessary
-(this is a very fast constant time operation for PersistentVector and
-gvec; for SubVector it is O(log n), where n is the size of the
-underlying vector).
+Like Clojure vectors, core.rrb-vector vectors can store arbitrary
+values, or using `vector-of` you can create vectors restricted to one
+primitive type, e.g. long, double, etc.  The core.rrb-vector
+implementation provides seamless interoperability with the built in
+Clojure vectors of class `clojure.lang.PersistentVector`,
+`clojure.core.Vec` (vectors of primitive values) and
+`clojure.lang.APersistentVector$SubVector` instances:
+`clojure.core.rrb-vector/catvec` and `clojure.core.rrb-vector/subvec`
+convert their inputs to `clojure.core.rrb_vector.rrbt.Vector`
+instances whenever necessary (this is a very fast constant time
+operation for PersistentVector and primitive vectors; for SubVector it
+is O(log N), where N is the size of the underlying vector).
 
-`clojure.core.rrb-vector` also exports its own versions of `vector`,
-`vector-of` and `vec` which always produce
-`clojure.core.rrb_vector.rrbt.Vector` instances. Note that `vector-of`
-accepts `:object` as one of the possible type arguments, in addition
-to keywords naming primitive types.
+`clojure.core.rrb-vector` also provides its own versions of `vector`,
+`vector-of`, and `vec` that always produce
+`clojure.core.rrb_vector.rrbt.Vector` instances.  Note that
+`vector-of` accepts `:object` as one of the possible type arguments,
+in addition to keywords naming primitive types.
 
 
 ## Usage
