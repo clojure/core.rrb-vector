@@ -1,13 +1,38 @@
 # Other implementations and descriptions of RRB trees
 
+Note that most implementations have an associated paper.  If they have
+an author in common, then typically the paper or talk describes the
+implementation they published.
+
 Implementations:
 
+* TBD: Tiark Rompf and Phil Bagwell's original implementation code?
+  * If it is available somewhere, likely it is instrumented for
+    experimentation on multiple variations of the algorithms, and
+    counting significant events that they were trying to reduce.  Thus
+    more of a research implementation than one intended for use in
+    production.
 * [`scala-rrb-vector`](https://github.com/nicolasstucki/scala-rrb-vector)
-  by Nicolas Stucki
-* [`bifurcan`](https://github.com/lacuna/bifurcan) library by Zach
-  Tellman, Java class `io.lacuna.bifurcan.List`
-* [`Paguro`](https://github.com/GlenKPeterson/Paguro) library by Glen
-  Peterson, Java class `org.organicdesign.fp.collections.RrbTree`
+  Scala library by Nicolas Stucki
+* [`bifurcan`](https://github.com/lacuna/bifurcan) Java library by
+  Zach Tellman, Java class `io.lacuna.bifurcan.List`
+* [`Paguro`](https://github.com/GlenKPeterson/Paguro) Java library by
+  Glen Peterson, Java class `org.organicdesign.fp.collections.RrbTree`
+* [`c-rrb`](https://github.com/hypirion/c-rrb) C library by Jean
+  Niklas L'orange
+* [`Array`](https://github.com/xash/Array) RRB trees implemented in
+  JavaScript for use in the Elm programming language.
+* [`immer`](https://sinusoid.es/immer) C++ library by Juan Pedro
+  Bolivar Puente
+
+Implementation of immutable vectors that are not RRB trees:
+
+* [`Clojure`](https://github.com/clojure/clojure) collections library,
+  Java class `clojure.lang.PersistentVector` implemented in Java
+  * Also class `clojure.core.Vector` implemented in Clojure, with
+    memory/time optimizations achieved by restricting vector elements
+    to all be the same type of Java primitive, e.g. all `long` vector
+    elements, or all `double`.
 * [`Scala`](https://github.com/scala/scala) collection library, Java
   class `scala.collection.immutable.Vector`
   * In source file `src/library/scala/collection/immutable/Vector.scala`
@@ -17,13 +42,6 @@ Implementations:
   * commit 1c67c5b849d57a3fae89c4156f4a15defceccbf4 2009-Oct-10 was
     first to make them immutable vectors.  About 10 to 20 follow up
     commits later in the same month to fix bugs and enhance things
-* [`c-rrb`](https://github.com/hypirion/c-rrb) RRB trees implemented
-  in C
-* [`Array`](https://github.com/xash/Array) RRB trees implemented in
-  JavaScript for use in the Elm programming language.
-* Tiark Rompf and Phil Bagwell's original implementation code?  Did
-  this become what was used in Scala?  Was there an earlier version
-  used in first research paper results?
 
 Published papers and theses:
 
