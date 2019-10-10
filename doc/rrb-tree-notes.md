@@ -24,6 +24,16 @@ Implementations:
   JavaScript for use in the Elm programming language.
 * [`immer`](https://sinusoid.es/immer) C++ library by Juan Pedro
   Bolivar Puente
+* [`Vector`](https://docs.rs/im/12.3.3/im/vector/enum.Vector.html)
+  Rust implementation of RRB trees by Bodil Stokke
+  * [Source code](https://docs.rs/crate/im/12.3.3/source)
+* [`RRBVector`](https://github.com/rmunn/FSharpx.Collections/blob/rrb-vector/src/FSharpx.Collections.Experimental/RRBVector.fs)
+  F# library by Robin Munn.
+  * According to discussion on [this Github
+    issue](https://github.com/fsprojects/FSharpx.Collections/issues/72)
+    it appears to have known bugs the author would still like to find
+    and fix as of 2019-Oct-10.
+
 
 Implementation of immutable vectors that are not RRB trees:
 
@@ -42,6 +52,7 @@ Implementation of immutable vectors that are not RRB trees:
   * commit 1c67c5b849d57a3fae89c4156f4a15defceccbf4 2009-Oct-10 was
     first to make them immutable vectors.  About 10 to 20 follow up
     commits later in the same month to fix bugs and enhance things
+
 
 Published papers and theses:
 
@@ -71,7 +82,11 @@ Published papers and theses:
   (September 2017), https://doi.org/10.1145/3110260
   [PDF](https://public.sinusoid.es/misc/immer/immer-icfp17.pdf)
   * Juan's talk [video](https://www.youtube.com/watch?v=sPhpelUfu8Q)
-    "Postmodern immutable data structures" at CppCon 2017
+    "Postmodern immutable data structures" given at CppCon 2017
+* Bodil Stokke talk
+  [video](https://www.youtube.com/watch?v=cUx2b_FO8EQ) "Meetings With
+  Remarkable Trees" given at ClojuTRE 2018
+
 
 Related things:
 
@@ -79,7 +94,6 @@ Related things:
   vector data structure and how it works inside.  These are good
   tutorial style articles.  I have not found any similar articles like
   these on RRB trees.
-
   * ["Understanding Clojure's Persistent Vectors, Part
     1"](https://hypirion.com/musings/understanding-persistent-vector-pt-1),
     September 2013
@@ -98,3 +112,14 @@ Related things:
   * ["Persistent Vector Performance
     Summarised"](https://hypirion.com/musings/persistent-vector-performance-summarised),
     February 2015
+* StackOverflow
+  [question](https://stackoverflow.com/questions/14007153/what-invariant-do-rrb-trees-maintain)
+  "What invariant do RRB-trees maintain?"
+
+
+Not RRB trees, but somewhat related ideas:
+
+* ["Theory and practice of chunked
+  sequences"](http://www.andrew.cmu.edu/user/mrainey//chunkedseq/chunkedseq.html)
+  web page has links to papers, talks, and Github repository
+  containing C++ of their ideas.
