@@ -26,7 +26,7 @@ Implementations:
   Bolivar Puente
 * [`Vector`](https://docs.rs/im/12.3.3/im/vector/enum.Vector.html)
   Rust implementation of RRB trees by Bodil Stokke
-  * [Source code](https://docs.rs/crate/im/12.3.3/source)
+  * [Source code](https://docs.rs/crate/im/12.3.3/source/)
 * [`RRBVector`](https://github.com/rmunn/FSharpx.Collections/blob/rrb-vector/src/FSharpx.Collections.Experimental/RRBVector.fs)
   F# library by Robin Munn.
   * According to discussion on [this Github
