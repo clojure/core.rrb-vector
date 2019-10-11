@@ -58,33 +58,33 @@ Published papers and theses:
 
 * Phil Bagwell, Tiark Rompf, "RRB-Trees: Efficient Immutable Vectors",
   EPFL-REPORT-169879, September, 2011
-  [PDF](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.592.5377&rep=rep1&type=pdf)
-  [SemanticScholar
-  page](https://www.semanticscholar.org/paper/RRB-Trees-%3A-Efficient-Immutable-Vectors-Phil-Tiark-Bagwell-Rompf/30c8c562f6421ab6b00d0b7faebd897c407de69c)
+  [[PDF]](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.592.5377&rep=rep1&type=pdf)
+  [[SemanticScholar
+  page]](https://www.semanticscholar.org/paper/RRB-Trees-%3A-Efficient-Immutable-Vectors-Phil-Tiark-Bagwell-Rompf/30c8c562f6421ab6b00d0b7faebd897c407de69c)
   * Phil Bagwell talk
-    [video](https://www.youtube.com/watch?v=K2NYwP90bNs), "Striving to
-    Make Things Simple and Fast", January 2013, given at Clojure conj
-    conference
+    [[video]](https://www.youtube.com/watch?v=K2NYwP90bNs), "Striving
+    to Make Things Simple and Fast", January 2013, given at Clojure
+    conj conference
 * Jean Niklas L'orange, "Improving RRB-Tree Performance through
   Transience", MAster Thesis, 2014,
-  [PDF](https://hypirion.com/thesis.pdf)
+  [[PDF]](https://hypirion.com/thesis.pdf)
 * "RRB Vector: A Practical General Purpose Immutable Sequence",
   Nicolas Stucki, Tiark, Rompf, Vlad Ureche, Phil Bagwell, Proc. of
   the 20th ACM SIGPLAN International Conference on Functional
-  Programming, 2015 [ACM digital library
-  link](http://dx.doi.org/10.1145/2784731.2784739)
-  [PDF](https://github.com/nicolasstucki/scala-rrb-vector/blob/master/documents/RRB%20Vector%20-%20A%20Practical%20General%20Purpose%20Immutable%20Sequence.pdf)
+  Programming, 2015 [[ACM digital library
+  link]](http://dx.doi.org/10.1145/2784731.2784739)
+  [[PDF]](https://github.com/nicolasstucki/scala-rrb-vector/blob/master/documents/RRB%20Vector%20-%20A%20Practical%20General%20Purpose%20Immutable%20Sequence.pdf)
 * Nicolas Stucki, "Turning Relaxed Radix Balanced Vector from Theory
   into Practice for Scala Collections", Master Thesis, 2015
-  [PFD](https://github.com/nicolasstucki/scala-rrb-vector/blob/master/documents/Master%20Thesis%20-%20Nicolas%20Stucki%20-%20Turning%20Relaxed%20Radix%20Balanced%20Vector%20from%20Theory%20into%20Practice%20for%20Scala%20Collections.pdf?raw=true)
+  [[PDF]](https://github.com/nicolasstucki/scala-rrb-vector/blob/master/documents/Master%20Thesis%20-%20Nicolas%20Stucki%20-%20Turning%20Relaxed%20Radix%20Balanced%20Vector%20from%20Theory%20into%20Practice%20for%20Scala%20Collections.pdf?raw=true)
 * Juan Pedro Bolivar Puente, "Persistence for the Masses: RRB-Vectors
   in a Systems Language", Proc. ACM Program. Lang. 1, ICFP, Article 16
   (September 2017), https://doi.org/10.1145/3110260
-  [PDF](https://public.sinusoid.es/misc/immer/immer-icfp17.pdf)
-  * Juan's talk [video](https://www.youtube.com/watch?v=sPhpelUfu8Q)
+  [[PDF]](https://public.sinusoid.es/misc/immer/immer-icfp17.pdf)
+  * Juan's talk [[video]](https://www.youtube.com/watch?v=sPhpelUfu8Q)
     "Postmodern immutable data structures" given at CppCon 2017
 * Bodil Stokke talk
-  [video](https://www.youtube.com/watch?v=cUx2b_FO8EQ) "Meetings With
+  [[video]](https://www.youtube.com/watch?v=cUx2b_FO8EQ) "Meetings With
   Remarkable Trees" given at ClojuTRE 2018
 
 
