@@ -14,6 +14,9 @@ Implementations:
     production.
 * [`scala-rrb-vector`](https://github.com/nicolasstucki/scala-rrb-vector)
   Scala library by Nicolas Stucki
+  * As of Oct 2019, this library has a few unfixed bugs that were
+    reported as Github issues in 2017.  I have not examined them to
+    see how easy they might be to fix.
 * [`bifurcan`](https://github.com/lacuna/bifurcan) Java library by
   Zach Tellman, Java class `io.lacuna.bifurcan.List`
 * [`Paguro`](https://github.com/GlenKPeterson/Paguro) Java library by
@@ -49,9 +52,10 @@ Implementation of immutable vectors that are not RRB trees:
   * As far as I can tell, as of 2019-Oct-10, it appears that this
     class does _not_ use RRB trees, and thus implements concatenation
     of vectors in linear time in the length of the second vector.
-  * commit 1c67c5b849d57a3fae89c4156f4a15defceccbf4 2009-Oct-10 was
-    first to make them immutable vectors.  About 10 to 20 follow up
-    commits later in the same month to fix bugs and enhance things
+    [This Github
+    issue](https://github.com/nicolasstucki/scala-rrb-vector/issues/9)
+    from April 2019 implies that Scala has not yet had an RRB tree
+    implementation incorporated into its standard library.
 
 
 Published papers and theses:
