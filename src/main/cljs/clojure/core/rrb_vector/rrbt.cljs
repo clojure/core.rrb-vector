@@ -9,8 +9,7 @@
                      replace-leftmost-child replace-rightmost-child
                      fold-tail new-path* index-of-nil]]
             [clojure.core.rrb-vector.trees
-             :refer [tail-offset array-for push-tail pop-tail new-path
-                     do-assoc]]
+             :refer [push-tail pop-tail new-path do-assoc]]
             [clojure.core.rrb-vector.transients
              :refer [ensure-editable editable-root editable-tail push-tail!
                      pop-tail! do-assoc!]])
@@ -18,6 +17,10 @@
 
 (def ^:const rrbt-concat-threshold 33)
 (def ^:const max-extra-search-steps 2)
+
+(defprotocol IVecImpl
+  (-tail-offset [v])
+  (-array-for [v i]))
 
 (defprotocol AsRRBT
   (-as-rrbt [v]))
@@ -113,7 +116,7 @@
 
 (defn rrb-chunked-seq
   ([vec i off]
-     (RRBChunkedSeq. vec (array-for vec i) i off nil nil))
+     (RRBChunkedSeq. vec (-array-for vec i) i off nil nil))
   ([vec node i off]
      (RRBChunkedSeq. vec node i off nil nil))
   ([vec node i off meta]
@@ -295,7 +298,7 @@
   (-seq [this]
     (cond
       (zero? cnt) nil
-      (zero? (tail-offset this)) (array-seq tail)
+      (zero? (-tail-offset this)) (array-seq tail)
       :else (rrb-chunked-seq this 0 0)))
 
   ICounted
@@ -409,8 +412,8 @@
         (Vector. (dec cnt) shift root new-tail meta nil))
 
       :else
-      (let [new-tail (array-for this (- cnt 2))
-            root-cnt (tail-offset this)
+      (let [new-tail (-array-for this (- cnt 2))
+            root-cnt (-tail-offset this)
             new-root (pop-tail shift root-cnt (.-edit root) root)]
         (cond
           (nil? new-root)
@@ -432,7 +435,7 @@
   (-assoc-n [this i val]
     (cond
       (and (<= 0 i) (< i cnt))
-      (let [tail-off (tail-offset this)]
+      (let [tail-off (-tail-offset this)]
         (if (>= i tail-off)
           (let [new-tail (make-array (alength tail))
                 idx (- i tail-off)]
@@ -480,7 +483,7 @@
     (loop [i    0
            j    0
            init init
-           arr  (array-for this i)
+           arr  (-array-for this i)
            lim  (dec (alength arr))
            step (inc lim)]
       (let [init (f init (+ i j) (aget arr j))]
@@ -490,7 +493,7 @@
             (recur i (inc j) init arr lim step)
             (let [i (+ i step)]
               (if (< i cnt)
-                (let [arr (array-for this i)
+                (let [arr (-array-for this i)
                       len (alength arr)
                       lim (dec len)]
                   (recur i 0 init arr lim len))
@@ -523,7 +526,7 @@
         (throw (js/Error. "start index greater than end index"))
 
         :else
-        (let [tail-off (tail-offset this)]
+        (let [tail-off (-tail-offset this)]
           (if (>= start tail-off)
             (let [new-tail (make-array new-cnt)]
               (array-copy tail (- start tail-off)
@@ -543,9 +546,9 @@
                                     new-tail (make-array new-len)]
                                 (array-copy tail 0 new-tail 0 new-len)
                                 new-tail)
-                              (array-for (Vector. new-cnt shift new-root
-                                                  (array) meta nil)
-                                         (dec new-cnt)))
+                              (-array-for (Vector. new-cnt shift new-root
+                                                   (array) meta nil)
+                                          (dec new-cnt)))
                   new-root  (if tail-cut?
                               new-root
                               (pop-tail shift new-cnt (.-edit new-root)
@@ -562,6 +565,39 @@
   PSpliceableVector
   (-splicev [this that]
     (splice-rrbts this (-as-rrbt that)))
+
+  IVecImpl
+  (-tail-offset [this]
+    (- cnt (alength tail)))
+
+  (-array-for [this i]
+    (if (and (<= 0 i) (< i cnt))
+      (if (>= i (-tail-offset this))
+        tail
+        (loop [i i node root shift shift]
+          (if (zero? shift)
+            (.-arr node)
+            (if (regular? node)
+              (loop [node  (aget (.-arr node)
+                                 (bit-and (bit-shift-right i shift) 0x1f))
+                     shift (- shift 5)]
+                (if (zero? shift)
+                  (.-arr node)
+                  (recur (aget (.-arr node)
+                               (bit-and (bit-shift-right i shift) 0x1f))
+                         (- shift 5))))
+              (let [rngs (node-ranges node)
+                    j    (loop [j (bit-and (bit-shift-right i shift) 0x1f)]
+                           (if (< i (aget rngs j))
+                             j
+                             (recur (inc j))))
+                    i    (if (pos? j)
+                           (- i (aget rngs (dec j)))
+                           i)]
+                (recur i
+                       (aget (.-arr node) j)
+                       (- shift 5)))))))
+      (vector-index-out-of-bounds i cnt)))
 
   AsRRBT
   (-as-rrbt [this]
@@ -1009,7 +1045,7 @@
 ;; 1/1024.
 
 (defn poor-branching? [v]
-  (let [tail-off (tail-offset v)]
+  (let [tail-off (-tail-offset v)]
     (if (zero? tail-off)
       false
       (let [shift-amount (- (.-shift v) 5)
@@ -1035,14 +1071,14 @@
             (poor-branching? splice-result))
       (do
         (dbg (str "splice-rrbts result had shift " (.-shift splice-result)
-                  " and " (tail-offset splice-result) " elements not counting"
+                  " and " (-tail-offset splice-result) " elements not counting"
                   " the tail. Falling back to slower method of concatenation."))
         (if (poor-branching? v1)
           ;; The v1 we started with was not good, either.
           (do
             (swap! fallback-to-slow-splice-count1 inc)
             (dbg (str "splice-rrbts first arg had shift " (.-shift v1)
-                      " and " (tail-offset v1) " elements not counting"
+                      " and " (-tail-offset v1) " elements not counting"
                       " the tail.  Building the result from scratch."))
             ;: See Note 3
             (let [new-splice-result (-> (empty v1) (into v1) (into v2))]
@@ -1093,7 +1129,7 @@
                      (aset arr 32 rngs)))
                  (->VectorNode nil arr))
                (fold-tail r1 s1
-                          (tail-offset v1)
+                          (-tail-offset v1)
                           (.-tail v1)))
           s1 (if o? (+ s1 5) s1)
           r2 (.-root v2)
@@ -1238,7 +1274,7 @@
             this)
 
         :else
-        (let [new-tail-base (array-for this (- cnt 2))
+        (let [new-tail-base (-array-for this (- cnt 2))
               new-tail      (editable-tail new-tail-base)
               new-tidx      (alength new-tail-base)
               new-root      (pop-tail! shift cnt (.-edit root) root)]
@@ -1272,4 +1308,37 @@
   (-count [this]
     (if ^boolean (.-edit root)
       cnt
-      (throw (js/Error. "count after persistent!")))))
+      (throw (js/Error. "count after persistent!"))))
+
+  IVecImpl
+  (-tail-offset [this]
+    (- cnt tidx))
+
+  (-array-for [this i]
+    (if (and (<= 0 i) (< i cnt))
+      (if (>= i (-tail-offset this))
+        tail
+        (loop [i i node root shift shift]
+          (if (zero? shift)
+            (.-arr node)
+            (if (regular? node)
+              (loop [node  (aget (.-arr node)
+                                 (bit-and (bit-shift-right i shift) 0x1f))
+                     shift (- shift 5)]
+                (if (zero? shift)
+                  (.-arr node)
+                  (recur (aget (.-arr node)
+                               (bit-and (bit-shift-right i shift) 0x1f))
+                         (- shift 5))))
+              (let [rngs (node-ranges node)
+                    j    (loop [j (bit-and (bit-shift-right i shift) 0x1f)]
+                           (if (< i (aget rngs j))
+                             j
+                             (recur (inc j))))
+                    i    (if (pos? j)
+                           (- i (aget rngs (dec j)))
+                           i)]
+                (recur i
+                       (aget (.-arr node) j)
+                       (- shift 5)))))))
+      (vector-index-out-of-bounds i cnt))))

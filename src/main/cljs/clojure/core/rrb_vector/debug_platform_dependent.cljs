@@ -1,9 +1,7 @@
 (ns clojure.core.rrb-vector.debug-platform-dependent
-  (:require clojure.core.rrb-vector.rrbt
+  (:require [clojure.core.rrb-vector.rrbt :as rrbt]
             [clojure.core.rrb-vector.nodes :refer [regular? node-ranges]]
             [clojure.core.rrb-vector :as fv]
-            [clojure.core.rrb-vector.trees
-             :refer [tail-offset]]
             [goog.string :as gstring]
             goog.string.format))
 
@@ -40,7 +38,7 @@
 
     (or (instance? clojure.core.rrb-vector.rrbt/Vector v)
         (instance? clojure.core.rrb-vector.rrbt/Transient v))
-    (tail-offset v)
+    (rrbt/-tail-offset v)
 
     :else
     (throw (ex-info (str "Called debug-tailoff on value with unsupported type "

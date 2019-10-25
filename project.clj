@@ -28,7 +28,10 @@
              :master {:dependencies [[org.clojure/clojure "1.11.0-master-SNAPSHOT"]]}}
   :cljsbuild {:builds {:test {:source-paths ["src/main/cljs"
                                              "src/test/cljs"]
-                              :compiler {:optimizations :advanced
+                              :compiler {;;:optimizations :none
+                                         ;;:optimizations :whitespace
+                                         ;;:optimizations :simple
+                                         :optimizations :advanced
                                          :output-to "out/test.js"}}}
               :test-commands
               {"node" ["node" "-e"

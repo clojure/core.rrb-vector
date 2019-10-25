@@ -2,7 +2,7 @@
   (:refer-clojure :exclude [new-path])
   (:require [clojure.core.rrb-vector.nodes
              :refer [regular? clone node-ranges last-range overflow?]]
-            [clojure.core.rrb-vector.trees :refer [tail-offset new-path]]))
+            [clojure.core.rrb-vector.trees :refer [new-path]]))
 
 (defn ensure-editable [edit node]
   (if (identical? (.-edit node) edit)
