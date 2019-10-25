@@ -1,4 +1,4 @@
-# Changes expected to be released in 0.1.1
+# Changes in 0.1.1
 
 ## Changes visible to users of the library
 
