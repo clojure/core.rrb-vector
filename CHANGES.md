@@ -1,3 +1,38 @@
+# Changes expected to be released in 0.1.1
+
+## Changes visible to users of the library
+
+Bug fixes:
+
+* Eliminate warning issued by ClojureScript compiler caused by use of a not-yet-defined type name [CRRBV-24](https://clojure.atlassian.net/browse/CRRBV-24)
+
+Minor code cleanup:
+
+* Eliminate redundant require of a namespace
+  [commit](https://github.com/clojure/core.rrb-vector/commit/8c3bdc03f4d4c73326ac0146310bf472cda4d035)
+
+Documentation:
+
+* Created this change log.
+* Added new introductory text at beginning of README explaining
+  briefly why someone might want to use this library.
+* Added doc/benchmarks/benchmarks.md document, with link from README,
+  showing some benchmark results of this library versus several other
+  implementations of vector data structures, some of which are based
+  on RRB trees, some of which have only a linear time vector
+  concatenation operation.
+* Added doc/rrb-tree-notes.md with links to other implementations of
+  RRB trees, and papers and theses that have been written about them.
+
+
+## Changes relevant to those who test and develop the library itself
+
+* Added doc/use-transducers/ directory with README and proposed patch
+  for speeding up some of the code by using transducers, which in the
+  cases used provide a speedup by avoiding allocating multiple
+  intermediate sequences.
+
+
 # Changes in 0.1.0
 
 ## Changes visible to users of the library
