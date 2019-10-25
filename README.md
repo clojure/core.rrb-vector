@@ -243,6 +243,14 @@ To run relatively short ClojureScript tests, but no Clojure tests:
 $ ./script/sdo test
 ```
 
+Warning: Currently the command above for running ClojureScript tests
+does _not_ show warnings from the ClojureScript compiler.  I have seen
+some ClojureScript compiler warnings appear when running the Maven
+command above, and the Leiningen command given below for running
+ClojureScript tests, that unfortunately do not appear using
+`./script/sdo test`.  Suggestions welcome on how to make that command
+also show similar warnings.
+
 Replace `test` in the commands above with one of the following for
 other useful things:
 
