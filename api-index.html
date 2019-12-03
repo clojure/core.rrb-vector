@@ -1,7 +1,7 @@
 <html>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Index - RRB-Tree-based Vectors 0.0.12 API documentation</title>
+    <title>Index - core.rrb-vector 0.1.2-SNAPSHOT API documentation</title>
     <link rel="icon" href="static/favicon.png" />
     <link rel="shortcut icon" href="static/favicon.png" />
     <link rel="stylesheet" href="static/clojure.css" type="text/css" media="all" />
@@ -25,14 +25,14 @@ namespace.
       <div id="leftcolumn"><div style="text-align: center;"></div>
 <div class="menu">
   <div class="WikiCustomNav WikiElement wiki">
-    <span class="toc-header"><span id="project-name">RRB-Tree-based Vectors</span> <span id="version">0.0.12</span> API</span><br />
+    <span class="toc-header"><span id="project-name">core.rrb-vector</span> <span id="version">0.1.2-SNAPSHOT</span> API</span><br />
     <ul>
       <li><a href="index.html" class="wiki_link">Overview</a></li>
       <li><a href="api-index.html" class="wiki_link">API Index</a></li>
     </ul>
     
     
-    <a class="wiki_link" href="http://clojure.org">Clojure Home</a>
+    <a class="wiki_link" href="https://clojure.org">Clojure Home</a>
   </div>
 </div>
 </div>
@@ -41,9 +41,9 @@ namespace.
 	  <div class="contentBox"><div class="innerContentBox">
               <div class="wiki wikiPage" id="content_view">
                 <div id="right-sidebar"></div>
-                <div id="content-tag"><h1 id="overview">Index of Public Functions and Variables - <span id="header-project">RRB-Tree-based Vectors</span> <span id="header-version">0.0.12</span><span id="header-status-block"> (<span id="header-status">in development</span>)</span></h1>
+                <div id="content-tag"><h1 id="overview">Index of Public Functions and Variables - <span id="header-project">core.rrb-vector</span> <span id="header-version">0.1.2-SNAPSHOT</span><span id="header-status-block"> (<span id="header-status">in development</span>)</span></h1>
 This page has an alphabetical index of all the documented functions and variables
-in <span class="project-name-span">RRB-Tree-based Vectors</span>.
+in <span class="project-name-span">core.rrb-vector</span>.
 
 <!-- TODO: enable this functionality on github?
 
@@ -81,6 +81,18 @@ Shortcuts:<br />
   <h2 id="C"><span id="section-head">C</span></h2>
   <pre>
 <span id="section-content"> <a href="index.html#clojure.core.rrb-vector/catvec">catvec</a><span id="line-content">                       function      clojure.core.rrb-vector Concatenates the given vectors in logarithmic...
+</span></span><span id="section-content"> <a href="index.html#clojure.core.rrb-vector.debug/check-catvec">check-catvec</a><span id="line-content">                 function      clojure.core.rrb-vector.debug Perform a sequence of calls to catvec o...
+</span></span><span id="section-content"> <a href="index.html#clojure.core.rrb-vector.debug/check-subvec">check-subvec</a><span id="line-content">                 function      clojure.core.rrb-vector.debug Perform a sequence of calls to subvec a...
+</span></span><span id="section-content"> <a href="index.html#clojure.core.rrb-vector.debug/checking-catvec">checking-catvec</a><span id="line-content">              function      clojure.core.rrb-vector.debug checking-catvec is similar to checking-...
+</span></span><span id="section-content"> <a href="index.html#clojure.core.rrb-vector.debug/checking-catvec-impl">checking-catvec-impl</a><span id="line-content">         function      clojure.core.rrb-vector.debug checking-catvec-impl is identical to ca...
+</span></span><span id="section-content"> <a href="index.html#clojure.core.rrb-vector.debug/checking-pop">checking-pop</a><span id="line-content">                 function      clojure.core.rrb-vector.debug These two namespace aliases will be use...
+</span></span><span id="section-content"> <a href="index.html#clojure.core.rrb-vector.debug/checking-pop!">checking-pop!</a><span id="line-content">                function      clojure.core.rrb-vector.debug checking-pop! is similar to checking-po...
+</span></span><span id="section-content"> <a href="index.html#clojure.core.rrb-vector.debug/checking-slicev">checking-slicev</a><span id="line-content">              function      clojure.core.rrb-vector.debug checking-slicev is similar to checking-...
+</span></span><span id="section-content"> <a href="index.html#clojure.core.rrb-vector.debug/checking-splice-rrbts">checking-splice-rrbts</a><span id="line-content">        function      clojure.core.rrb-vector.debug checking-splice-rrbts is similar to che...
+</span></span><span id="section-content"> <a href="index.html#clojure.core.rrb-vector.debug/checking-splice-rrbts-main">checking-splice-rrbts-main</a><span id="line-content">   function      clojure.core.rrb-vector.debug checking-splice-rrbts-main is similar t...
+</span></span><span id="section-content"> <a href="index.html#clojure.core.rrb-vector.debug/checking-splicev">checking-splicev</a><span id="line-content">             function      clojure.core.rrb-vector.debug checking-splicev is identical to splice...
+</span></span><span id="section-content"> <a href="index.html#clojure.core.rrb-vector.debug/checking-subvec">checking-subvec</a><span id="line-content">              function      clojure.core.rrb-vector.debug checking-subvec is similar to checking-...
+</span></span><span id="section-content"> <a href="index.html#clojure.core.rrb-vector.debug/checking-transient">checking-transient</a><span id="line-content">           function      clojure.core.rrb-vector.debug checking-transient is similar to checki...
 </span></span>
   </pre>
 </div><div id="index-body">
@@ -96,12 +108,16 @@ Shortcuts:<br />
 </div><div id="index-body">
   <h2 id="F"><span id="section-head">F</span></h2>
   <pre>
-
+<span id="section-content"> <a href="index.html#clojure.core.rrb-vector.debug/filter-indexes">filter-indexes</a><span id="line-content">               function      clojure.core.rrb-vector.debug Return a sequence of all indexes of ele...
+</span></span><span id="section-content"> <a href="index.html#clojure.core.rrb-vector.debug/first-diff">first-diff</a><span id="line-content">                   function      clojure.core.rrb-vector.debug Compare two sequences to see if they ha...
+</span></span>
   </pre>
 </div><div id="index-body">
   <h2 id="G"><span id="section-head">G</span></h2>
   <pre>
-
+<span id="section-content"> <a href="index.html#clojure.core.rrb-vector.debug/generative-check-catvec">generative-check-catvec</a><span id="line-content">      function      clojure.core.rrb-vector.debug Perform many calls to check-catvec with...
+</span></span><span id="section-content"> <a href="index.html#clojure.core.rrb-vector.debug/generative-check-subvec">generative-check-subvec</a><span id="line-content">      function      clojure.core.rrb-vector.debug Perform many calls to check-subvec with...
+</span></span>
   </pre>
 </div><div id="index-body">
   <h2 id="H"><span id="section-head">H</span></h2>
@@ -141,7 +157,8 @@ Shortcuts:<br />
 </div><div id="index-body">
   <h2 id="O"><span id="section-head">O</span></h2>
   <pre>
-
+<span id="section-content"> <a href="index.html#clojure.core.rrb-vector.debug/objects-in-slot-32-of-obj-arrays">objects-in-slot-32-of-obj-arrays</a><span id="line-content"> function  clojure.core.rrb-vector.debug Function to look for errors of the form...
+</span></span>
   </pre>
 </div><div id="index-body">
   <h2 id="P"><span id="section-head">P</span></h2>
@@ -161,7 +178,9 @@ Shortcuts:<br />
 </div><div id="index-body">
   <h2 id="S"><span id="section-head">S</span></h2>
   <pre>
-<span id="section-content"> <a href="index.html#clojure.core.rrb-vector/subvec">subvec</a><span id="line-content">                       function      clojure.core.rrb-vector Returns a new vector containing the elements ...
+<span id="section-content"> <a href="index.html#clojure.core.rrb-vector.debug/sanity-check-vector-internals">sanity-check-vector-internals</a><span id="line-content"> function     clojure.core.rrb-vector.debug This function is called by all of the c...
+</span></span><span id="section-content"> <a href="index.html#clojure.core.rrb-vector.debug/set-debug-opts!">set-debug-opts!</a><span id="line-content">              function      clojure.core.rrb-vector.debug set-debug-opts! modified the debug-opts...
+</span></span><span id="section-content"> <a href="index.html#clojure.core.rrb-vector/subvec">subvec</a><span id="line-content">                       function      clojure.core.rrb-vector Returns a new vector containing the elements ...
 </span></span>
   </pre>
 </div><div id="index-body">
@@ -181,6 +200,12 @@ Shortcuts:<br />
   <pre>
 <span id="section-content"> <a href="index.html#clojure.core.rrb-vector.rrbt/-&gt;VecSeq">-&gt;VecSeq</a><span id="line-content">                     function      clojure.core.rrb-vector.rrbt Positional factory function for class cl...
 </span></span><span id="section-content"> <a href="index.html#clojure.core.rrb-vector.rrbt/-&gt;Vector">-&gt;Vector</a><span id="line-content">                     function      clojure.core.rrb-vector.rrbt Positional factory function for class cl...
+</span></span><span id="section-content"> <a href="index.html#clojure.core.rrb-vector.debug/validating-catvec">validating-catvec</a><span id="line-content">            function      clojure.core.rrb-vector.debug validating-catvec behaves similarly to ...
+</span></span><span id="section-content"> <a href="index.html#clojure.core.rrb-vector.debug/validating-pop">validating-pop</a><span id="line-content">               function      clojure.core.rrb-vector.debug validating-pop is not really designed t...
+</span></span><span id="section-content"> <a href="index.html#clojure.core.rrb-vector.debug/validating-pop!">validating-pop!</a><span id="line-content">              function      clojure.core.rrb-vector.debug validating-pop! behaves the same as val...
+</span></span><span id="section-content"> <a href="index.html#clojure.core.rrb-vector.debug/validating-slicev">validating-slicev</a><span id="line-content">            function      clojure.core.rrb-vector.debug validating-slicev behaves similarly to ...
+</span></span><span id="section-content"> <a href="index.html#clojure.core.rrb-vector.debug/validating-splice-rrbts-main">validating-splice-rrbts-main</a><span id="line-content"> function      clojure.core.rrb-vector.debug validating-splice-rrbts-main behaves th...
+</span></span><span id="section-content"> <a href="index.html#clojure.core.rrb-vector.debug/validating-transient">validating-transient</a><span id="line-content">         function      clojure.core.rrb-vector.debug validating-transient behaves the same a...
 </span></span><span id="section-content"> <a href="index.html#clojure.core.rrb-vector/vec">vec</a><span id="line-content">                          function      clojure.core.rrb-vector Returns a vector containing the contents of c...
 </span></span><span id="section-content"> <a href="index.html#clojure.core.rrb-vector.rrbt/VecSeq">VecSeq</a><span id="line-content">                       type          clojure.core.rrb-vector.rrbt 
 </span></span><span id="section-content"> <a href="index.html#clojure.core.rrb-vector/vector">vector</a><span id="line-content">                       function      clojure.core.rrb-vector Creates a new vector containing the args..
@@ -223,7 +248,7 @@ Shortcuts:<br />
           </div>
 	</div>
 	<div id="foot">
-	  <div id="copyright" style="text-align: center;">Copyright 2007-2017 by Rich Hickey and the various contributors</div>
+	  <div id="copyright" style="text-align: center;">Copyright 2007-2019 by Rich Hickey and the various contributors</div>
 	</div>
       </div>
       <div id="DesignedBy">Logo &amp; site design by <a href="http://www.tomhickey.com" title="Visit Tom Hickey's website.">Tom Hickey</a>.<br />
