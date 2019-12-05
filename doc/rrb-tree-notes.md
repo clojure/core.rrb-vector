@@ -9,9 +9,9 @@ Implementations:
 * TBD: Tiark Rompf and Phil Bagwell's original implementation code?
   * If it is available somewhere, likely it is instrumented for
     experimentation on multiple variations of the algorithms, and
-    counting significant events that they were trying to reduce.  Thus
-    more of a research implementation than one intended for use in
-    production.
+    counting significant events that they were trying to optimize.
+    Thus more of a research implementation than one intended for use
+    in production.
 * [`scala-rrb-vector`](https://github.com/nicolasstucki/scala-rrb-vector)
   Scala library by Nicolas Stucki
   * As of Oct 2019, this library has a few unfixed bugs that were
@@ -20,7 +20,12 @@ Implementations:
 * [`bifurcan`](https://github.com/lacuna/bifurcan) Java library by
   Zach Tellman, Java class `io.lacuna.bifurcan.List`
 * [`Paguro`](https://github.com/GlenKPeterson/Paguro) Java library by
-  Glen Peterson, Java class `org.organicdesign.fp.collections.RrbTree`
+  Glen Peterson, Java class `org.organicdesign.fp.collections.RrbTree`.
+  * From some comments in the code, it appears that perhaps this
+    implementation is more precisely a data structure based upon
+    B-trees, because those comments imply that nodes in the tree can
+    have a number of children varying between some branching factor B,
+    and be as low as B/2.
 * [`c-rrb`](https://github.com/hypirion/c-rrb) C library by Jean
   Niklas L'orange
 * [`Array`](https://github.com/xash/Array) RRB trees implemented in
