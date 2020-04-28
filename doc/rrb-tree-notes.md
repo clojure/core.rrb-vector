@@ -75,7 +75,7 @@ Published papers and theses:
     to Make Things Simple and Fast", January 2013, given at Clojure
     conj conference
 * Jean Niklas L'orange, "Improving RRB-Tree Performance through
-  Transience", MAster Thesis, 2014,
+  Transience", Master Thesis, 2014,
   [[PDF]](https://hypirion.com/thesis.pdf)
 * "RRB Vector: A Practical General Purpose Immutable Sequence",
   Nicolas Stucki, Tiark, Rompf, Vlad Ureche, Phil Bagwell, Proc. of
