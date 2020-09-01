@@ -165,6 +165,11 @@ snapshots are available from the Sonatype OSS repository.
 
 Follow the first link above to discover the current release number.
 
+[CLI/`deps.edn`](https://clojure.org/reference/deps_and_cli) dependency information:
+```clojure
+org.clojure/core.rrb-vector {:mvn/version "${version}"}
+```
+
 [Leiningen](http://leiningen.org/) dependency information:
 
     [org.clojure/core.rrb-vector "${version}"]
