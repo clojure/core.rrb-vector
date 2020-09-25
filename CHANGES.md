@@ -1,3 +1,9 @@
+# Changes in 0.1.2
+
+Bug fixes:
+
+* Correct handling of reduce-kv for empty vectors [CRRBV-29](https://clojure.atlassian.net/browse/CRRBV-29)
+
 # Changes in 0.1.1
 
 ## Changes visible to users of the library
