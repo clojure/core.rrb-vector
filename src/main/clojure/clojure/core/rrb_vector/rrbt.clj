@@ -1018,24 +1018,26 @@
 
   IKVReduce
   (kv-reduce [this f init]
-    (loop [i (int 0)
-           j (int 0)
-           init init
-           arr  (.arrayFor this i)
-           lim  (unchecked-dec-int (.alength am arr))
-           step (unchecked-inc-int lim)]
-      (let [init (f init (unchecked-add-int i j) (.aget am arr j))]
-        (if (reduced? init)
-          @init
-          (if (< j lim)
-            (recur i (unchecked-inc-int j) init arr lim step)
-            (let [i (unchecked-add-int i step)]
-              (if (< i cnt)
-                (let [arr (.arrayFor this i)
-                      len (.alength am arr)
-                      lim (unchecked-dec-int len)]
-                  (recur i (int 0) init arr lim len))
-                init)))))))
+    (if (zero? cnt)
+      init
+      (loop [i (int 0)
+             j (int 0)
+             init init
+             arr  (.arrayFor this i)
+             lim  (unchecked-dec-int (.alength am arr))
+             step (unchecked-inc-int lim)]
+        (let [init (f init (unchecked-add-int i j) (.aget am arr j))]
+          (if (reduced? init)
+            @init
+            (if (< j lim)
+              (recur i (unchecked-inc-int j) init arr lim step)
+              (let [i (unchecked-add-int i step)]
+                (if (< i cnt)
+                  (let [arr (.arrayFor this i)
+                        len (.alength am arr)
+                        lim (unchecked-dec-int len)]
+                    (recur i (int 0) init arr lim len))
+                  init))))))))
 
   CollFold
   ;; adapted from #'clojure.core.reducers/foldvec
