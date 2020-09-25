@@ -83,6 +83,14 @@
            (reduce + 0 (r/map identity (seq v1)))
            (reduce + 0 (r/map identity (seq v2)))))))
 
+(deftest test-reduce-3
+  (let [v0 (vec [])
+        rv0 (fv/vec [])]
+    (testing "reduce"
+      (is (= (reduce + v0) (reduce + rv0))))
+    (testing "reduce-kv"
+      (is (= (reduce-kv + 0 v0) (reduce-kv + 0 rv0))))))
+
 (deftest test-seq
   (let [v (fv/vec (range 128))
         s (seq v)]

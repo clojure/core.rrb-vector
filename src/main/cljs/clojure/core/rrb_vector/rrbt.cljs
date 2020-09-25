@@ -488,24 +488,26 @@
 
   IKVReduce
   (-kv-reduce [this f init]
-    (loop [i    0
-           j    0
-           init init
-           arr  (-array-for this i)
-           lim  (dec (alength arr))
-           step (inc lim)]
-      (let [init (f init (+ i j) (aget arr j))]
-        (if (reduced? init)
-          @init
-          (if (< j lim)
-            (recur i (inc j) init arr lim step)
-            (let [i (+ i step)]
-              (if (< i cnt)
-                (let [arr (-array-for this i)
-                      len (alength arr)
-                      lim (dec len)]
-                  (recur i 0 init arr lim len))
-                init)))))))
+    (if (zero? cnt)
+      init
+      (loop [i    0
+             j    0
+             init init
+             arr  (-array-for this i)
+             lim  (dec (alength arr))
+             step (inc lim)]
+        (let [init (f init (+ i j) (aget arr j))]
+          (if (reduced? init)
+            @init
+            (if (< j lim)
+              (recur i (inc j) init arr lim step)
+              (let [i (+ i step)]
+                (if (< i cnt)
+                  (let [arr (-array-for this i)
+                        len (alength arr)
+                        lim (dec len)]
+                    (recur i 0 init arr lim len))
+                  init))))))))
 
   IComparable
   (-compare [this that]
