@@ -48,12 +48,12 @@
   ;; Using collections-check requires this minimum version of
   ;; test.check, and at least Clojure 1.7.0
   :clj-check {:extra-paths ["src/test_local/clojure"]
-              :extra-deps {collection-check {:mvn/version "0.1.7"}
+              :extra-deps {collection-check/collection-check {:mvn/version "0.1.7"}
                            com.gfredericks/test.chuck {:mvn/version "0.2.10"}
                            org.clojure/test.check {:mvn/version "0.9.0"}}}
   :clj-runcheck {:main-opts ["-e" "(require,'[clojure.test,:as,t],'clojure.core.rrb-vector-check),(t/run-tests,'clojure.core.rrb-vector-check)"]}
   :cljs-check {:extra-paths ["src/test_local/clojure"]
-               :extra-deps {collection-check {:mvn/version "0.1.7"}
+               :extra-deps {collection-check/collection-check {:mvn/version "0.1.7"}
                             com.gfredericks/test.chuck {:mvn/version "0.2.10"}
                             org.clojure/test.check {:mvn/version "0.9.0"}}}
   :cljs-runcheck {:main-opts ["-m" "cljs.main"
@@ -84,8 +84,8 @@
 ;;                            "-d" "src/test/cljs"]}
 ;;  :cljol {:extra-deps {cljol {:local/root "/Users/andy/clj/cljol"}
 ;;                       org.clojure/clojure {:mvn/version "1.7.0"}}}
-  :cljol {:extra-deps {cljol {:git/url "https://github.com/jafingerhut/cljol"
-                              :sha "bb5549e9832e73e4a9fc5dfdf695c48e797729fa"}}}
+  :cljol {:extra-deps {cljol/cljol {:git/url "https://github.com/jafingerhut/cljol"
+                                    :sha "bb5549e9832e73e4a9fc5dfdf695c48e797729fa"}}}
   :cap {;; recommended options from README of
         ;; https://github.com/clojure-goes-fast/clj-async-profiler
         :jvm-opts ["-Djdk.attach.allowAttachSelf"
@@ -102,7 +102,7 @@
   :eastwood {:extra-deps {jonase/eastwood {:mvn/version "0.3.5"}}
              :main-opts ["-m" "eastwood.lint"
                          "{:source-paths,[\"src/main/clojure\"],:test-paths,[\"src/test/clojure\",\"src/test/cljs\",\"src/test_local/clojure\"],:add-linters,[:unused-fn-args,:unused-locals,:unused-namespaces,:unused-private-vars],:exclude-linters,[:implicit-dependencies],:exclude-namespaces,[]}"]}
-  :clj-kondo {:extra-deps {clj-kondo {:mvn/version "RELEASE"}}
+  :clj-kondo {:extra-deps {clj-kondo/clj-kondo {:mvn/version "RELEASE"}}
               :main-opts ["-m" "clj-kondo.main"]}
 
   ;; pull in specific versions of Clojure:
