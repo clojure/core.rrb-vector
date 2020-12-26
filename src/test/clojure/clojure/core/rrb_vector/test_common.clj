@@ -553,3 +553,17 @@
   (u/reset-optimizer-counts!)
   (is (integer? (puzzle-b-rrbv 978)))
   (u/print-optimizer-counts))
+
+(deftest test-crrbv-30
+  (let [v1 [1 2 3]
+        tv1 (transient [1 2 3])
+        fv1 (fv/vector 1 2 3)
+        tfv1 (transient (fv/vector 1 2 3))]
+    (doseq [v [v1
+               fv1
+               (map #(nth v1 %) [0 1 2])
+               (map #(nth tv1 %) [0 1 2])
+               (map #(nth fv1 %) [0 1 2])
+               (map #(nth tfv1 %) [0 1 2])]]
+      (println "v=" v " (class v)=" (class v))
+      (is (= '(1 2 3) v)))))
