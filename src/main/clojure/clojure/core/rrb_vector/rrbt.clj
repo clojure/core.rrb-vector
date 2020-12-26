@@ -1865,7 +1865,7 @@
   (nth [this i]
     (.ensureEditable transient-helper nm root)
     (if (and (<= (int 0) i) (< i cnt))
-      (let [tail-off (unchecked-subtract-int cnt (.alength am tail))]
+      (let [tail-off (.tailoff this)]
         (if (<= tail-off i)
           (.aget am tail (unchecked-subtract-int i tail-off))
           (loop [i i node root shift shift]
