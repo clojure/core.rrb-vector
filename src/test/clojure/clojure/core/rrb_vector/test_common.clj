@@ -559,11 +559,14 @@
         tv1 (transient [1 2 3])
         fv1 (fv/vector 1 2 3)
         tfv1 (transient (fv/vector 1 2 3))]
-    (doseq [v [v1
-               fv1
-               (map #(nth v1 %) [0 1 2])
-               (map #(nth tv1 %) [0 1 2])
-               (map #(nth fv1 %) [0 1 2])
-               (map #(nth tfv1 %) [0 1 2])]]
-      (println "v=" v " (class v)=" (class v))
-      (is (= '(1 2 3) v)))))
+    (doseq [[v msg] [[v1 "v1"]
+                     [fv1 "fv1"]
+                     [(map #(nth v1 %) [0 1 2])   "#(nth v1 %)"]
+                     [(map #(v1 %) [0 1 2])       "#(v1 %)"]
+                     [(map #(nth tv1 %) [0 1 2])  "#(nth tv1 %)"]
+                     [(map #(tv1 %) [0 1 2])      "#(tv1 %)"]
+                     [(map #(nth fv1 %) [0 1 2])  "#(nth fv1 %)"]
+                     [(map #(fv1 %) [0 1 2])      "%(fv1 %)"]
+                     [(map #(nth tfv1 %) [0 1 2]) "#(nth tfv1 %)"]
+                     [(map #(tfv1 %) [0 1 2])     "#(tfv1 %)"]]]
+      (is (= '(1 2 3) v) (str "Failing case: " msg)))))
