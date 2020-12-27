@@ -548,7 +548,7 @@
   clojure.lang.Indexed
   (nth [this i]
     (if (and (<= (int 0) i) (< i cnt))
-      (let [tail-off (unchecked-subtract-int cnt (.alength am tail))]
+      (let [tail-off (.tailoff this)]
         (if (<= tail-off i)
           (.aget am tail (unchecked-subtract-int i tail-off))
           (loop [i i node root shift shift]
@@ -1998,7 +1998,7 @@
     (.ensureEditable transient-helper nm root)
     (cond
       (and (<= 0 i) (< i cnt))
-      (let [tail-off (unchecked-subtract-int cnt tidx)]
+      (let [tail-off (.tailoff this)]
         (if (<= tail-off i)
           (.aset am tail (unchecked-subtract-int i tail-off) val)
           (set! root (.doAssoc transient-helper nm am

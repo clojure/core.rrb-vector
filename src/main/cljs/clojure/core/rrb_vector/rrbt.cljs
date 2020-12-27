@@ -316,7 +316,7 @@
   IIndexed
   (-nth [this i]
     (if (and (<= 0 i) (< i cnt))
-      (let [tail-off (- cnt (alength tail))]
+      (let [tail-off (-tail-offset this)]
         (if (<= tail-off i)
           (aget tail (- i tail-off))
           (loop [i i node root shift shift]
@@ -1305,7 +1305,7 @@
     (if ^boolean (.-edit root)
       (cond
         (and (<= 0 i) (< i cnt))
-        (let [tail-off (- cnt tidx)]
+        (let [tail-off (-tail-offset this)]
           (if (<= tail-off i)
             (aset tail (- i tail-off) val)
             (set! root (do-assoc! shift (.-edit root) root i val)))
