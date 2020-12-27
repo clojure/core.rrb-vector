@@ -1192,6 +1192,57 @@
                     ^:mutable root
                     ^:mutable tail
                     ^:mutable tidx]
+
+  ;; The Clojure/Java deftype Transient implements the Java interface
+  ;; clojure.lang.ILookup.  The corresponding ClojureScript protocol
+  ;; named ILookup is implemented by the deftype Vector in this file.
+  ;; TBD: Should ILookup be implemented by type Transient, too?
+
+  IIndexed
+  (-nth [this i]
+    (if (and (<= 0 i) (< i cnt))
+      (let [tail-off (-tail-offset this)]
+        (if (<= tail-off i)
+          (aget tail (- i tail-off))
+          (loop [i i node root shift shift]
+            (if (zero? shift)
+              (let [arr (.-arr node)]
+                (aget arr (bit-and (bit-shift-right i shift) 0x1f)))
+              (if (regular? node)
+                (let [arr (.-arr node)
+                      idx (bit-and (bit-shift-right i shift) 0x1f)]
+                  (loop [i     i
+                         node  (aget arr idx)
+                         shift (- shift 5)]
+                    (let [arr (.-arr node)
+                          idx (bit-and (bit-shift-right i shift) 0x1f)]
+                      (if (zero? shift)
+                        (aget arr idx)
+                        (recur i (aget arr idx) (- shift 5))))))
+                (let [arr  (.-arr node)
+                      rngs (node-ranges node)
+                      idx  (loop [j (bit-and (bit-shift-right i shift) 0x1f)]
+                             (if (< i (aget rngs j))
+                               j
+                               (recur (inc j))))
+                      i    (if (zero? idx)
+                             i
+                             (- i (aget rngs (dec idx))))]
+                  (recur i (aget arr idx) (- shift 5))))))))
+      (vector-index-out-of-bounds i cnt)))
+
+  (-nth [this i not-found]
+    (if (and (>= i 0) (< i cnt))
+      (-nth this i)
+      not-found))
+
+  IFn
+  (-invoke [this k]
+    (-nth this k))
+
+  (-invoke [this k not-found]
+    (-nth this k not-found))
+
   ITransientCollection
   (-conj! [this o]
     (if ^boolean (.-edit root)
