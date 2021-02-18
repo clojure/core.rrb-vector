@@ -199,17 +199,14 @@ org.clojure/core.rrb-vector {:mvn/version "${version}"}
 
 core.rrb-vector is being developed as a Clojure Contrib project, see
 the
-[What is Clojure Contrib](http://dev.clojure.org/pages/viewpage.action?pageId=5767464)
+[What is Clojure Contrib](https://clojure.org/dev/contrib_libs)
 page for details. Patches will only be accepted from developers who
 have signed the Clojure Contributor Agreement.
 
 * [GitHub project](https://github.com/clojure/core.rrb-vector)
-
-* [Bug Tracker](http://dev.clojure.org/jira/browse/CRRBV)
-
-* [Continuous Integration](http://build.clojure.org/job/core.rrb-vector/)
-
-* [Compatibility Test Matrix](http://build.clojure.org/job/core.rrb-vector-test-matrix/)
+* [Bug Tracker](https://clojure.atlassian.net/browse/CRRBV)
+* [Continuous Integration](https://build.clojure.org/job/core.rrb-vector/)
+* [Compatibility Test Matrix](https://build.clojure.org/job/core.rrb-vector-test-matrix/)
 
 
 ### Useful Maven commands
