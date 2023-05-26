@@ -205,8 +205,7 @@ have signed the Clojure Contributor Agreement.
 
 * [GitHub project](https://github.com/clojure/core.rrb-vector)
 * [Bug Tracker](https://clojure.atlassian.net/browse/CRRBV)
-* [Continuous Integration](https://build.clojure.org/job/core.rrb-vector/)
-* [Compatibility Test Matrix](https://build.clojure.org/job/core.rrb-vector-test-matrix/)
+* [Continuous Integration](https://github.com/clojure/core.rrb-vector/actions/workflows/test.yml)
 
 
 ### Useful Maven commands
@@ -396,7 +395,7 @@ copyright notice:
 
 ## Licence
 
-Copyright © 2012-2019 Michał Marczyk, Andy Fingerhut, Rich Hickey and contributors
+Copyright © 2012-2023 Michał Marczyk, Andy Fingerhut, Rich Hickey and contributors
 
 Distributed under the
 [Eclipse Public License 1.0](http://opensource.org/licenses/eclipse-1.0.php),
