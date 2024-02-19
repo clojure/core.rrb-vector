@@ -153,15 +153,10 @@ ClojureScript release.
 core.rrb-vector releases are available from Maven Central. Development
 snapshots are available from the Sonatype OSS repository.
 
- * [Released versions](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22org.clojure%22%20AND%20a%3A%22core.rrb-vector%22)
-
- * [Development snapshots](https://oss.sonatype.org/index.html#nexus-search;gav~org.clojure~core.rrb-vector~~~)
-
- * [Change log](CHANGES.md) of changes made in this library.
-
- * Some [benchmark results](doc/benchmarks/benchmarks.md) comparing
-   the run time of core.rrb-vector's JVM implementation against other
-   vector/list implementations on the JVM.
+* [Released versions](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22org.clojure%22%20AND%20a%3A%22core.rrb-vector%22)
+* [Development snapshots](https://oss.sonatype.org/index.html#nexus-search;gav~org.clojure~core.rrb-vector~~~)
+* [Change log](CHANGES.md) of changes made in this library.
+* Some [benchmark results](doc/benchmarks/benchmarks.md) comparing the run time of core.rrb-vector's JVM implementation against other vector/list implementations on the JVM.
 
 Follow the first link above to discover the current release number.
 
@@ -395,7 +390,7 @@ copyright notice:
 
 ## Licence
 
-Copyright © 2012-2023 Michał Marczyk, Andy Fingerhut, Rich Hickey and contributors
+Copyright © Michał Marczyk, Andy Fingerhut, Rich Hickey and contributors
 
 Distributed under the
 [Eclipse Public License 1.0](https://opensource.org/license/epl-1-0/),

@@ -1,3 +1,7 @@
+# Changes in 0.2.0
+
+* Update dependencies and versions
+
 # Changes in 0.1.2
 
 Bug fixes:
