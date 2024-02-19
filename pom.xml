@@ -9,7 +9,7 @@
   <licenses>
     <license>
       <name>Eclipse Public License 1.0</name>
-      <url>http://opensource.org/licenses/eclipse-1.0.php</url>
+      <url>https://opensource.org/license/epl-1-0/</url>
       <distribution>repo</distribution>
     </license>
   </licenses>
@@ -17,7 +17,7 @@
   <parent>
     <groupId>org.clojure</groupId>
     <artifactId>pom.contrib</artifactId>
-    <version>0.2.2</version>
+    <version>1.2.0</version>
   </parent>
 
   <developers>
@@ -35,9 +35,7 @@
   </scm>
 
   <properties>
-    <!-- core.rrb-vector depends on implementation details of vectors
-         which were made public in Clojure 1.5.0 -->
-    <clojure.version>1.6.0</clojure.version>
+    <clojure.version>1.9.0</clojure.version>
     <clojure.warnOnReflection>true</clojure.warnOnReflection>
   </properties>
 
@@ -76,15 +74,9 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.codehaus.jsr166-mirror</groupId>
-      <artifactId>jsr166y</artifactId>
-      <version>1.7.0</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>test.check</artifactId>
-      <version>0.7.0</version>
+      <version>1.1.1</version>
       <scope>test</scope>
     </dependency>
     <dependency>
