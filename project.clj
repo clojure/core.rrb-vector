@@ -4,24 +4,24 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :min-lein-version "2.2.0"
-  :parent [org.clojure/pom.contrib "1.2.0"]
-  :dependencies [[org.clojure/clojure "1.9.0"]]
+  :parent [org.clojure/pom.contrib "1.4.0"]
+  :dependencies [[org.clojure/clojure "1.11.4"]]
   :source-paths ["src/main/clojure" "src/main/cljs"]
   ;;:source-paths ["src/parameterized/clojure" "src/main/cljs"]
   :test-paths ["src/test/clojure"]
   :test-selectors {:default (complement :cljs-nashorn)}
   :jvm-opts ^:replace ["-XX:+UseG1GC"
                        "-XX:-OmitStackTraceInFastThrow"]
-  :profiles {:dev {:dependencies [[org.clojure/test.check "1.1.1"]]
+  :profiles {:dev {:dependencies [[org.clojure/test.check "1.1.3"]]
                    :plugins [[lein-cljsbuild "1.1.7"]]}
              :coll {:test-paths ["src/test_local/clojure"]
-                    :dependencies [[org.clojure/test.check "1.1.1"]
+                    :dependencies [[org.clojure/test.check "1.1.3"]
                                    [collection-check "0.1.7"]]}
-             :cljs {:dependencies [[org.clojure/clojure "1.10.1"]
+             :cljs {:dependencies [[org.clojure/clojure "1.11.4"]
                                    [org.clojure/clojurescript "1.10.238"]]}
-             :1.9 {:dependencies [[org.clojure/clojure "1.9.0"]]}
-             :1.10 {:dependencies [[org.clojure/clojure "1.10.1"]]}
-             :master {:dependencies [[org.clojure/clojure "1.11.0-master-SNAPSHOT"]]}}
+             :1.9 {:dependencies [[org.clojure/clojure "1.11.4"]]}
+             :1.10 {:dependencies [[org.clojure/clojure "1.11.4"]]}
+             :master {:dependencies [[org.clojure/clojure "1.13.0-master-SNAPSHOT"]]}}
   :cljsbuild {:builds {:test {:source-paths ["src/main/cljs"
                                              "src/test/cljs"]
                               :compiler {;;:optimizations :none

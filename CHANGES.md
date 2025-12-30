@@ -1,3 +1,7 @@
+# Changes in 0.2.1
+
+* Update parent pom and default Clojure version to 1.11.4
+
 # Changes in 0.2.0
 
 * Update dependencies and versions
